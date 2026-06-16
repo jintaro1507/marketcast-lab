@@ -17,54 +17,92 @@
     "middle_east": "中東地政学"
   },
   "effect_tag_labels": {
-    "oil_spike": "原油高",
-    "oil_drop": "原油安",
-    "inflation_up": "インフレ加速",
-    "disinflation": "ディスインフレ",
+    "oil_up": "原油上昇",
+    "oil_down": "原油下落",
+    "gold_up": "金上昇",
+    "gold_down": "金下落",
+    "equity_up": "株式上昇",
+    "equity_down": "株式下落",
+    "yield_up": "金利上昇",
+    "yield_down": "金利低下",
     "usd_strong": "ドル高",
     "usd_weak": "ドル安",
-    "risk_off": "リスクオフ",
-    "risk_on": "リスクオン",
-    "volatility_up": "変動性上昇",
-    "rate_up": "金利上昇",
-    "rate_down": "金利低下"
+    "vix_up": "VIX上昇",
+    "vix_down": "VIX低下"
   },
-  "effect_rules_note": "effect_tagsはcalculate_event_reactions.pyが30日変化率から自動付与する。下記は判定基準の記録（実装はスクリプト側）。",
+  "effect_rules_note": "modeがpctは相対変化率(%)、abs_ptは絶対変化幅(pt)で判定。閾値未満はタグなし(横ばい)。ドル円のusd_strong=円安方向(ドル円上昇)。",
   "effect_rules": {
-    "oil_spike": {
+    "oil_up": {
       "asset": "wti",
+      "mode": "pct",
       "op": ">=",
       "threshold": 5
     },
-    "oil_drop": {
+    "oil_down": {
       "asset": "wti",
+      "mode": "pct",
       "op": "<=",
       "threshold": -5
     },
-    "risk_off": {
-      "asset": "sp500",
-      "op": "<=",
-      "threshold": -5
-    },
-    "risk_on": {
-      "asset": "sp500",
+    "gold_up": {
+      "asset": "gold",
+      "mode": "pct",
       "op": ">=",
       "threshold": 5
     },
-    "volatility_up": {
+    "gold_down": {
+      "asset": "gold",
+      "mode": "pct",
+      "op": "<=",
+      "threshold": -5
+    },
+    "equity_up": {
+      "asset": "sp500",
+      "mode": "pct",
+      "op": ">=",
+      "threshold": 5
+    },
+    "equity_down": {
+      "asset": "sp500",
+      "mode": "pct",
+      "op": "<=",
+      "threshold": -5
+    },
+    "vix_up": {
       "asset": "vix",
+      "mode": "pct",
       "op": ">=",
       "threshold": 20
     },
-    "rate_up": {
-      "asset": "ust10y",
-      "op": ">=",
-      "threshold": 0.01
-    },
-    "rate_down": {
-      "asset": "ust10y",
+    "vix_down": {
+      "asset": "vix",
+      "mode": "pct",
       "op": "<=",
-      "threshold": -0.01
+      "threshold": -20
+    },
+    "usd_strong": {
+      "asset": "usdjpy",
+      "mode": "pct",
+      "op": ">=",
+      "threshold": 2
+    },
+    "usd_weak": {
+      "asset": "usdjpy",
+      "mode": "pct",
+      "op": "<=",
+      "threshold": -2
+    },
+    "yield_up": {
+      "asset": "ust10y",
+      "mode": "abs_pt",
+      "op": ">=",
+      "threshold": 0.25
+    },
+    "yield_down": {
+      "asset": "ust10y",
+      "mode": "abs_pt",
+      "op": "<=",
+      "threshold": -0.25
     }
   },
   "category_labels": {
