@@ -1,0 +1,50 @@
+name: Update market data and deploy
+
+# いつ動かすか
+on:
+  schedule:
+    # UTCで毎日 0時・6時・12時・18時（日本時間で 9時・15時・21時・翌3時ごろ）に実行
+    - cron: "0 0,6,12,18 * * *"
+  workflow_dispatch:   # 手動実行ボタンも有効化（テスト用）
+  push:
+    branches: [ main ] # mainブランチへの変更時にも公開を更新
+
+# GitHub Pages公開に必要な権限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時実行を防ぐ（重複起動の整理）
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: Python をセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 市場データを取得・生成
+        env:
+          # FREDキーは下のSecretsから安全に注入される（コードには書かない）
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          python3 scripts/fetch_and_build.py
+
+      - name: Pages 用に成果物をまとめる
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # サイトのルート（index.html がある場所）をそのまま公開
+          path: "."
+
+      - name: GitHub Pages へデプロイ
+        id: deployment
+        uses: actions/deploy-pages@v4
