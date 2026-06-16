@@ -71,6 +71,29 @@
   footer .back{display:inline-block;margin-bottom:12px;border-bottom:1px solid var(--line-rule);}
   footer .disclaimer{max-width:64ch;line-height:1.8;}
   .empty{padding:40px 5vw;color:var(--ink-soft);font-size:14px;}
+
+  /* category badge */
+  .cat-badge{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;color:var(--ink-soft);border:1px solid var(--line-rule);padding:3px 9px;border-radius:2px;margin-bottom:12px;}
+
+  /* similarity reason */
+  .reason{padding:14px 5vw 0;}
+  .reason .reason-box{background:var(--paper-deep);border:1px solid var(--line-rule);border-left:3px solid var(--ink-soft);padding:16px 18px;max-width:64ch;}
+  .reason .reason-box p{margin:0;font-size:13.5px;line-height:1.85;}
+
+  /* horizon switch */
+  .horizon-switch{display:flex;gap:6px;padding:14px 5vw 0;flex-wrap:wrap;}
+  .horizon-switch .hbtn{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line-rule);padding:5px 12px;border-radius:2px;color:var(--ink-soft);cursor:pointer;background:var(--paper);}
+  .horizon-switch .hbtn:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .horizon-switch .hbtn.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  table.react td.hl,table.react th.hl{background:rgba(0,0,0,0.04);}
+
+  /* sources */
+  .sources{padding:14px 5vw 0;}
+  .sources ul{list-style:none;margin:0;padding:0;}
+  .sources li{font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line-rule);}
+  .sources li a{border-bottom:1px solid var(--line-rule);color:var(--ink-soft);}
+  .sources li a:hover{color:var(--ink);}
+  .sources .src-note{font-size:11px;color:var(--ink-soft);margin-top:8px;}
 </style>
 </head>
 <body>
@@ -120,31 +143,53 @@
     (i>0?'<span class="arrow">→</span>':'') + `<span class="node">${n}</span>`
   ).join('');
 
+  // カテゴリ
+  const catLabels = data.category_labels || {};
+  const catBadge = ev.category ? `<div class="cat-badge">カテゴリ: ${catLabels[ev.category]||ev.category}</div>` : '';
+
   // 反応テーブル
   const horizons = data.horizons || ['d1','d7','d30','d90'];
   const order = ['wti','gold','sp500','ust10y','usdjpy','vix'];
-  const rows = order.filter(k=>ev.reactions[k]).map(k=>{
-    const a = ev.reactions[k];
-    const cells = horizons.map(h=>{
-      const v = a.status==='ok' ? a.changes[h] : null;
-      return `<td class="${cls(v)}">${a.status==='ok'?pct(v):'—'}</td>`;
-    }).join('');
-    const rnote = a.restricted ? ' <span class="restricted-note">(派生値)</span>' : '';
-    return `<tr><td><span class="asset-name"><span class="swatch ${a.asset}"></span>${a.label}${rnote}</span></td>${cells}</tr>`;
-  }).join('');
-  const thHorizons = horizons.map(h=>`<th>${horizonLabels[h]||h}</th>`).join('');
 
-  // 同タグの他イベントへのリンク
+  function buildTable(activeH){
+    const thHorizons = horizons.map(h=>`<th class="${h===activeH?'hl':''}">${horizonLabels[h]||h}</th>`).join('');
+    const rows = order.filter(k=>ev.reactions[k]).map(k=>{
+      const a = ev.reactions[k];
+      const cells = horizons.map(h=>{
+        const v = a.status==='ok' ? a.changes[h] : null;
+        return `<td class="${cls(v)} ${h===activeH?'hl':''}">${a.status==='ok'?pct(v):'—'}</td>`;
+      }).join('');
+      const rnote = a.restricted ? ' <span class="restricted-note">(派生値)</span>' : '';
+      return `<tr><td><span class="asset-name"><span class="swatch ${a.asset}"></span>${a.label}${rnote}</span></td>${cells}</tr>`;
+    }).join('');
+    return `<tr><th>資産</th>${thHorizons}</tr>${rows}`;
+  }
+
+  // 同タグの他イベント（＝この局面グループ）
   const related = (data.events||[]).filter(e=>e.id!==ev.id && e.tags.some(t=>ev.tags.includes(t)));
   const relatedHtml = related.length
     ? related.map(e=>`<a href="event_detail.html?id=${e.id}">${e.date} ${e.name}</a>`).join(' ')
     : '<span style="color:var(--ink-soft);font-size:13px;">同じタグの他イベントはまだ登録されていません。</span>';
+
+  // 参照元
+  const sources = ev.sources || [];
+  const sourcesHtml = sources.length
+    ? `<ul>${sources.map(s=>`<li><a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.title} ↗</a></li>`).join('')}</ul>
+       <div class="src-note">外部サイトへのリンクです。内容は各サイトの責任に帰属します。</div>`
+    : '<span style="color:var(--ink-soft);font-size:13px;">参照元は未登録です。</span>';
+
+  // 類似根拠
+  const reasonHtml = ev.similarity_reason
+    ? `<div class="section-label">なぜ類似局面と見なすか</div>
+       <div class="reason"><div class="reason-box"><p>${ev.similarity_reason}</p></div></div>`
+    : '';
 
   content.innerHTML = `
     <div class="breadcrumb"><a href="index.html">トップ</a> ／ <a href="similar_events.html?tag=${ev.tags[0]}">${tagLabels[ev.tags[0]]||ev.tags[0]}</a> ／ ${ev.name}</div>
 
     <div class="ev-head">
       <div class="date">発生日: ${ev.date}</div>
+      ${catBadge}
       <h1>${ev.name}</h1>
       <p>${ev.description}</p>
       <div class="tags">${tagsHtml}</div>
@@ -153,25 +198,37 @@
     <div class="section-label">想定される伝播パターン</div>
     <div class="prop"><div class="prop-flow">${flowHtml || '<span style="color:var(--ink-soft)">記録なし</span>'}</div></div>
 
+    ${reasonHtml}
+
     <div class="section-label">発生後の各資産の変化（実データ）</div>
+    <div class="horizon-switch" id="horizon-switch">
+      ${horizons.map((h,i)=>`<span class="hbtn ${h==='d30'?'active':''}" data-h="${h}">${horizonLabels[h]||h}</span>`).join('')}
+    </div>
     <div class="react-wrap">
-      <table class="react">
-        <tbody>
-          <tr><th>資産</th>${thHorizons}</tr>
-          ${rows}
-        </tbody>
-      </table>
+      <table class="react"><tbody id="react-body">${buildTable('d30')}</tbody></table>
     </div>
     <div class="react-note">基準日: ${ev.date} 時点（休場の場合は直前の取引日）。数値は基準日からのおおよその変化率。一部系列は再配布制限のため派生値のみ。出典: FRED 等。</div>
 
-    <div class="section-label">同じ種類の過去イベント</div>
+    <div class="section-label">この局面が属する類似グループ</div>
     <div class="related">${relatedHtml}</div>
+
+    <div class="section-label">参照元</div>
+    <div class="sources">${sourcesHtml}</div>
 
     <footer>
       <a class="back" href="similar_events.html?tag=${ev.tags[0]}">← ${tagLabels[ev.tags[0]]||ev.tags[0]} の一覧へ</a>
-      <div class="disclaimer">本ページの数値は過去の事実の記録であり、将来の値動きを示すものでも、特定の取引・銘柄・商品を推奨するものでもありません。各イベントの前提条件は異なります。</div>
+      <div class="disclaimer">本ページの数値は過去の事実の記録であり、将来の値動きを示すものでも、特定の取引・銘柄・商品を推奨するものでもありません。各イベントの前提条件は異なり、同様の結果が将来も再現される保証はありません。</div>
     </footer>
   `;
+
+  // 期間切替の挙動
+  document.querySelectorAll('#horizon-switch .hbtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#horizon-switch .hbtn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('react-body').innerHTML = buildTable(btn.dataset.h);
+    });
+  });
 })();
 </script>
 
