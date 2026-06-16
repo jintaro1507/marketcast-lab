@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "note": "過去イベントのマスターデータ。日付(date)を起点にFREDから各資産の変化率を計算する。タグ(tags)が類似局面のグルーピングに使われる。",
+  "tag_labels": {
+    "middle_east": "中東リスク",
+    "oil_supply": "原油供給不安",
+    "military_conflict": "軍事衝突",
+    "financial_shock": "金融ショック",
+    "pandemic": "パンデミック",
+    "central_bank": "中央銀行政策転換",
+    "inflation_shock": "インフレショック",
+    "liquidity_crisis": "流動性危機"
+  },
+  "events": [
+    {
+      "id": "saudi_attack_2019",
+      "name": "サウジアラビア石油施設への攻撃",
+      "date": "2019-09-14",
+      "tags": ["middle_east", "oil_supply"],
+      "description": "サウジアラビアの主要石油施設が攻撃を受け、世界の原油供給の一部に影響が及ぶとの報道から、供給不安が一気に意識された局面。",
+      "propagation": ["原油供給不安", "原油先物 上昇", "エネルギー株 上昇", "航空・物流株 下落"]
+    },
+    {
+      "id": "us_iran_tension_2020",
+      "name": "米イラン緊張の高まり",
+      "date": "2020-01-03",
+      "tags": ["middle_east", "military_conflict"],
+      "description": "地域の軍事的緊張が急激に高まり、報復措置への懸念から短期的にリスク回避の動きが広がった局面。",
+      "propagation": ["地政学リスク上昇", "原油先物 上昇", "金 上昇", "株式 下落"]
+    },
+    {
+      "id": "russia_ukraine_2022",
+      "name": "ロシアによるウクライナ侵攻",
+      "date": "2022-02-24",
+      "tags": ["military_conflict", "oil_supply", "inflation_shock"],
+      "description": "大規模な軍事侵攻が始まり、エネルギー・穀物の供給網への懸念から商品価格が急騰、世界的なインフレ圧力が強まった局面。",
+      "propagation": ["軍事衝突", "エネルギー・穀物 供給不安", "商品価格 急騰", "インフレ圧力 上昇"]
+    },
+    {
+      "id": "hamas_israel_2023",
+      "name": "ハマス・イスラエル衝突",
+      "date": "2023-10-07",
+      "tags": ["middle_east", "military_conflict"],
+      "description": "中東地域で大規模な武力衝突が発生し、地域情勢の不確実性が一気に高まった局面。",
+      "propagation": ["中東リスク上昇", "原油先物 上昇", "金 上昇"]
+    },
+    {
+      "id": "iran_israel_strike_2024",
+      "name": "イランによるイスラエルへの攻撃",
+      "date": "2024-04-13",
+      "tags": ["middle_east", "military_conflict"],
+      "description": "地域間の直接的な軍事的応酬が報じられ、事態の拡大が警戒された局面。事態の限定的な収束が見えた後、市場の反応は比較的短期間で収まった。",
+      "propagation": ["中東リスク上昇", "原油先物 上昇", "金 上昇", "防衛関連株 上昇"]
+    }
+  ]
+}
