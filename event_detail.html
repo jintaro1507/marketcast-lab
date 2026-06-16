@@ -175,11 +175,20 @@
 
   const causeTags = ev.cause_tags || [];
   const effectTags = ev.effect_tags || [];
+  const effectDetails = ev.effect_tag_details || {};
   const primaryCause = causeTags[0] || '';
+
+  // period情報付きのタグラベル生成。例: oil_up+["d1","d7"] → "原油上昇（1日・7日）"
+  const PERIOD_LABELS = {d1:'1日', d7:'7日', d30:'30日'};
+  function effectChipLabel(tag){
+    const base = effectLabels[tag] || tag;
+    const periods = (effectDetails[tag] || []).map(p => PERIOD_LABELS[p] || p);
+    return periods.length ? `${base}（${periods.join('・')}）` : base;
+  }
 
   const causeHtml = causeTags.map(t=>`<a href="similar_events.html?tag=${t}">${causeLabels[t]||t}</a>`).join('');
   const effectHtml = effectTags.length
-    ? effectTags.map(t=>`<span class="effect-chip">${effectLabels[t]||t}</span>`).join('')
+    ? effectTags.map(t=>`<span class="effect-chip">${effectChipLabel(t)}</span>`).join('')
     : '<span style="color:var(--ink-soft);font-size:12.5px;">該当する結果タグはありません</span>';
 
   // 伝播フロー
