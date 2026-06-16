@@ -98,6 +98,38 @@
   .sources li a{border-bottom:1px solid var(--line-rule);color:var(--ink-soft);}
   .sources li a:hover{color:var(--ink);}
   .sources .src-note{font-size:11px;color:var(--ink-soft);margin-top:8px;}
+
+  /* why_reaction */
+  .why{padding:14px 5vw 0;}
+  .why p{max-width:64ch;font-size:14px;line-height:1.9;margin:0;}
+
+  /* contrast card */
+  .contrast{padding:14px 5vw 0;}
+  .contrast-card{border:1px solid var(--line-rule);background:var(--paper-deep);padding:0;overflow:hidden;max-width:760px;}
+  .contrast-axis{background:var(--ink);color:var(--paper);font-size:12.5px;padding:10px 18px;font-family:var(--mono);letter-spacing:0.02em;}
+  .contrast-axis b{color:var(--paper);}
+  .contrast-sides{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;}
+  .contrast-side{padding:18px;}
+  .contrast-side.this{background:rgba(138,59,46,0.05);}
+  .contrast-side .role{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-bottom:6px;letter-spacing:0.06em;}
+  .contrast-side .ev-name{font-family:var(--display);font-size:15px;margin-bottom:8px;line-height:1.5;}
+  .contrast-side .ev-name a{border-bottom:1px solid var(--line-rule);}
+  .contrast-side .ev-name a:hover{color:var(--ink);}
+  .contrast-side .side-axis{font-size:13px;color:var(--ink);}
+  .contrast-mid{display:flex;align-items:center;justify-content:center;padding:0 6px;font-size:18px;color:var(--ink-soft);}
+  .contrast-outcome{border-top:1px solid var(--line-rule);padding:16px 18px;font-size:13px;line-height:1.85;}
+  .contrast-outcome::before{content:"→ ";color:var(--ink-soft);}
+
+  /* key_insight */
+  .insight{padding:14px 5vw 0;}
+  .insight-box{border:1px solid var(--line-rule);border-left:3px solid var(--gold);background:var(--paper-deep);padding:18px;max-width:64ch;}
+  .insight-box p{margin:0 0 10px;font-size:14px;line-height:1.9;}
+  .insight-box .insight-note{font-size:11px;color:var(--ink-soft);margin:0;padding-top:8px;border-top:1px dashed var(--line-rule);}
+
+  @media (max-width:680px){
+    .contrast-sides{grid-template-columns:1fr;}
+    .contrast-mid{padding:8px 0;transform:rotate(90deg);}
+  }
 </style>
 </head>
 <body>
@@ -196,6 +228,48 @@
        <div class="reason"><div class="reason-box"><p>${ev.similarity_reason}</p></div></div>`
     : '';
 
+  // なぜこの反応になったのか
+  const whyHtml = ev.why_reaction
+    ? `<div class="section-label">なぜこの反応になったのか</div>
+       <div class="why"><p>${ev.why_reaction}</p></div>`
+    : '';
+
+  // 結果が分かれた局面との対比（片方向：このイベントに記述があるときのみ）
+  const eventNames = data.event_names || {};
+  const contrastList = ev.contrast || [];
+  const contrastHtml = contrastList.length
+    ? `<div class="section-label">結果が分かれた局面との対比</div>` +
+      contrastList.map(c=>{
+        const otherName = eventNames[c.with] || c.with;
+        return `<div class="contrast"><div class="contrast-card">
+          <div class="contrast-axis">分岐の軸： <b>${c.axis}</b></div>
+          <div class="contrast-sides">
+            <div class="contrast-side this">
+              <div class="role">このイベント</div>
+              <div class="ev-name">${ev.name}</div>
+              <div class="side-axis">${c.this_side||''}</div>
+            </div>
+            <div class="contrast-mid">⇄</div>
+            <div class="contrast-side">
+              <div class="role">対照イベント</div>
+              <div class="ev-name"><a href="event_detail.html?id=${c.with}">${otherName}</a></div>
+              <div class="side-axis">${c.other_side||''}</div>
+            </div>
+          </div>
+          <div class="contrast-outcome">${c.outcome_note||''}</div>
+        </div></div>`;
+      }).join('')
+    : '';
+
+  // 過去データから読み取れる傾向（key_insight）。注記を必ず付ける。
+  const insightHtml = ev.key_insight
+    ? `<div class="section-label">過去データから読み取れる傾向</div>
+       <div class="insight"><div class="insight-box">
+         <p>${ev.key_insight}</p>
+         <p class="insight-note">これは過去の傾向であり、将来を保証するものではありません。特定の取引・銘柄・商品を推奨するものでもありません。</p>
+       </div></div>`
+    : '';
+
   content.innerHTML = `
     <div class="breadcrumb"><a href="index.html">トップ</a> ／ <a href="similar_events.html?tag=${primaryCause}">${causeLabels[primaryCause]||primaryCause}</a> ／ ${ev.name}</div>
 
@@ -227,6 +301,12 @@
       <table class="react"><tbody id="react-body">${buildTable('d30')}</tbody></table>
     </div>
     <div class="react-note">基準日: ${ev.date} 時点（休場の場合は直前の取引日）。数値は基準日からのおおよその変化率。一部系列は再配布制限のため派生値のみ。出典: FRED 等。</div>
+
+    ${whyHtml}
+
+    ${contrastHtml}
+
+    ${insightHtml}
 
     <div class="section-label">この局面が属する類似グループ（同じ原因）</div>
     <div class="related">${relatedHtml}</div>
