@@ -10,123 +10,824 @@
     "inflation_shock": "インフレショック",
     "liquidity_crisis": "流動性危機"
   },
-  "horizons": ["d1", "d7", "d30", "d90"],
+  "horizons": [
+    "d1",
+    "d7",
+    "d30",
+    "d90"
+  ],
   "summary_horizon": "d30",
   "events": [
     {
       "id": "saudi_attack_2019",
       "name": "サウジアラビア石油施設への攻撃",
       "date": "2019-09-14",
-      "tags": ["middle_east", "oil_supply"],
-      "description": "サウジアラビアの主要石油施設が攻撃を受け、世界の原油供給の一部に影響が及ぶとの報道から、供給不安が一気に意識された局面。",
-      "propagation": ["原油供給不安", "原油先物 上昇", "エネルギー株 上昇", "航空・物流株 下落"],
+      "tags": [
+        "middle_east",
+        "oil_supply"
+      ],
+      "description": "サウジアラビアの主要石油施設アブカイクとクライス油田がドローン・ミサイル攻撃を受け、同国の原油生産の約半分、世界供給の約5%が一時的に停止した。供給不安から原油価格が記録的に急騰した局面。",
+      "propagation": [
+        "原油供給インフラ損傷",
+        "原油先物 急騰",
+        "エネルギー株 上昇",
+        "航空・物流株 下落"
+      ],
       "reactions": {
-        "wti":    {"label": "WTI原油", "asset": "oil", "restricted": false, "status": "ok", "base_date": "2019-09-13", "changes": {"d1": 14.7, "d7": 6.2, "d30": 1.8, "d90": -3.4}},
-        "gold":   {"label": "金", "asset": "gold", "restricted": true, "status": "ok", "base_date": "2019-09-13", "changes": {"d1": 1.2, "d7": -0.3, "d30": 0.9, "d90": 3.1}},
-        "sp500":  {"label": "S&P500", "asset": "equity", "restricted": true, "status": "ok", "base_date": "2019-09-13", "changes": {"d1": -0.3, "d7": 0.5, "d30": 1.9, "d90": 6.8}},
-        "ust10y": {"label": "米10年債利回り", "asset": "bond", "restricted": false, "status": "ok", "base_date": "2019-09-13", "changes": {"d1": 1.4, "d7": -2.1, "d30": -5.2, "d90": -8.1}},
-        "usdjpy": {"label": "ドル円", "asset": "fx", "restricted": false, "status": "ok", "base_date": "2019-09-13", "changes": {"d1": 0.2, "d7": 0.6, "d30": 1.1, "d90": 1.5}},
-        "vix":    {"label": "VIX", "asset": "equity", "restricted": false, "status": "ok", "base_date": "2019-09-13", "changes": {"d1": 8.3, "d7": -4.2, "d30": -12.1, "d90": -18.5}}
-      }
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2019-09-13",
+          "changes": {
+            "d1": 14.7,
+            "d7": 6.2,
+            "d30": 1.8,
+            "d90": -3.4
+          }
+        },
+        "gold": {
+          "label": "金",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2019-09-13",
+          "changes": {
+            "d1": 1.2,
+            "d7": -0.3,
+            "d30": 0.9,
+            "d90": 3.1
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2019-09-13",
+          "changes": {
+            "d1": -0.3,
+            "d7": 0.5,
+            "d30": 1.9,
+            "d90": 6.8
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2019-09-13",
+          "changes": {
+            "d1": 1.4,
+            "d7": -2.1,
+            "d30": -5.2,
+            "d90": -8.1
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2019-09-13",
+          "changes": {
+            "d1": 0.2,
+            "d7": 0.6,
+            "d30": 1.1,
+            "d90": 1.5
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2019-09-13",
+          "changes": {
+            "d1": 8.3,
+            "d7": -4.2,
+            "d30": -12.1,
+            "d90": -18.5
+          }
+        }
+      },
+      "category": "geopolitics",
+      "similarity_reason": "中東の主要産油インフラが物理的に損傷し、現実の供給が止まったケース。『供給ショック型』の地政学リスクの典型例として、後続の供給途絶懸念イベントと比較する基準点になる。",
+      "sources": [
+        {
+          "title": "U.S. EIA: Saudi Arabia crude oil production outage",
+          "url": "https://www.eia.gov/todayinenergy/detail.php?id=41413"
+        },
+        {
+          "title": "Al Jazeera: Aramco attack sends oil prices soaring",
+          "url": "https://www.aljazeera.com/economy/2019/9/16/aramco-attack-worst-disruption-ever-sends-oil-prices-soaring"
+        }
+      ]
     },
     {
       "id": "us_iran_tension_2020",
-      "name": "米イラン緊張の高まり",
+      "name": "米イラン緊張の高まり（ソレイマニ司令官殺害）",
       "date": "2020-01-03",
-      "tags": ["middle_east", "military_conflict"],
-      "description": "地域の軍事的緊張が急激に高まり、報復措置への懸念から短期的にリスク回避の動きが広がった局面。",
-      "propagation": ["地政学リスク上昇", "原油先物 上昇", "金 上昇", "株式 下落"],
+      "tags": [
+        "middle_east",
+        "military_conflict"
+      ],
+      "description": "イランの軍事指導者が殺害され、報復への懸念から中東情勢の軍事的緊張が急激に高まった局面。実際の供給途絶は限定的だったが、短期的にリスク回避の動きが広がった。",
+      "propagation": [
+        "軍事的緊張の高まり",
+        "原油先物 上昇",
+        "金 上昇（逃避）",
+        "株式 一時下落"
+      ],
       "reactions": {
-        "wti":    {"label": "WTI原油", "asset": "oil", "restricted": false, "status": "ok", "base_date": "2020-01-02", "changes": {"d1": 3.6, "d7": -2.1, "d30": -6.4, "d90": -68.2}},
-        "gold":   {"label": "金", "asset": "gold", "restricted": true, "status": "ok", "base_date": "2020-01-02", "changes": {"d1": 1.6, "d7": 2.9, "d30": 4.1, "d90": 5.8}},
-        "sp500":  {"label": "S&P500", "asset": "equity", "restricted": true, "status": "ok", "base_date": "2020-01-02", "changes": {"d1": -0.7, "d7": 0.8, "d30": 1.5, "d90": -22.1}},
-        "ust10y": {"label": "米10年債利回り", "asset": "bond", "restricted": false, "status": "ok", "base_date": "2020-01-02", "changes": {"d1": -2.3, "d7": -3.1, "d30": -12.4, "d90": -64.2}},
-        "usdjpy": {"label": "ドル円", "asset": "fx", "restricted": false, "status": "ok", "base_date": "2020-01-02", "changes": {"d1": -0.4, "d7": 0.3, "d30": 0.9, "d90": 1.2}},
-        "vix":    {"label": "VIX", "asset": "equity", "restricted": false, "status": "ok", "base_date": "2020-01-02", "changes": {"d1": 4.5, "d7": -8.2, "d30": 9.1, "d90": 285.0}}
-      }
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2020-01-02",
+          "changes": {
+            "d1": 3.6,
+            "d7": -2.1,
+            "d30": -6.4,
+            "d90": -68.2
+          }
+        },
+        "gold": {
+          "label": "金",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2020-01-02",
+          "changes": {
+            "d1": 1.6,
+            "d7": 2.9,
+            "d30": 4.1,
+            "d90": 5.8
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2020-01-02",
+          "changes": {
+            "d1": -0.7,
+            "d7": 0.8,
+            "d30": 1.5,
+            "d90": -22.1
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2020-01-02",
+          "changes": {
+            "d1": -2.3,
+            "d7": -3.1,
+            "d30": -12.4,
+            "d90": -64.2
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2020-01-02",
+          "changes": {
+            "d1": -0.4,
+            "d7": 0.3,
+            "d30": 0.9,
+            "d90": 1.2
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2020-01-02",
+          "changes": {
+            "d1": 4.5,
+            "d7": -8.2,
+            "d30": 9.1,
+            "d90": 285.0
+          }
+        }
+      },
+      "category": "geopolitics",
+      "similarity_reason": "供給インフラ自体は無傷だが『報復・戦争への懸念』が主役となった、緊張先行型の中東リスク。実害より心理的リスクが価格を動かしたケースとして分類する。",
+      "sources": [
+        {
+          "title": "CNBC: Oil prices jump after US airstrike",
+          "url": "https://www.cnbc.com/2020/01/03/oil-prices-jump-after-us-airstrike-kills-irans-soleimani.html"
+        }
+      ]
     },
     {
       "id": "russia_ukraine_2022",
       "name": "ロシアによるウクライナ侵攻",
       "date": "2022-02-24",
-      "tags": ["military_conflict", "oil_supply", "inflation_shock"],
-      "description": "大規模な軍事侵攻が始まり、エネルギー・穀物の供給網への懸念から商品価格が急騰、世界的なインフレ圧力が強まった局面。",
-      "propagation": ["軍事衝突", "エネルギー・穀物 供給不安", "商品価格 急騰", "インフレ圧力 上昇"],
+      "tags": [
+        "military_conflict",
+        "oil_supply",
+        "inflation_shock"
+      ],
+      "description": "大規模な軍事侵攻が始まり、エネルギー・穀物の供給網への懸念から商品価格が急騰。世界的なインフレ圧力と各国中央銀行の利上げ加速につながった局面。",
+      "propagation": [
+        "大規模軍事侵攻",
+        "エネルギー・穀物 供給不安",
+        "商品価格 急騰",
+        "インフレ圧力 上昇",
+        "利上げ加速"
+      ],
       "reactions": {
-        "wti":    {"label": "WTI原油", "asset": "oil", "restricted": false, "status": "ok", "base_date": "2022-02-23", "changes": {"d1": 8.0, "d7": 22.4, "d30": 16.1, "d90": 12.8}},
-        "gold":   {"label": "金", "asset": "gold", "restricted": true, "status": "ok", "base_date": "2022-02-23", "changes": {"d1": 1.5, "d7": 3.8, "d30": 2.1, "d90": -3.2}},
-        "sp500":  {"label": "S&P500", "asset": "equity", "restricted": true, "status": "ok", "base_date": "2022-02-23", "changes": {"d1": 1.5, "d7": -0.4, "d30": 5.2, "d90": -6.1}},
-        "ust10y": {"label": "米10年債利回り", "asset": "bond", "restricted": false, "status": "ok", "base_date": "2022-02-23", "changes": {"d1": -2.1, "d7": 1.2, "d30": 18.4, "d90": 42.1}},
-        "usdjpy": {"label": "ドル円", "asset": "fx", "restricted": false, "status": "ok", "base_date": "2022-02-23", "changes": {"d1": 0.3, "d7": 0.9, "d30": 5.1, "d90": 12.4}},
-        "vix":    {"label": "VIX", "asset": "equity", "restricted": false, "status": "ok", "base_date": "2022-02-23", "changes": {"d1": 6.2, "d7": -5.1, "d30": -18.2, "d90": -12.4}}
-      }
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2022-02-23",
+          "changes": {
+            "d1": 8.0,
+            "d7": 22.4,
+            "d30": 16.1,
+            "d90": 12.8
+          }
+        },
+        "gold": {
+          "label": "金",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2022-02-23",
+          "changes": {
+            "d1": 1.5,
+            "d7": 3.8,
+            "d30": 2.1,
+            "d90": -3.2
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2022-02-23",
+          "changes": {
+            "d1": 1.5,
+            "d7": -0.4,
+            "d30": 5.2,
+            "d90": -6.1
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2022-02-23",
+          "changes": {
+            "d1": -2.1,
+            "d7": 1.2,
+            "d30": 18.4,
+            "d90": 42.1
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2022-02-23",
+          "changes": {
+            "d1": 0.3,
+            "d7": 0.9,
+            "d30": 5.1,
+            "d90": 12.4
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2022-02-23",
+          "changes": {
+            "d1": 6.2,
+            "d7": -5.1,
+            "d30": -18.2,
+            "d90": -12.4
+          }
+        }
+      },
+      "category": "geopolitics",
+      "similarity_reason": "中東ではないが、エネルギー大国が当事者となった大規模軍事衝突。供給不安とインフレ波及という点で中東の供給ショック型と構造が重なるため、横断比較の対象とする。",
+      "sources": [
+        {
+          "title": "Reuters: Oil tops $100 as Russia attacks Ukraine",
+          "url": "https://www.reuters.com/business/energy/oil-tops-100-first-time-since-2014-russia-attacks-ukraine-2022-02-24/"
+        }
+      ]
     },
     {
       "id": "hamas_israel_2023",
       "name": "ハマス・イスラエル衝突",
       "date": "2023-10-07",
-      "tags": ["middle_east", "military_conflict"],
-      "description": "中東地域で大規模な武力衝突が発生し、地域情勢の不確実性が一気に高まった局面。",
-      "propagation": ["中東リスク上昇", "原油先物 上昇", "金 上昇"],
+      "tags": [
+        "middle_east",
+        "military_conflict"
+      ],
+      "description": "中東地域で大規模な武力衝突が発生し、地域情勢の不確実性が一気に高まった局面。直接の産油国が当事者ではなかったため、原油の反応は当初想定より限定的だった。",
+      "propagation": [
+        "中東での武力衝突",
+        "地政学リスク上昇",
+        "金 上昇（逃避）",
+        "原油は限定的反応"
+      ],
       "reactions": {
-        "wti":    {"label": "WTI原油", "asset": "oil", "restricted": false, "status": "ok", "base_date": "2023-10-06", "changes": {"d1": 4.3, "d7": 1.2, "d30": -8.1, "d90": -10.2}},
-        "gold":   {"label": "金", "asset": "gold", "restricted": true, "status": "ok", "base_date": "2023-10-06", "changes": {"d1": 1.6, "d7": 3.9, "d30": 7.3, "d90": 9.1}},
-        "sp500":  {"label": "S&P500", "asset": "equity", "restricted": true, "status": "ok", "base_date": "2023-10-06", "changes": {"d1": 0.6, "d7": 0.5, "d30": -1.2, "d90": 8.4}},
-        "ust10y": {"label": "米10年債利回り", "asset": "bond", "restricted": false, "status": "ok", "base_date": "2023-10-06", "changes": {"d1": -1.2, "d7": 2.1, "d30": -2.4, "d90": -14.1}},
-        "usdjpy": {"label": "ドル円", "asset": "fx", "restricted": false, "status": "ok", "base_date": "2023-10-06", "changes": {"d1": 0.1, "d7": 0.4, "d30": 1.2, "d90": 1.8}},
-        "vix":    {"label": "VIX", "asset": "equity", "restricted": false, "status": "ok", "base_date": "2023-10-06", "changes": {"d1": 2.1, "d7": 6.8, "d30": -14.2, "d90": -28.1}}
-      }
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2023-10-06",
+          "changes": {
+            "d1": 4.3,
+            "d7": 1.2,
+            "d30": -8.1,
+            "d90": -10.2
+          }
+        },
+        "gold": {
+          "label": "金",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2023-10-06",
+          "changes": {
+            "d1": 1.6,
+            "d7": 3.9,
+            "d30": 7.3,
+            "d90": 9.1
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2023-10-06",
+          "changes": {
+            "d1": 0.6,
+            "d7": 0.5,
+            "d30": -1.2,
+            "d90": 8.4
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2023-10-06",
+          "changes": {
+            "d1": -1.2,
+            "d7": 2.1,
+            "d30": -2.4,
+            "d90": -14.1
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2023-10-06",
+          "changes": {
+            "d1": 0.1,
+            "d7": 0.4,
+            "d30": 1.2,
+            "d90": 1.8
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2023-10-06",
+          "changes": {
+            "d1": 2.1,
+            "d7": 6.8,
+            "d30": -14.2,
+            "d90": -28.1
+          }
+        }
+      },
+      "category": "geopolitics",
+      "similarity_reason": "中東の軍事衝突だが、主要産油インフラへの直接的な打撃を伴わなかったケース。『地政学リスクの高まり＝必ず原油急騰』ではないことを示す対照例として重要。",
+      "sources": [
+        {
+          "title": "Reuters: Global markets after Hamas attack on Israel",
+          "url": "https://www.reuters.com/markets/global-markets-themes-2023-10-09/"
+        }
+      ]
     },
     {
       "id": "iran_israel_strike_2024",
       "name": "イランによるイスラエルへの攻撃",
       "date": "2024-04-13",
-      "tags": ["middle_east", "military_conflict"],
-      "description": "地域間の直接的な軍事的応酬が報じられ、事態の拡大が警戒された局面。事態の限定的な収束が見えた後、市場の反応は比較的短期間で収まった。",
-      "propagation": ["中東リスク上昇", "原油先物 上昇", "金 上昇", "防衛関連株 上昇"],
+      "tags": [
+        "middle_east",
+        "military_conflict"
+      ],
+      "description": "イランがイスラエル領土へ直接、大規模なドローン・ミサイル攻撃を実施。多くが迎撃され実害が限定的だったため、市場は当初の警戒から比較的早く落ち着いた。",
+      "propagation": [
+        "直接的な軍事的応酬",
+        "原油・金 一時上昇",
+        "迎撃成功で警戒後退",
+        "反応は短期間で収束"
+      ],
       "reactions": {
-        "wti":    {"label": "WTI原油", "asset": "oil", "restricted": false, "status": "ok", "base_date": "2024-04-12", "changes": {"d1": -0.3, "d7": -3.1, "d30": -4.2, "d90": -7.8}},
-        "gold":   {"label": "金", "asset": "gold", "restricted": true, "status": "ok", "base_date": "2024-04-12", "changes": {"d1": 1.6, "d7": -2.4, "d30": 1.1, "d90": 5.2}},
-        "sp500":  {"label": "S&P500", "asset": "equity", "restricted": true, "status": "ok", "base_date": "2024-04-12", "changes": {"d1": -1.2, "d7": -0.9, "d30": 2.8, "d90": 6.1}},
-        "ust10y": {"label": "米10年債利回り", "asset": "bond", "restricted": false, "status": "ok", "base_date": "2024-04-12", "changes": {"d1": 0.4, "d7": 1.8, "d30": -1.2, "d90": -6.4}},
-        "usdjpy": {"label": "ドル円", "asset": "fx", "restricted": false, "status": "ok", "base_date": "2024-04-12", "changes": {"d1": 0.2, "d7": 0.8, "d30": 2.1, "d90": 4.2}},
-        "vix":    {"label": "VIX", "asset": "equity", "restricted": false, "status": "ok", "base_date": "2024-04-12", "changes": {"d1": 5.1, "d7": -12.4, "d30": -22.1, "d90": -18.2}}
-      }
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2024-04-12",
+          "changes": {
+            "d1": -0.3,
+            "d7": -3.1,
+            "d30": -4.2,
+            "d90": -7.8
+          }
+        },
+        "gold": {
+          "label": "金",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2024-04-12",
+          "changes": {
+            "d1": 1.6,
+            "d7": -2.4,
+            "d30": 1.1,
+            "d90": 5.2
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2024-04-12",
+          "changes": {
+            "d1": -1.2,
+            "d7": -0.9,
+            "d30": 2.8,
+            "d90": 6.1
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2024-04-12",
+          "changes": {
+            "d1": 0.4,
+            "d7": 1.8,
+            "d30": -1.2,
+            "d90": -6.4
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2024-04-12",
+          "changes": {
+            "d1": 0.2,
+            "d7": 0.8,
+            "d30": 2.1,
+            "d90": 4.2
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2024-04-12",
+          "changes": {
+            "d1": 5.1,
+            "d7": -12.4,
+            "d30": -22.1,
+            "d90": -18.2
+          }
+        }
+      },
+      "category": "geopolitics",
+      "similarity_reason": "中東の直接的な軍事的応酬だが、攻撃が大きく迎撃され『拡大しなかった』ケース。緊張が高まっても短期間で織り込みが進むパターンの代表例として分類する。",
+      "sources": [
+        {
+          "title": "CNBC: Oil prices after Iran attack on Israel",
+          "url": "https://www.cnbc.com/2024/04/14/oil-prices-are-set-to-rise-as-market-braces-for-israel-response-to-irans-missile-and-drone-barrage.html"
+        },
+        {
+          "title": "Investing.com: Iranian attacks put markets on edge",
+          "url": "https://www.investing.com/analysis/iranian-attacks-put-markets-on-edge-but-fallout-limited-200647640"
+        }
+      ]
     }
   ],
   "tag_summary": {
     "middle_east": {
-      "wti":    {"label": "WTI原油", "asset": "oil", "count": 4, "up": 1, "down": 3, "avg": -3.6, "median": -5.2, "max": 1.8, "min": -8.1},
-      "gold":   {"label": "金", "asset": "gold", "count": 4, "up": 4, "down": 0, "avg": 2.6, "median": 1.1, "max": 7.3, "min": 0.9},
-      "sp500":  {"label": "S&P500", "asset": "equity", "count": 4, "up": 3, "down": 1, "avg": 1.3, "median": 2.4, "max": 2.8, "min": -1.2},
-      "ust10y": {"label": "米10年債利回り", "asset": "bond", "count": 4, "up": 0, "down": 4, "avg": -5.3, "median": -3.8, "max": -1.2, "min": -12.4},
-      "usdjpy": {"label": "ドル円", "asset": "fx", "count": 4, "up": 4, "down": 0, "avg": 1.4, "median": 1.2, "max": 2.1, "min": 0.9},
-      "vix":    {"label": "VIX", "asset": "equity", "count": 4, "up": 0, "down": 4, "avg": -15.7, "median": -14.2, "max": -12.1, "min": -22.1}
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 4,
+        "up": 1,
+        "down": 3,
+        "avg": -3.6,
+        "median": -5.2,
+        "max": 1.8,
+        "min": -8.1
+      },
+      "gold": {
+        "label": "金",
+        "asset": "gold",
+        "count": 4,
+        "up": 4,
+        "down": 0,
+        "avg": 2.6,
+        "median": 1.1,
+        "max": 7.3,
+        "min": 0.9
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 4,
+        "up": 3,
+        "down": 1,
+        "avg": 1.3,
+        "median": 2.4,
+        "max": 2.8,
+        "min": -1.2
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 4,
+        "up": 0,
+        "down": 4,
+        "avg": -5.3,
+        "median": -3.8,
+        "max": -1.2,
+        "min": -12.4
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 4,
+        "up": 4,
+        "down": 0,
+        "avg": 1.4,
+        "median": 1.2,
+        "max": 2.1,
+        "min": 0.9
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 4,
+        "up": 0,
+        "down": 4,
+        "avg": -15.7,
+        "median": -14.2,
+        "max": -12.1,
+        "min": -22.1
+      }
     },
     "military_conflict": {
-      "wti":    {"label": "WTI原油", "asset": "oil", "count": 4, "up": 1, "down": 3, "avg": -0.7, "median": -5.3, "max": 16.1, "min": -8.1},
-      "gold":   {"label": "金", "asset": "gold", "count": 4, "up": 4, "down": 0, "avg": 3.7, "median": 2.1, "max": 7.3, "min": 1.1},
-      "sp500":  {"label": "S&P500", "asset": "equity", "count": 4, "up": 3, "down": 1, "avg": 2.1, "median": 2.8, "max": 5.2, "min": -1.2},
-      "ust10y": {"label": "米10年債利回り", "asset": "bond", "count": 4, "up": 1, "down": 3, "avg": 0.6, "median": -1.8, "max": 18.4, "min": -12.4},
-      "usdjpy": {"label": "ドル円", "asset": "fx", "count": 4, "up": 4, "down": 0, "avg": 2.3, "median": 1.7, "max": 5.1, "min": 0.9},
-      "vix":    {"label": "VIX", "asset": "equity", "count": 4, "up": 0, "down": 4, "avg": -14.1, "median": -16.2, "max": -14.2, "min": -22.1}
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 4,
+        "up": 1,
+        "down": 3,
+        "avg": -0.7,
+        "median": -5.3,
+        "max": 16.1,
+        "min": -8.1
+      },
+      "gold": {
+        "label": "金",
+        "asset": "gold",
+        "count": 4,
+        "up": 4,
+        "down": 0,
+        "avg": 3.7,
+        "median": 2.1,
+        "max": 7.3,
+        "min": 1.1
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 4,
+        "up": 3,
+        "down": 1,
+        "avg": 2.1,
+        "median": 2.8,
+        "max": 5.2,
+        "min": -1.2
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 4,
+        "up": 1,
+        "down": 3,
+        "avg": 0.6,
+        "median": -1.8,
+        "max": 18.4,
+        "min": -12.4
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 4,
+        "up": 4,
+        "down": 0,
+        "avg": 2.3,
+        "median": 1.7,
+        "max": 5.1,
+        "min": 0.9
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 4,
+        "up": 0,
+        "down": 4,
+        "avg": -14.1,
+        "median": -16.2,
+        "max": -14.2,
+        "min": -22.1
+      }
     },
     "oil_supply": {
-      "wti":    {"label": "WTI原油", "asset": "oil", "count": 2, "up": 2, "down": 0, "avg": 9.0, "median": 9.0, "max": 16.1, "min": 1.8},
-      "gold":   {"label": "金", "asset": "gold", "count": 2, "up": 2, "down": 0, "avg": 1.5, "median": 1.5, "max": 2.1, "min": 0.9},
-      "sp500":  {"label": "S&P500", "asset": "equity", "count": 2, "up": 2, "down": 0, "avg": 3.6, "median": 3.6, "max": 5.2, "min": 1.9},
-      "ust10y": {"label": "米10年債利回り", "asset": "bond", "count": 2, "up": 1, "down": 1, "avg": 6.6, "median": 6.6, "max": 18.4, "min": -5.2},
-      "usdjpy": {"label": "ドル円", "asset": "fx", "count": 2, "up": 2, "down": 0, "avg": 3.1, "median": 3.1, "max": 5.1, "min": 1.1},
-      "vix":    {"label": "VIX", "asset": "equity", "count": 2, "up": 0, "down": 2, "avg": -15.2, "median": -15.2, "max": -12.1, "min": -18.2}
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 2,
+        "up": 2,
+        "down": 0,
+        "avg": 9.0,
+        "median": 9.0,
+        "max": 16.1,
+        "min": 1.8
+      },
+      "gold": {
+        "label": "金",
+        "asset": "gold",
+        "count": 2,
+        "up": 2,
+        "down": 0,
+        "avg": 1.5,
+        "median": 1.5,
+        "max": 2.1,
+        "min": 0.9
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 2,
+        "up": 2,
+        "down": 0,
+        "avg": 3.6,
+        "median": 3.6,
+        "max": 5.2,
+        "min": 1.9
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 2,
+        "up": 1,
+        "down": 1,
+        "avg": 6.6,
+        "median": 6.6,
+        "max": 18.4,
+        "min": -5.2
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 2,
+        "up": 2,
+        "down": 0,
+        "avg": 3.1,
+        "median": 3.1,
+        "max": 5.1,
+        "min": 1.1
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 2,
+        "up": 0,
+        "down": 2,
+        "avg": -15.2,
+        "median": -15.2,
+        "max": -12.1,
+        "min": -18.2
+      }
     },
     "inflation_shock": {
-      "wti":    {"label": "WTI原油", "asset": "oil", "count": 1, "up": 1, "down": 0, "avg": 16.1, "median": 16.1, "max": 16.1, "min": 16.1},
-      "gold":   {"label": "金", "asset": "gold", "count": 1, "up": 1, "down": 0, "avg": 2.1, "median": 2.1, "max": 2.1, "min": 2.1},
-      "sp500":  {"label": "S&P500", "asset": "equity", "count": 1, "up": 1, "down": 0, "avg": 5.2, "median": 5.2, "max": 5.2, "min": 5.2},
-      "ust10y": {"label": "米10年債利回り", "asset": "bond", "count": 1, "up": 1, "down": 0, "avg": 18.4, "median": 18.4, "max": 18.4, "min": 18.4},
-      "usdjpy": {"label": "ドル円", "asset": "fx", "count": 1, "up": 1, "down": 0, "avg": 5.1, "median": 5.1, "max": 5.1, "min": 5.1},
-      "vix":    {"label": "VIX", "asset": "equity", "count": 1, "up": 0, "down": 1, "avg": -18.2, "median": -18.2, "max": -18.2, "min": -18.2}
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 16.1,
+        "median": 16.1,
+        "max": 16.1,
+        "min": 16.1
+      },
+      "gold": {
+        "label": "金",
+        "asset": "gold",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 2.1,
+        "median": 2.1,
+        "max": 2.1,
+        "min": 2.1
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 5.2,
+        "median": 5.2,
+        "max": 5.2,
+        "min": 5.2
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 18.4,
+        "median": 18.4,
+        "max": 18.4,
+        "min": 18.4
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 5.1,
+        "median": 5.1,
+        "max": 5.1,
+        "min": 5.1
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -18.2,
+        "median": -18.2,
+        "max": -18.2,
+        "min": -18.2
+      }
     }
   },
-  "disclaimer": "本データは過去の同種イベント発生後の市場反応を記録・整理したものであり、将来の値動きを示すものでも、売買を推奨するものでもありません。"
+  "disclaimer": "本データは過去の同種イベント発生後の市場反応を記録・整理したものであり、将来の値動きを示すものでも、売買を推奨するものでもありません。",
+  "category_labels": {
+    "geopolitics": "地政学",
+    "macro": "マクロ経済",
+    "monetary": "金融政策",
+    "health": "公衆衛生"
+  }
 }
