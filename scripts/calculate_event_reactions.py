@@ -118,14 +118,40 @@ def compute_reactions_for_event(event):
     return assets_out
 
 
-def summarize_by_tag(events_with_reactions, horizon="d30"):
+def detect_effect_tags(reactions, effect_rules, horizon="d30"):
+    """30日変化率(既定)から結果タグを自動判定する。"""
+    tags = []
+    for tag, rule in effect_rules.items():
+        a = reactions.get(rule["asset"])
+        if not a or a.get("status") != "ok":
+            continue
+        v = a["changes"].get(horizon)
+        if v is None:
+            continue
+        op, th = rule["op"], rule["threshold"]
+        if op == ">=" and v >= th:
+            tags.append(tag)
+        elif op == "<=" and v <= th:
+            tags.append(tag)
+    return tags
+
+
+def confidence_for(n, levels):
+    """件数nから信頼性レベル定義を返す。"""
+    for lv in levels:
+        if n <= lv["max_n"]:
+            return {"level": lv["level"], "label": lv["label"], "note": lv.get("note", "")}
+    return {"level": "high", "label": "信頼性：高", "note": ""}
+
+
+def summarize_by_cause(events_with_reactions, horizon="d30", conf_levels=None):
     """
-    タグごとに、指定期間(既定30日後)の各資産の変化率を集計する。
-    上昇/下落回数・平均・中央値・最大・最小を返す。
+    原因タグ(cause_tags)ごとに、指定期間(既定30日後)の各資産の変化率を集計する。
+    上昇/下落回数・平均・中央値・最大・最小に加え、件数nと信頼性レベルを返す。
     """
     tag_stats = {}
     for ev in events_with_reactions:
-        for tag in ev["tags"]:
+        for tag in ev["cause_tags"]:
             tag_stats.setdefault(tag, {})
             for akey, adata in ev["reactions"].items():
                 if adata["status"] != "ok":
@@ -146,10 +172,11 @@ def summarize_by_tag(events_with_reactions, horizon="d30"):
                 continue
             ups = sum(1 for v in vals if v > 0)
             downs = sum(1 for v in vals if v < 0)
-            summary[tag][akey] = {
+            n = len(vals)
+            entry = {
                 "label": info["label"],
                 "asset": info["asset"],
-                "count": len(vals),
+                "count": n,
                 "up": ups,
                 "down": downs,
                 "avg": round(statistics.mean(vals), 1),
@@ -157,6 +184,9 @@ def summarize_by_tag(events_with_reactions, horizon="d30"):
                 "max": round(max(vals), 1),
                 "min": round(min(vals), 1),
             }
+            if conf_levels:
+                entry["confidence"] = confidence_for(n, conf_levels)
+            summary[tag][akey] = entry
     return summary
 
 
@@ -164,15 +194,23 @@ def build():
     with open(EVENTS_PATH, encoding="utf-8") as f:
         events_master = json.load(f)
 
+    effect_rules = events_master.get("effect_rules", {})
+    conf_levels = events_master.get("confidence_levels", [])
+
     events_with_reactions = []
     for ev in events_master["events"]:
         reactions = compute_reactions_for_event(ev)
+        # 結果タグは実データ(30日変化率)から自動判定する（手動値があっても上書き）
+        effect_tags = detect_effect_tags(reactions, effect_rules, horizon="d30")
         events_with_reactions.append({
             "id": ev["id"],
             "name": ev["name"],
             "date": ev["date"],
             "category": ev.get("category"),
-            "tags": ev["tags"],
+            "cause_tags": ev.get("cause_tags", []),
+            "effect_tags": effect_tags,
+            "causal_chain": ev.get("causal_chain", []),
+            "context_snapshot": ev.get("context_snapshot", {}),
             "description": ev["description"],
             "similarity_reason": ev.get("similarity_reason", ""),
             "propagation": ev.get("propagation", []),
@@ -180,16 +218,18 @@ def build():
             "reactions": reactions,
         })
 
-    summary = summarize_by_tag(events_with_reactions, horizon="d30")
+    summary = summarize_by_cause(events_with_reactions, horizon="d30", conf_levels=conf_levels)
 
     return {
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
-        "tag_labels": events_master["tag_labels"],
+        "cause_tag_labels": events_master.get("cause_tag_labels", {}),
+        "effect_tag_labels": events_master.get("effect_tag_labels", {}),
         "category_labels": events_master.get("category_labels", {}),
+        "confidence_levels": conf_levels,
         "horizons": [h[0] for h in HORIZONS],
         "summary_horizon": "d30",
         "events": events_with_reactions,
-        "tag_summary": summary,
+        "cause_summary": summary,
         "disclaimer": "本データは過去の同種イベント発生後の市場反応を記録・整理したものであり、将来の値動きを示すものでも、売買を推奨するものでもありません。",
     }
 
