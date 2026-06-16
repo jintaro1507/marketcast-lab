@@ -16,7 +16,11 @@
         "事態が拡大したか、早期に収束したか"
       ],
       "interpretation_caveat": "同じ『中東地政学』でも、原油の反応は局面ごとに大きく異なる。緊張の大きさそのものより、現実の供給が止まったか否かが反応を分けてきたため、平均値だけで判断せず代表イベントを個別に確認することを推奨する。",
-      "representative_events": ["saudi_attack_2019", "hamas_israel_2023", "us_iran_tension_2020"]
+      "representative_events": [
+        "saudi_attack_2019",
+        "hamas_israel_2023",
+        "us_iran_tension_2020"
+      ]
     },
     "war": {
       "label": "戦争・軍事衝突",
@@ -32,7 +36,11 @@
         "実際の供給網への被害の有無"
       ],
       "interpretation_caveat": "戦争・軍事衝突は、当事国の経済的な立ち位置（資源国か否か）によって市場への波及が大きく変わる。同じグループでも、供給網に直結したケースとそうでないケースが混在している点に注意。",
-      "representative_events": ["russia_ukraine_2022", "us_iran_tension_2020", "hamas_israel_2023"]
+      "representative_events": [
+        "russia_ukraine_2022",
+        "us_iran_tension_2020",
+        "hamas_israel_2023"
+      ]
     },
     "monetary_easing": {
       "label": "金融緩和",
@@ -48,7 +56,10 @@
         "利下げが単発か、緩和サイクルの起点か"
       ],
       "interpretation_caveat": "『利下げ＝株高』と単純化しやすいが、危機対応の緊急利下げ局面では実施直後に株式が急落した例もある。緩和の背景を区別せずに平均すると、性質の異なる局面を混ぜた数字になりやすい。",
-      "representative_events": ["fed_cut_start_2019", "fed_cut_start_2024", "fed_emergency_cut_2020"]
+      "representative_events": [
+        "fed_cut_start_2019",
+        "fed_cut_start_2024"
+      ]
     },
     "monetary_tightening": {
       "label": "金融引き締め",
@@ -64,7 +75,10 @@
         "市場が利上げをどこまで織り込んでいたか"
       ],
       "interpretation_caveat": "同じ『利上げ』でも、サイクルの開始局面では金利の先高観が強く、終盤局面ではピークアウトが意識されるため、市場の反応は逆方向になりうる。段階を区別せずに集計すると傾向が打ち消し合う点に注意。",
-      "representative_events": ["fed_hike_start_2022", "fed_hike_final_2023"]
+      "representative_events": [
+        "fed_hike_start_2022",
+        "fed_hike_final_2023"
+      ]
     },
     "supply_shock": {
       "label": "供給ショック",
@@ -76,7 +90,7 @@
     },
     "emergency_cut": {
       "label": "緊急利下げ",
-      "summary": "",
+      "summary": "通常の景気調整ではなく、危機対応として実施された利下げ局面を集めたグループ。現在は1件のみのため統計的な意味は限定的。件数が増えた段階で詳細な集計を行う。",
       "common_traits": [],
       "divergence_factors": [],
       "interpretation_caveat": "",
@@ -92,27 +106,51 @@
     },
     "terror": {
       "label": "テロ",
-      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+      "summary": "",
+      "common_traits": [],
+      "divergence_factors": [],
+      "interpretation_caveat": "",
+      "representative_events": []
     },
     "demand_shock": {
       "label": "需要ショック",
-      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+      "summary": "",
+      "common_traits": [],
+      "divergence_factors": [],
+      "interpretation_caveat": "",
+      "representative_events": []
     },
     "bank_crisis": {
       "label": "銀行危機",
-      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+      "summary": "",
+      "common_traits": [],
+      "divergence_factors": [],
+      "interpretation_caveat": "",
+      "representative_events": []
     },
     "debt_crisis": {
       "label": "債務危機",
-      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+      "summary": "",
+      "common_traits": [],
+      "divergence_factors": [],
+      "interpretation_caveat": "",
+      "representative_events": []
     },
     "currency_crisis": {
       "label": "通貨危機",
-      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+      "summary": "",
+      "common_traits": [],
+      "divergence_factors": [],
+      "interpretation_caveat": "",
+      "representative_events": []
     },
     "natural_disaster": {
       "label": "自然災害",
-      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+      "summary": "",
+      "common_traits": [],
+      "divergence_factors": [],
+      "interpretation_caveat": "",
+      "representative_events": []
     }
   }
 }
