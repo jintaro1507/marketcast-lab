@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>イベント詳細 ｜ Marketcast Lab</title>
+<style>
+  :root{
+    --paper:#F2EFE8; --paper-deep:#E8E3D7; --ink:#1C1A16; --ink-soft:#5B564B;
+    --line-rule:#cfc7b6;
+    --oil:#B5703A; --gold:#9C7A2E; --equity:#38456B; --crypto:#6B4A8A;
+    --fx:#4A6B5A; --bond:#7A6A55;
+    --up:#8A3B2E; --down:#2F5D4E;
+    --display:"Shippori Mincho","Noto Serif JP",serif;
+    --body:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;
+    --mono:"JetBrains Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.7;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+
+  .strip{background:var(--ink);color:var(--paper);font-size:12px;padding:8px 5vw;}
+  .strip b{font-weight:600;}
+  header{border-bottom:1px solid var(--line-rule);padding:18px 5vw 16px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .brand{font-family:var(--display);font-size:20px;letter-spacing:0.04em;display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{font-family:var(--mono);font-size:11px;color:var(--ink-soft);border:1px solid var(--line-rule);padding:2px 6px;border-radius:2px;letter-spacing:0.08em;}
+  nav{display:flex;gap:24px;font-size:13px;color:var(--ink-soft);}
+  nav a:hover{color:var(--ink);}
+
+  .breadcrumb{padding:20px 5vw 0;font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
+  .breadcrumb a{border-bottom:1px solid var(--line-rule);}
+
+  .ev-head{padding:14px 5vw 26px;border-bottom:1px solid var(--line-rule);}
+  .ev-head .date{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-bottom:10px;}
+  .ev-head h1{font-family:var(--display);font-size:clamp(24px,3.2vw,34px);margin:0 0 14px;max-width:28ch;}
+  .ev-head p{max-width:62ch;color:var(--ink-soft);font-size:14px;margin:0 0 16px;}
+  .ev-head .tags{display:flex;gap:6px;flex-wrap:wrap;}
+  .ev-head .tags a{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);border:1px solid var(--line-rule);padding:3px 9px;border-radius:2px;}
+  .ev-head .tags a:hover{border-color:var(--ink-soft);color:var(--ink);}
+
+  .section-label{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);padding:32px 5vw 0;}
+
+  /* propagation */
+  .prop{padding:14px 5vw 0;}
+  .prop-flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--paper-deep);border:1px solid var(--line-rule);padding:20px;}
+  .prop-flow .node{background:var(--paper);border:1px solid var(--line-rule);padding:8px 14px;font-size:13px;border-radius:2px;}
+  .prop-flow .arrow{color:var(--ink-soft);font-family:var(--mono);}
+
+  /* reaction table */
+  .react-wrap{padding:14px 5vw 0;overflow-x:auto;}
+  table.react{width:100%;border-collapse:collapse;font-size:13px;min-width:620px;}
+  table.react th{text-align:right;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;color:var(--ink-soft);text-transform:uppercase;border-bottom:1px solid var(--line-rule);padding:9px 12px;}
+  table.react th:first-child{text-align:left;}
+  table.react td{padding:13px 12px;border-bottom:1px solid var(--line-rule);text-align:right;font-family:var(--mono);}
+  table.react td:first-child{text-align:left;font-family:var(--body);}
+  .asset-name{display:flex;align-items:center;gap:8px;}
+  .swatch{width:9px;height:9px;border-radius:2px;display:inline-block;flex-shrink:0;}
+  .swatch.oil{background:var(--oil);}.swatch.gold{background:var(--gold);}
+  .swatch.equity{background:var(--equity);}.swatch.fx{background:var(--fx);}.swatch.bond{background:var(--bond);}
+  .pos{color:var(--up);} .neg{color:var(--down);}
+  .restricted-note{font-family:var(--body);font-size:10px;color:var(--ink-soft);}
+
+  .react-note{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);padding:10px 5vw 0;}
+
+  .related{padding:14px 5vw 0;}
+  .related a{display:inline-block;font-size:13px;border:1px solid var(--line-rule);padding:8px 16px;border-radius:2px;color:var(--ink-soft);}
+  .related a:hover{border-color:var(--ink-soft);color:var(--ink);}
+
+  footer{margin-top:50px;border-top:1px solid var(--line-rule);padding:28px 5vw 50px;font-size:12px;color:var(--ink-soft);}
+  footer .back{display:inline-block;margin-bottom:12px;border-bottom:1px solid var(--line-rule);}
+  footer .disclaimer{max-width:64ch;line-height:1.8;}
+  .empty{padding:40px 5vw;color:var(--ink-soft);font-size:14px;}
+</style>
+</head>
+<body>
+
+<div class="strip"><b>本サイトは情報提供・教育目的です。</b>個別の投資助言ではありません。最終判断はご自身の責任で行ってください。</div>
+
+<header>
+  <div class="brand"><a href="index.html">Marketcast Lab</a> <span class="mark">観測所</span></div>
+  <nav>
+    <a href="index.html#events">イベント観測</a>
+    <a href="index.html#assets">資産別反応史</a>
+    <a href="glossary.html">用語解説</a>
+    <a href="disclaimer.html">免責事項</a>
+  </nav>
+</header>
+
+<div id="content"></div>
+
+<script>
+(async function(){
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  const content = document.getElementById('content');
+
+  const horizonLabels = {d1:'1日後', d7:'7日後', d30:'30日後', d90:'90日後'};
+  function pct(v){ if(v===null||v===undefined) return '—'; return (v>0?'+':'')+v.toFixed(1)+'%'; }
+  function cls(v){ if(v===null||v===undefined) return ''; return v>0?'pos':(v<0?'neg':''); }
+
+  let data;
+  try{
+    const res = await fetch('data/event_reactions.json', {cache:'no-store'});
+    data = await res.json();
+  }catch(e){
+    content.innerHTML = '<div class="empty">データを読み込めませんでした。</div>'; return;
+  }
+
+  const tagLabels = data.tag_labels || {};
+  const ev = (data.events||[]).find(e => e.id === id) || data.events[0];
+  if(!ev){ content.innerHTML = '<div class="empty">イベントが見つかりませんでした。</div>'; return; }
+
+  document.title = ev.name + ' ｜ Marketcast Lab';
+
+  const tagsHtml = ev.tags.map(t=>`<a href="similar_events.html?tag=${t}">${tagLabels[t]||t}</a>`).join('');
+
+  // 伝播フロー
+  const flowHtml = (ev.propagation||[]).map((n,i)=>
+    (i>0?'<span class="arrow">→</span>':'') + `<span class="node">${n}</span>`
+  ).join('');
+
+  // 反応テーブル
+  const horizons = data.horizons || ['d1','d7','d30','d90'];
+  const order = ['wti','gold','sp500','ust10y','usdjpy','vix'];
+  const rows = order.filter(k=>ev.reactions[k]).map(k=>{
+    const a = ev.reactions[k];
+    const cells = horizons.map(h=>{
+      const v = a.status==='ok' ? a.changes[h] : null;
+      return `<td class="${cls(v)}">${a.status==='ok'?pct(v):'—'}</td>`;
+    }).join('');
+    const rnote = a.restricted ? ' <span class="restricted-note">(派生値)</span>' : '';
+    return `<tr><td><span class="asset-name"><span class="swatch ${a.asset}"></span>${a.label}${rnote}</span></td>${cells}</tr>`;
+  }).join('');
+  const thHorizons = horizons.map(h=>`<th>${horizonLabels[h]||h}</th>`).join('');
+
+  // 同タグの他イベントへのリンク
+  const related = (data.events||[]).filter(e=>e.id!==ev.id && e.tags.some(t=>ev.tags.includes(t)));
+  const relatedHtml = related.length
+    ? related.map(e=>`<a href="event_detail.html?id=${e.id}">${e.date} ${e.name}</a>`).join(' ')
+    : '<span style="color:var(--ink-soft);font-size:13px;">同じタグの他イベントはまだ登録されていません。</span>';
+
+  content.innerHTML = `
+    <div class="breadcrumb"><a href="index.html">トップ</a> ／ <a href="similar_events.html?tag=${ev.tags[0]}">${tagLabels[ev.tags[0]]||ev.tags[0]}</a> ／ ${ev.name}</div>
+
+    <div class="ev-head">
+      <div class="date">発生日: ${ev.date}</div>
+      <h1>${ev.name}</h1>
+      <p>${ev.description}</p>
+      <div class="tags">${tagsHtml}</div>
+    </div>
+
+    <div class="section-label">想定される伝播パターン</div>
+    <div class="prop"><div class="prop-flow">${flowHtml || '<span style="color:var(--ink-soft)">記録なし</span>'}</div></div>
+
+    <div class="section-label">発生後の各資産の変化（実データ）</div>
+    <div class="react-wrap">
+      <table class="react">
+        <tbody>
+          <tr><th>資産</th>${thHorizons}</tr>
+          ${rows}
+        </tbody>
+      </table>
+    </div>
+    <div class="react-note">基準日: ${ev.date} 時点（休場の場合は直前の取引日）。数値は基準日からのおおよその変化率。一部系列は再配布制限のため派生値のみ。出典: FRED 等。</div>
+
+    <div class="section-label">同じ種類の過去イベント</div>
+    <div class="related">${relatedHtml}</div>
+
+    <footer>
+      <a class="back" href="similar_events.html?tag=${ev.tags[0]}">← ${tagLabels[ev.tags[0]]||ev.tags[0]} の一覧へ</a>
+      <div class="disclaimer">本ページの数値は過去の事実の記録であり、将来の値動きを示すものでも、特定の取引・銘柄・商品を推奨するものでもありません。各イベントの前提条件は異なります。</div>
+    </footer>
+  `;
+})();
+</script>
+
+</body>
+</html>
