@@ -56,6 +56,24 @@
 
   .summary-note{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);padding:10px 5vw 0;}
 
+  /* group panel */
+  #group-panel{padding:24px 5vw 0;}
+  .group-card{border:1px solid var(--line-rule);background:var(--paper-deep);padding:22px 24px;max-width:860px;}
+  .group-card .g-summary{font-size:14.5px;line-height:1.85;margin:0 0 18px;}
+  .group-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  .group-col h4{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;color:var(--ink-soft);text-transform:uppercase;margin:0 0 10px;border-bottom:1px solid var(--line-rule);padding-bottom:6px;}
+  .group-col ul{margin:0;padding-left:18px;}
+  .group-col li{font-size:13px;line-height:1.7;margin-bottom:5px;}
+  .group-caveat{margin-top:18px;border-top:1px dashed var(--line-rule);padding-top:14px;font-size:12.5px;line-height:1.8;color:var(--ink);background:rgba(156,122,46,0.06);padding:14px;border-left:3px solid var(--gold);}
+  .group-caveat .c-label{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--ink-soft);display:block;margin-bottom:5px;}
+  .rep-events{margin-top:18px;}
+  .rep-events .r-label{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:10px;}
+  .rep-events .r-list{display:flex;gap:8px;flex-wrap:wrap;}
+  .rep-events .r-list a{font-size:12.5px;border:1px solid var(--line-rule);background:var(--paper);padding:7px 13px;border-radius:2px;color:var(--ink);}
+  .rep-events .r-list a:hover{border-color:var(--ink-soft);}
+  .rep-events .r-list a .r-date{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-right:6px;}
+  @media (max-width:680px){ .group-cols{grid-template-columns:1fr;} }
+
   /* event list */
   .events-list{padding:14px 5vw 0;}
   .ev{border-top:1px solid var(--line-rule);padding:22px 0;display:grid;grid-template-columns:140px 1fr 200px;gap:22px;align-items:start;}
@@ -108,6 +126,8 @@
 </div>
 
 <div class="tagbar" id="tagbar"><!-- タグチップをJSで生成 --></div>
+
+<div id="group-panel"><!-- グループ説明をJSで生成 --></div>
 
 <div class="section-label" id="summary-label">過去の同種イベント後の反応（30日後）</div>
 <div id="conf-warning"></div>
@@ -174,6 +194,42 @@
       history.replaceState(null,'', '?tag='+activeTag);
       render();
     }));
+
+    // グループ説明パネル（group_metadataに中身があるときのみ表示）
+    const meta = (data.group_metadata && data.group_metadata[activeTag]) || null;
+    const eventNames = data.event_names || {};
+    const panel = document.getElementById('group-panel');
+    if(meta && meta.summary){
+      const traits = (meta.common_traits||[]).map(t=>`<li>${t}</li>`).join('');
+      const factors = (meta.divergence_factors||[]).map(t=>`<li>${t}</li>`).join('');
+      const caveat = meta.interpretation_caveat
+        ? `<div class="group-caveat"><span class="c-label">集計値の読み方・注意点</span>${meta.interpretation_caveat}</div>` : '';
+      // 代表イベント（event_idで紐づけ、詳細へリンク）
+      const reps = (meta.representative_events||[]).filter(id=>eventNames[id]);
+      const repBlock = reps.length ? `
+        <div class="rep-events">
+          <div class="r-label">代表的な局面</div>
+          <div class="r-list">${reps.map(id=>{
+            const ev = data.events.find(e=>e.id===id);
+            const date = ev ? ev.date : '';
+            return `<a href="event_detail.html?id=${id}"><span class="r-date">${date}</span>${eventNames[id]}</a>`;
+          }).join('')}</div>
+        </div>` : '';
+      panel.innerHTML = `
+        <div class="group-card">
+          <p class="g-summary">${meta.summary}</p>
+          <div class="group-cols">
+            <div class="group-col"><h4>共通点</h4><ul>${traits}</ul></div>
+            <div class="group-col"><h4>結果が分かれる主な要因</h4><ul>${factors}</ul></div>
+          </div>
+          ${caveat}
+          ${repBlock}
+        </div>`;
+      panel.style.display = 'block';
+    }else{
+      panel.innerHTML = '';
+      panel.style.display = 'none';
+    }
 
     // この原因タグに属するイベント数 → 全体の信頼性
     const evs = data.events.filter(e => (e.cause_tags||[]).includes(activeTag));
