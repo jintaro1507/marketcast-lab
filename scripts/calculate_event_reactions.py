@@ -271,27 +271,36 @@ def compute_reactions_for_event(event):
 
 
 def detect_effect_tags(reactions, effect_rules, horizon="d30"):
-    """30日変化(既定)から観察事実タグを自動判定する。
-    mode='pct'は相対変化率(%)、mode='abs_pt'は絶対変化幅(pt:利回り用)で判定。
-    閾値未満はタグを付けない（横ばいゾーン）。"""
-    tags = []
+    """1日後・7日後・30日後の3期間いずれかで閾値を超えた場合にタグを付与する。
+    90日後はノイズ（別イベントの混入）が大きいためタグ判定から除外。90日のデータは表示用に保持。
+    返値: (effect_tags リスト, effect_tag_details 辞書)
+    effect_tag_details = {"oil_up": ["d1","d7"], "gold_up": ["d30"]} のように期間情報を保持。
+    引数 horizon は後方互換のために残すが、3期間チェックに変更したため使用しない。
+    risk_on/risk_off などの解釈タグは使わない（観察事実タグのみ）。"""
+    TAG_HORIZONS = ["d1", "d7", "d30"]  # 90日はタグ判定対象外
+    tag_periods = {}
+
     for tag, rule in effect_rules.items():
         a = reactions.get(rule["asset"])
         if not a or a.get("status") != "ok":
             continue
         mode = rule.get("mode", "pct")
-        if mode == "abs_pt":
-            v = a.get("changes_pt", {}).get(horizon)
-        else:
-            v = a.get("changes", {}).get(horizon)
-        if v is None:
-            continue
         op, th = rule["op"], rule["threshold"]
-        if op == ">=" and v >= th:
-            tags.append(tag)
-        elif op == "<=" and v <= th:
-            tags.append(tag)
-    return tags
+
+        for h in TAG_HORIZONS:
+            if mode == "abs_pt":
+                v = a.get("changes_pt", {}).get(h)
+            else:
+                v = a.get("changes", {}).get(h)
+            if v is None:
+                continue
+            hit = (op == ">=" and v >= th) or (op == "<=" and v <= th)
+            if hit:
+                tag_periods.setdefault(tag, []).append(h)
+
+    effect_tags = sorted(tag_periods.keys())
+    effect_tag_details = {tag: periods for tag, periods in tag_periods.items()}
+    return effect_tags, effect_tag_details
 
 
 def confidence_for(n, levels):
@@ -358,8 +367,8 @@ def build():
     events_with_reactions = []
     for ev in events_master["events"]:
         reactions = compute_reactions_for_event(ev)
-        # 結果タグは実データ(30日変化率)から自動判定する（手動値があっても上書き）
-        effect_tags = detect_effect_tags(reactions, effect_rules, horizon="d30")
+        # 結果タグは全期間(1日/7日/30日/90日)のいずれかで閾値超えなら付与（全期間チェック方式）
+        effect_tags, effect_tag_details = detect_effect_tags(reactions, effect_rules)
         events_with_reactions.append({
             "id": ev["id"],
             "name": ev["name"],
@@ -367,6 +376,7 @@ def build():
             "category": ev.get("category"),
             "cause_tags": ev.get("cause_tags", []),
             "effect_tags": effect_tags,
+            "effect_tag_details": effect_tag_details,
             "causal_chain": ev.get("causal_chain", []),
             "context_snapshot": ev.get("context_snapshot", {}),
             "description": ev["description"],
