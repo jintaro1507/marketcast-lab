@@ -63,8 +63,13 @@
   .ev .ev-date{font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
   .ev .ev-body h3{font-family:var(--display);font-size:16px;margin:0 0 6px;}
   .ev .ev-body p{font-size:12.5px;color:var(--ink-soft);margin:0 0 10px;max-width:60ch;}
-  .ev .ev-tags{display:flex;gap:6px;flex-wrap:wrap;}
-  .ev .ev-tags span{font-family:var(--mono);font-size:10px;color:var(--ink-soft);border:1px solid var(--line-rule);padding:2px 7px;border-radius:2px;}
+  .ev .ev-tags{display:flex;flex-direction:column;gap:6px;}
+  .tag-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .tag-group .tag-lead{font-family:var(--mono);font-size:9.5px;letter-spacing:0.08em;color:var(--ink-soft);width:30px;flex-shrink:0;}
+  .ev .ev-tags span.cause{font-family:var(--mono);font-size:10px;color:var(--ink);border:1px solid var(--ink-soft);padding:2px 7px;border-radius:2px;}
+  .ev .ev-tags span.effect{font-family:var(--mono);font-size:10px;color:var(--ink-soft);background:var(--paper-deep);border:1px solid var(--line-rule);padding:2px 7px;border-radius:2px;}
+  .conf-badge{font-family:var(--mono);font-size:10px;border:1px solid;padding:2px 8px;border-radius:2px;margin-left:8px;}
+  #conf-warning{display:none;background:var(--paper-deep);border:1px solid var(--line-rule);border-left:3px solid #9C7A2E;padding:12px 16px;margin:10px 5vw 0;font-size:12.5px;color:var(--ink);max-width:64ch;}
   .ev .ev-mini{display:flex;flex-direction:column;gap:5px;font-size:12px;}
   .ev .ev-mini .row{display:flex;justify-content:space-between;gap:10px;}
   .ev .ev-mini .row .a{color:var(--ink-soft);display:flex;align-items:center;gap:6px;}
@@ -105,6 +110,7 @@
 <div class="tagbar" id="tagbar"><!-- タグチップをJSで生成 --></div>
 
 <div class="section-label" id="summary-label">過去の同種イベント後の反応（30日後）</div>
+<div id="conf-warning"></div>
 <div class="summary-wrap">
   <table class="summary" id="summary-table"><tbody></tbody></table>
 </div>
@@ -121,9 +127,7 @@
 <script>
 (async function(){
   const params = new URLSearchParams(location.search);
-  let activeTag = params.get('tag') || 'middle_east';
 
-  const arrows = {up:'▲', down:'▼'};
   function pct(v){ if(v===null||v===undefined) return '—'; return (v>0?'+':'')+v.toFixed(1)+'%'; }
   function cls(v){ if(v===null||v===undefined) return ''; return v>0?'pos':(v<0?'neg':''); }
 
@@ -136,15 +140,34 @@
     return;
   }
 
-  const tagLabels = data.tag_labels || {};
+  const causeLabels = data.cause_tag_labels || {};
+  const effectLabels = data.effect_tag_labels || {};
+
+  // デフォルトタグ：URL指定 → なければ件数が最も多い原因タグ
+  let activeTag = params.get('tag');
+  if(!activeTag || !causeLabels[activeTag]){
+    const counts = {};
+    data.events.forEach(e => (e.cause_tags||[]).forEach(t => counts[t]=(counts[t]||0)+1));
+    activeTag = Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0] || Object.keys(causeLabels)[0];
+  }
+
+  // 信頼性バッジのHTML
+  function confBadge(conf){
+    if(!conf) return '';
+    const colorMap = {reference:'var(--ink-soft)', low:'#9C7A2E', medium:'#38456B', high:'#2F5D4E'};
+    const c = colorMap[conf.level] || 'var(--ink-soft)';
+    return `<span class="conf-badge" style="border-color:${c};color:${c};">${conf.label}</span>`;
+  }
 
   function render(){
-    document.getElementById('page-title').textContent = (tagLabels[activeTag] || activeTag) + ' の類似局面';
+    document.getElementById('page-title').textContent = (causeLabels[activeTag] || activeTag) + ' の類似局面';
 
-    // タグチップ
-    const allTags = Object.keys(tagLabels).filter(t => (data.tag_summary && data.tag_summary[t]) || data.events.some(e=>e.tags.includes(t)));
+    // 原因タグチップ（登録イベントがある原因タグのみ）
+    const usedCauses = {};
+    data.events.forEach(e => (e.cause_tags||[]).forEach(t=>usedCauses[t]=true));
+    const allTags = Object.keys(causeLabels).filter(t => usedCauses[t]);
     document.getElementById('tagbar').innerHTML = allTags.map(t =>
-      `<span class="chip ${t===activeTag?'active':''}" data-tag="${t}">${tagLabels[t]||t}</span>`
+      `<span class="chip ${t===activeTag?'active':''}" data-tag="${t}">${causeLabels[t]||t}</span>`
     ).join('');
     document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
       activeTag = c.dataset.tag;
@@ -152,16 +175,39 @@
       render();
     }));
 
-    // サマリー表
-    const summary = (data.tag_summary && data.tag_summary[activeTag]) || {};
+    // この原因タグに属するイベント数 → 全体の信頼性
+    const evs = data.events.filter(e => (e.cause_tags||[]).includes(activeTag));
+    const n = evs.length;
+    let overallConf = null;
+    (data.confidence_levels||[]).forEach(lv=>{ if(!overallConf && n<=lv.max_n) overallConf={level:lv.level,label:lv.label,note:lv.note||''}; });
+
+    // 信頼性の注意書き（参考値のときは強めに）
+    const confLine = document.getElementById('summary-label');
+    let confNote = `参考件数：${n}件`;
+    if(overallConf){ confNote += ` ／ ${overallConf.label}`; }
+    confLine.innerHTML = `過去の同種イベント後の反応（30日後） <span style="text-transform:none;letter-spacing:0;">— ${confNote}</span>`;
+
+    const warnBox = document.getElementById('conf-warning');
+    if(overallConf && overallConf.level === 'reference'){
+      warnBox.style.display = 'block';
+      warnBox.textContent = '※ 件数が少ないため、平均・中央値などは統計的な傾向ではなく参考値としてご覧ください。';
+    }else{
+      warnBox.style.display = 'none';
+    }
+
+    // サマリー表（原因タグ集計）
+    const summary = (data.cause_summary && data.cause_summary[activeTag]) || {};
     const order = ['wti','gold','sp500','ust10y','usdjpy','vix'];
+    const isReference = overallConf && overallConf.level === 'reference';
     const rows = order.filter(k=>summary[k]).map(k=>{
       const s = summary[k];
+      // 参考値のときは平均・中央値を控えめ（グレー）に
+      const dim = isReference ? 'style="color:var(--ink-soft)"' : '';
       return `<tr>
         <td><span class="asset-name"><span class="swatch ${s.asset}"></span>${s.label}</span></td>
         <td class="winrate">${s.up}/${s.count}件 上昇</td>
-        <td class="${cls(s.avg)}">${pct(s.avg)}</td>
-        <td class="${cls(s.median)}">${pct(s.median)}</td>
+        <td class="${cls(s.avg)}" ${dim}>${pct(s.avg)}</td>
+        <td class="${cls(s.median)}" ${dim}>${pct(s.median)}</td>
         <td class="${cls(s.max)}">${pct(s.max)}</td>
         <td class="${cls(s.min)}">${pct(s.min)}</td>
       </tr>`;
@@ -171,11 +217,10 @@
       tbl.querySelector('tbody').innerHTML =
         `<tr><th>資産</th><th>勝率</th><th>平均</th><th>中央値</th><th>最大</th><th>最小</th></tr>` + rows;
     }else{
-      tbl.querySelector('tbody').innerHTML = `<tr><td colspan="6" style="color:var(--ink-soft)">このタグの集計データはまだありません。</td></tr>`;
+      tbl.querySelector('tbody').innerHTML = `<tr><td colspan="6" style="color:var(--ink-soft)">この原因タグの集計データはまだありません。</td></tr>`;
     }
 
     // 個別イベント一覧
-    const evs = data.events.filter(e => e.tags.includes(activeTag));
     const list = document.getElementById('events-list');
     if(!evs.length){ list.innerHTML = '<div class="empty">該当するイベントがまだ登録されていません。</div>'; return; }
     list.innerHTML = evs.map(e=>{
@@ -184,13 +229,17 @@
         const c = r[k].changes.d30;
         return `<div class="row"><span class="a"><span class="swatch ${r[k].asset}"></span>${r[k].label}</span><span class="v ${cls(c)}">${c!==null?(c>0?'▲':'▼')+' '+pct(c):'—'}</span></div>`;
       }).join('');
-      const tags = e.tags.map(t=>`<span>${tagLabels[t]||t}</span>`).join('');
+      const causeChips = (e.cause_tags||[]).map(t=>`<span class="cause">${causeLabels[t]||t}</span>`).join('');
+      const effectChips = (e.effect_tags||[]).map(t=>`<span class="effect">${effectLabels[t]||t}</span>`).join('');
       return `<div class="ev">
         <div class="ev-date">${e.date}</div>
         <div class="ev-body">
           <h3>${e.name}</h3>
           <p>${e.description}</p>
-          <div class="ev-tags">${tags}</div>
+          <div class="ev-tags">
+            <div class="tag-group"><span class="tag-lead">原因</span>${causeChips}</div>
+            ${effectChips ? `<div class="tag-group"><span class="tag-lead">結果</span>${effectChips}</div>` : ''}
+          </div>
           <a class="detail-link" href="event_detail.html?id=${e.id}">このイベントの詳細 →</a>
         </div>
         <div class="ev-mini">
