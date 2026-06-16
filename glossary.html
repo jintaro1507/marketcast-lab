@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用語解説 ｜ Marketcast Lab</title>
+<style>
+  :root{
+    --paper: #F2EFE8;
+    --paper-deep: #E8E3D7;
+    --ink: #1C1A16;
+    --ink-soft: #5B564B;
+    --line-rule: #cfc7b6;
+    --oil: #B5703A;
+    --gold: #9C7A2E;
+    --equity: #38456B;
+    --crypto: #6B4A8A;
+    --display: "Shippori Mincho", "Noto Serif JP", serif;
+    --body: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+    --mono: "JetBrains Mono", "Courier New", monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  :target{scroll-margin-top:24px;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+
+  .strip{background:var(--ink);color:var(--paper);font-size:12px;padding:8px 5vw;}
+  .strip b{font-weight:600;}
+
+  header{border-bottom:1px solid var(--line-rule);padding:18px 5vw 16px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .brand{font-family:var(--display);font-size:20px;letter-spacing:0.04em;display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{font-family:var(--mono);font-size:11px;color:var(--ink-soft);border:1px solid var(--line-rule);padding:2px 6px;border-radius:2px;letter-spacing:0.08em;}
+  nav{display:flex;gap:24px;font-size:13px;color:var(--ink-soft);}
+  nav a:hover{color:var(--ink);}
+
+  .page-head{padding:48px 5vw 28px;border-bottom:1px solid var(--line-rule);}
+  .page-head .eyebrow{font-family:var(--mono);font-size:12px;color:var(--ink-soft);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;}
+  .page-head h1{font-family:var(--display);font-size:clamp(26px,3.4vw,38px);margin:0 0 16px;}
+  .page-head p{max-width:60ch;color:var(--ink-soft);font-size:14.5px;margin:0;}
+
+  .terms{padding:10px 5vw 0;max-width:880px;}
+  .term{padding:26px 0;border-bottom:1px solid var(--line-rule);}
+  .term .term-name{font-family:var(--display);font-size:18px;margin:0 0 6px;display:flex;align-items:center;gap:10px;}
+  .swatch{width:9px;height:9px;border-radius:2px;display:inline-block;flex-shrink:0;}
+  .swatch.oil{background:var(--oil);}
+  .swatch.gold{background:var(--gold);}
+  .swatch.equity{background:var(--equity);}
+  .swatch.crypto{background:var(--crypto);}
+  .term .term-reading{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-bottom:12px;letter-spacing:0.04em;}
+  .term p{font-size:14px;margin:0;max-width:64ch;}
+
+  .group-label{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);padding:30px 5vw 0;}
+
+  footer{margin-top:50px;border-top:1px solid var(--line-rule);padding:30px 5vw 50px;font-size:12px;color:var(--ink-soft);}
+  footer .back{display:inline-block;margin-bottom:14px;border-bottom:1px solid var(--line-rule);}
+  footer .disclaimer{max-width:64ch;line-height:1.8;}
+</style>
+</head>
+<body>
+
+<div class="strip"><b>本サイトは情報提供・教育目的です。</b>個別の投資助言ではありません。最終判断はご自身の責任で行ってください。</div>
+
+<header>
+  <div class="brand"><a href="index.html">Marketcast Lab</a> <span class="mark">観測所</span></div>
+  <nav>
+    <a href="index.html#events">イベント観測</a>
+    <a href="index.html#assets">資産別反応史</a>
+    <a href="glossary.html">用語解説</a>
+    <a href="disclaimer.html">免責事項</a>
+  </nav>
+</header>
+
+<div class="page-head">
+  <div class="eyebrow">Glossary</div>
+  <h1>用語解説</h1>
+  <p>当サイトで使われる基本的な用語を、投資初心者の方にもわかりやすくまとめています。専門的な厳密さよりも、サイトの内容を理解するための入り口となることを優先しています。</p>
+</div>
+
+<div class="group-label">基本の考え方</div>
+<div class="terms">
+
+  <div class="term">
+    <h3 class="term-name">供給ショック</h3>
+    <div class="term-reading">きょうきゅうショック / supply shock</div>
+    <p>戦争・災害・事故などで、ある商品（原油など）の供給が急に減ると予想される状況。モノが足りなくなる懸念から価格が短期間で大きく動くことがあります。中東情勢の緊張で原油先物が反応しやすいのは、この供給ショックが意識されるためです。</p>
+  </div>
+
+  <div class="term">
+    <h3 class="term-name">逃避先資産（安全資産）</h3>
+    <div class="term-reading">とうひさきしさん / safe haven</div>
+    <p>世の中が不安定なとき、投資家がお金を一時的に避難させる先として選ばれやすい資産のこと。代表例が金（ゴールド）です。「リスクの高いものを売って、安全とされるものに移す」という資金の流れが起きやすくなります。</p>
+  </div>
+
+  <div class="term">
+    <h3 class="term-name">リスクオフ / リスクオン</h3>
+    <div class="term-reading">risk-off / risk-on</div>
+    <p>リスクオフは、投資家が慎重になり、値動きの大きい資産を避けて安全な資産にお金を移す局面。リスクオンはその逆で、積極的にリスクを取りにいく局面です。不況や危機の懸念が高まるとリスクオフになりやすい傾向があります。</p>
+  </div>
+
+  <div class="term">
+    <h3 class="term-name">変化率</h3>
+    <div class="term-reading">へんかりつ / percent change</div>
+    <p>ある期間で価格が何%動いたかを示す数字。当サイトの「市場の現況」では、過去30日でのおおよその変化率を表示しています。たとえば「+7%」なら、30日前と比べて約7%上がった、という意味です。</p>
+  </div>
+
+</div>
+
+<div class="group-label">資産クラス</div>
+<div class="terms">
+
+  <div class="term">
+    <h3 class="term-name"><span class="swatch oil"></span>原油先物</h3>
+    <div class="term-reading">げんゆさきもの / crude oil futures</div>
+    <p>将来のある時点で原油を売買する約束を、今の価格で取引するもの。WTI（米国の指標）やBrent（欧州の指標）が代表的です。供給不安が高まると上がりやすい一方、世界的な不況で需要が減ると下がる、という二面性があります。</p>
+  </div>
+
+  <div class="term">
+    <h3 class="term-name"><span class="swatch gold"></span>金地金（ゴールド）</h3>
+    <div class="term-reading">きんじがね / gold</div>
+    <p>古くから価値の保存手段とされてきた貴金属。不安定な局面で買われやすい「逃避先資産」の代表格です。ただし常に上がるわけではなく、金利が上がる局面などでは魅力が薄れることもあります。</p>
+  </div>
+
+  <div class="term">
+    <h3 class="term-name"><span class="swatch equity"></span>株式（株価指数）</h3>
+    <div class="term-reading">かぶしき / equity</div>
+    <p>企業の所有権の一部を表すもの。個別企業の株のほか、市場全体の動きをまとめた「株価指数」（日経平均、S&P500など）があります。業種によって不況への強さが異なり、生活必需品など需要が落ちにくい業種は相対的に底堅い傾向があります。</p>
+  </div>
+
+  <div class="term">
+    <h3 class="term-name"><span class="swatch crypto"></span>暗号資産（仮想通貨）</h3>
+    <div class="term-reading">あんごうしさん / crypto asset</div>
+    <p>ビットコインなどに代表される、ブロックチェーン技術に基づくデジタル資産。歴史が比較的浅く、危機の局面でリスク資産として売られる場合と、逃避先として買われる場合が混在しており、反応のパターンが定まっていません。</p>
+  </div>
+
+</div>
+
+<div class="group-label">市場の指標</div>
+<div class="terms">
+
+  <div class="term">
+    <h3 class="term-name">VIX（恐怖指数）</h3>
+    <div class="term-reading">ヴィックス / volatility index</div>
+    <p>株式市場の先行きの「揺れ」の大きさに対する市場の予想を数値化したもの。数値が高いほど投資家の不安が強いとされ、急騰しているときはリスクオフ局面の目安になります。</p>
+  </div>
+
+  <div class="term">
+    <h3 class="term-name">国債利回り</h3>
+    <div class="term-reading">こくさいりまわり / treasury yield</div>
+    <p>国が発行する債券（国債）に投資したときの利回り。特に米10年債利回りは、市場の金利予想や景気見通しを映す重要な指標として注目されます。</p>
+  </div>
+
+  <div class="term">
+    <h3 class="term-name">先物価格と現物価格</h3>
+    <div class="term-reading">さきもの・げんぶつ / futures & spot</div>
+    <p>現物価格は「今すぐ売買する」ときの価格、先物価格は「将来のある時点で売買する約束」の価格です。両者は通常近い動きをしますが、保管コストや将来予想の違いから差が出ることもあります。</p>
+  </div>
+
+</div>
+
+<footer>
+  <a class="back" href="index.html">← トップに戻る</a>
+  <div class="disclaimer">本ページの解説は、サイトの内容を理解するための一般的・教育的な説明であり、特定の投資判断を推奨するものではありません。正確な定義は各分野の専門資料をご確認ください。</div>
+</footer>
+
+</body>
+</html>
