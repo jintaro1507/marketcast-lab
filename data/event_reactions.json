@@ -78,7 +78,9 @@
         "middle_east",
         "supply_shock"
       ],
-      "effect_tags": [],
+      "effect_tags": [
+        "oil_up"
+      ],
       "causal_chain": [],
       "context_snapshot": {},
       "description": "サウジアラビアの主要石油施設アブカイクとクライス油田がドローン・ミサイル攻撃を受け、同国の原油生産の約半分、世界供給の約5%が一時的に停止した。供給不安から原油価格が記録的に急騰した局面。",
@@ -195,6 +197,12 @@
             "d90": -18.5
           }
         }
+      },
+      "effect_tag_details": {
+        "oil_up": [
+          "d1",
+          "d7"
+        ]
       }
     },
     {
@@ -313,6 +321,11 @@
             "d90": 285.0
           }
         }
+      },
+      "effect_tag_details": {
+        "oil_down": [
+          "d30"
+        ]
       }
     },
     {
@@ -325,8 +338,8 @@
         "supply_shock"
       ],
       "effect_tags": [
-        "oil_up",
         "equity_up",
+        "oil_up",
         "usd_strong",
         "yield_up"
       ],
@@ -435,6 +448,22 @@
             "d90": -12.4
           }
         }
+      },
+      "effect_tag_details": {
+        "oil_up": [
+          "d1",
+          "d7",
+          "d30"
+        ],
+        "equity_up": [
+          "d30"
+        ],
+        "usd_strong": [
+          "d30"
+        ],
+        "yield_up": [
+          "d30"
+        ]
       }
     },
     {
@@ -447,8 +476,8 @@
         "war"
       ],
       "effect_tags": [
-        "oil_down",
-        "gold_up"
+        "gold_up",
+        "oil_down"
       ],
       "causal_chain": [],
       "context_snapshot": {},
@@ -554,6 +583,14 @@
             "d90": -28.1
           }
         }
+      },
+      "effect_tag_details": {
+        "oil_down": [
+          "d30"
+        ],
+        "gold_up": [
+          "d30"
+        ]
       }
     },
     {
@@ -566,8 +603,8 @@
         "war"
       ],
       "effect_tags": [
-        "vix_down",
-        "usd_strong"
+        "usd_strong",
+        "vix_down"
       ],
       "causal_chain": [],
       "context_snapshot": {},
@@ -677,6 +714,14 @@
             "d90": -18.2
           }
         }
+      },
+      "effect_tag_details": {
+        "vix_down": [
+          "d30"
+        ],
+        "usd_strong": [
+          "d30"
+        ]
       }
     },
     {
@@ -688,13 +733,16 @@
         "monetary_easing"
       ],
       "effect_tags": [
+        "oil_down",
+        "usd_weak",
+        "vix_up",
         "yield_down"
       ],
       "causal_chain": [],
       "context_snapshot": {},
       "description": "FRBが政策金利を0.25%引き下げ、2008年の金融危機以来初の利下げに踏み切った局面。景気減速と低インフレへの『予防的』な利下げと位置づけられた。",
       "similarity_reason": "景気後退入り前の『予防的利下げ』の起点。緩和サイクルの入り口で各資産がどう反応したかを見る基準点として分類する。",
-      "why_reaction": "2008年以来初の利下げだったが、景気後退に陥ってからの対応ではなく、減速と低インフレに先回りする『予防的利下げ』と位置づけられた。深刻な危機下ではなかったため、長期金利の低下や株式への追い風といった、緩和の教科書的な反応が比較的素直に観察された。",
+      "why_reaction": "FRBが2008年以来初めて利下げに踏み切った局面。景気減速への先回りとして『予防的』と位置づけられ、長期金利の低下は素直に現れた。しかし発表直後、トランプ政権が中国への追加関税（第4弾）の発動を表明したため、市場は利下げの好影響より米中貿易摩擦の深刻化を嫌気した。株安とVIX急騰が続き、7日後にはVIXが約38%上昇する展開となった。利下げ単体の効果が素直に出た局面ではなく、金融政策イベントと地政学イベント（貿易摩擦）が重なった複合局面として理解する必要がある。",
       "key_insight": "景気後退前の『予防的利下げ』は、危機対応の緊急利下げと比べて、金利低下や株式への追い風といった反応が素直に現れやすい傾向が過去データで観察された。緩和の効果は、それが平時の先回りか危機下の対応かで現れ方が異なってきた。",
       "contrast": [],
       "propagation": [
@@ -798,6 +846,20 @@
             "d90": -8.4
           }
         }
+      },
+      "effect_tag_details": {
+        "oil_down": [
+          "d1"
+        ],
+        "vix_up": [
+          "d7"
+        ],
+        "usd_weak": [
+          "d7"
+        ],
+        "yield_down": [
+          "d30"
+        ]
       }
     },
     {
@@ -810,9 +872,11 @@
         "pandemic"
       ],
       "effect_tags": [
+        "equity_down",
+        "gold_down",
         "oil_down",
-        "vix_down",
-        "usd_weak"
+        "usd_weak",
+        "vix_down"
       ],
       "causal_chain": [],
       "context_snapshot": {},
@@ -926,6 +990,26 @@
             "d90": -58.2
           }
         }
+      },
+      "effect_tag_details": {
+        "oil_down": [
+          "d1",
+          "d7",
+          "d30"
+        ],
+        "gold_down": [
+          "d7"
+        ],
+        "equity_down": [
+          "d1",
+          "d7"
+        ],
+        "vix_down": [
+          "d30"
+        ],
+        "usd_weak": [
+          "d30"
+        ]
       }
     },
     {
@@ -937,6 +1021,8 @@
         "monetary_tightening"
       ],
       "effect_tags": [
+        "equity_up",
+        "oil_down",
         "oil_up",
         "usd_strong",
         "yield_up"
@@ -1053,6 +1139,24 @@
             "d90": 21.4
           }
         }
+      },
+      "effect_tag_details": {
+        "oil_up": [
+          "d30"
+        ],
+        "oil_down": [
+          "d7"
+        ],
+        "equity_up": [
+          "d7"
+        ],
+        "usd_strong": [
+          "d7",
+          "d30"
+        ],
+        "yield_up": [
+          "d30"
+        ]
       }
     },
     {
@@ -1172,6 +1276,18 @@
             "d90": 12.1
           }
         }
+      },
+      "effect_tag_details": {
+        "oil_up": [
+          "d30"
+        ],
+        "usd_strong": [
+          "d7",
+          "d30"
+        ],
+        "yield_up": [
+          "d30"
+        ]
       }
     },
     {
@@ -1291,6 +1407,17 @@
             "d90": -4.2
           }
         }
+      },
+      "effect_tag_details": {
+        "gold_up": [
+          "d30"
+        ],
+        "usd_strong": [
+          "d30"
+        ],
+        "yield_up": [
+          "d30"
+        ]
       }
     }
   ],
@@ -1325,7 +1452,7 @@
         }
       },
       "gold": {
-        "label": "金",
+        "label": "金（GLD）",
         "asset": "gold",
         "count": 4,
         "up": 4,
@@ -1423,7 +1550,7 @@
         }
       },
       "gold": {
-        "label": "金",
+        "label": "金（GLD）",
         "asset": "gold",
         "count": 2,
         "up": 2,
@@ -1521,7 +1648,7 @@
         }
       },
       "gold": {
-        "label": "金",
+        "label": "金（GLD）",
         "asset": "gold",
         "count": 4,
         "up": 4,
@@ -1619,7 +1746,7 @@
         }
       },
       "gold": {
-        "label": "金",
+        "label": "金（GLD）",
         "asset": "gold",
         "count": 2,
         "up": 2,
@@ -1717,7 +1844,7 @@
         }
       },
       "gold": {
-        "label": "金",
+        "label": "金（GLD）",
         "asset": "gold",
         "count": 1,
         "up": 1,
@@ -1815,7 +1942,7 @@
         }
       },
       "gold": {
-        "label": "金",
+        "label": "金（GLD）",
         "asset": "gold",
         "count": 1,
         "up": 1,
@@ -1913,7 +2040,7 @@
         }
       },
       "gold": {
-        "label": "金",
+        "label": "金（GLD）",
         "asset": "gold",
         "count": 2,
         "up": 0,
