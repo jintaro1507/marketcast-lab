@@ -213,6 +213,9 @@ def build():
             "context_snapshot": ev.get("context_snapshot", {}),
             "description": ev["description"],
             "similarity_reason": ev.get("similarity_reason", ""),
+            "why_reaction": ev.get("why_reaction", ""),
+            "key_insight": ev.get("key_insight", ""),
+            "contrast": ev.get("contrast", []),
             "propagation": ev.get("propagation", []),
             "sources": ev.get("sources", []),
             "reactions": reactions,
@@ -229,6 +232,7 @@ def build():
         "horizons": [h[0] for h in HORIZONS],
         "summary_horizon": "d30",
         "events": events_with_reactions,
+        "event_names": {e["id"]: e["name"] for e in events_with_reactions},
         "cause_summary": summary,
         "disclaimer": "本データは過去の同種イベント発生後の市場反応を記録・整理したものであり、将来の値動きを示すものでも、売買を推奨するものでもありません。",
     }
