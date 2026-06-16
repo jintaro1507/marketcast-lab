@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-06-16T05:32:00+00:00",
+  "lookback_days": 30,
+  "series": [
+    { "label": "WTI原油先物",   "asset": "oil",    "status": "ok", "as_of": "2026-06-16", "base_date": "2026-05-17", "pct_change": 7.2, "direction": "up",   "latest_value": 74.6, "restricted": false },
+    { "label": "Brent原油先物", "asset": "oil",    "status": "ok", "as_of": "2026-06-16", "base_date": "2026-05-17", "pct_change": 6.8, "direction": "up",   "latest_value": 78.9, "restricted": false },
+    { "label": "VIX(恐怖指数)", "asset": "equity", "status": "ok", "as_of": "2026-06-16", "base_date": "2026-05-17", "pct_change": 12.4, "direction": "up",  "latest_value": 19.8, "restricted": false },
+    { "label": "米10年債利回り","asset": "bond",   "status": "ok", "as_of": "2026-06-16", "base_date": "2026-05-17", "pct_change": -2.1, "direction": "down", "latest_value": 4.21, "restricted": false },
+    { "label": "ドル円",        "asset": "fx",     "status": "ok", "as_of": "2026-06-16", "base_date": "2026-05-17", "pct_change": 1.3,  "direction": "up",   "latest_value": 156.8, "restricted": false },
+    { "label": "S&P500",        "asset": "equity", "status": "ok", "as_of": "2026-06-16", "base_date": "2026-05-17", "pct_change": -1.1, "direction": "down", "restricted": true },
+    { "label": "金(ロンドン値決め)", "asset": "gold", "status": "ok", "as_of": "2026-06-16", "base_date": "2026-05-17", "pct_change": 1.9, "direction": "up", "restricted": true }
+  ],
+  "disclaimer": "本データは公開情報に基づく一般的・教育的な情報提供であり、投資助言ではありません。"
+}
