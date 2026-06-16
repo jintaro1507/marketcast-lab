@@ -107,8 +107,11 @@ def fetch_stooq_range(symbol, start, end):
                 text = resp.read().decode("utf-8")
             lines = text.strip().splitlines()
             if not lines or not lines[0].lower().startswith("date"):
-                # Stooqはブロック時や無データ時に "No data" や別文言を返す
-                raise RuntimeError(f"有効なCSVヘッダなし（応答先頭: {text[:60]!r}）")
+                first = text[:80]
+                # HTMLが返ってきた = ブロックされている。リトライしても無駄なので即終了
+                if "<!doctype" in text.lower() or "<html" in text.lower():
+                    raise RuntimeError(f"Stooqにブロックされました（HTML応答）: {first!r}")
+                raise RuntimeError(f"有効なCSVヘッダなし（応答先頭: {first!r}）")
             header = lines[0].split(",")
             try:
                 close_idx = [h.lower() for h in header].index("close")
@@ -126,33 +129,46 @@ def fetch_stooq_range(symbol, start, end):
             if not out:
                 raise RuntimeError("CSVは取得したがデータ行が空")
             return out
-        except (URLError, HTTPError, RuntimeError) as e:
+        except RuntimeError as e:
+            # ブロック（HTML応答）はリトライしない
+            if "ブロック" in str(e):
+                print(f"  [Stooq] {symbol} ブロック確認、リトライ中止")
+                raise
             last_err = e
             print(f"  [Stooq] {symbol} 取得失敗 (試行{attempt}/3): {e}")
-            time.sleep(2 * attempt)  # リトライ間隔を少しずつ延ばす
+            time.sleep(2 * attempt)
+        except (URLError, HTTPError) as e:
+            # 接続エラーはリトライする価値あり
+            last_err = e
+            print(f"  [Stooq] {symbol} 接続エラー (試行{attempt}/3): {e}")
+            time.sleep(2 * attempt)
     raise RuntimeError(f"Stooq取得に3回失敗: {symbol} / 最終エラー: {last_err}")
 
 
 def fetch_yahoo_range(symbol, start, end):
     """Yahoo Financeから日次終値を {date: value} で返す（Stooq失敗時のフォールバック）。
     yfinanceがあれば使い、無ければYahooのchart APIを直接叩く。"""
-    # まず yfinance を試す
+    # まず yfinance を試す（0.2系以降のAPI対応）
     try:
         import yfinance as yf
-        df = yf.download(symbol, start=start.isoformat(),
-                         end=(end + dt.timedelta(days=1)).isoformat(),
-                         progress=False, auto_adjust=False)
+        ticker = yf.Ticker(symbol)
+        df = ticker.history(start=start.isoformat(),
+                            end=(end + dt.timedelta(days=1)).isoformat(),
+                            interval="1d", auto_adjust=True)
         out = {}
         if df is not None and len(df) > 0:
-            closes = df["Close"]
-            for idx, val in closes.items():
+            for idx, row in df.iterrows():
                 try:
-                    d = idx.date().isoformat()
-                    v = float(val.iloc[0]) if hasattr(val, "iloc") else float(val)
-                    out[d] = v
-                except (ValueError, TypeError):
+                    # 新APIはindexがTimestamp型（tzあり）
+                    if hasattr(idx, 'date'):
+                        d = idx.date().isoformat()
+                    else:
+                        d = str(idx)[:10]
+                    out[d] = float(row["Close"])
+                except (ValueError, TypeError, KeyError):
                     pass
         if out:
+            print(f"  [Yahoo/yfinance] {symbol} 取得成功: {len(out)}件")
             return out
         raise RuntimeError("yfinanceの応答が空")
     except ImportError:
@@ -160,13 +176,18 @@ def fetch_yahoo_range(symbol, start, end):
     except Exception as e:
         print(f"  [Yahoo/yfinance] {symbol} 取得失敗: {e} → chart APIを試行")
 
-    # フォールバックのフォールバック: Yahoo chart APIを直接叩く
-    period1 = int(dt.datetime(start.year, start.month, start.day).timestamp())
-    period2 = int(dt.datetime(end.year, end.month, end.day).timestamp()) + 86400
-    url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
-           f"?period1={period1}&period2={period2}&interval=1d")
-    headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"}
+    # フォールバックのフォールバック: Yahoo chart APIを直接叩く（v8は廃止、v8/financeに修正）
+    period1 = int(dt.datetime(start.year, start.month, start.day,
+                              tzinfo=dt.timezone.utc).timestamp())
+    period2 = int(dt.datetime(end.year, end.month, end.day,
+                              tzinfo=dt.timezone.utc).timestamp()) + 86400
+    url = (f"https://query2.finance.yahoo.com/v8/finance/chart/{symbol}"
+           f"?period1={period1}&period2={period2}&interval=1d&events=history")
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        "Accept": "application/json",
+    }
     req = Request(url, headers=headers)
     with urlopen(req, timeout=30) as resp:
         payload = json.loads(resp.read().decode("utf-8"))
@@ -181,6 +202,7 @@ def fetch_yahoo_range(symbol, start, end):
         out[d] = float(c)
     if not out:
         raise RuntimeError("Yahoo chart APIの応答が空")
+    print(f"  [Yahoo/chart API] {symbol} 取得成功: {len(out)}件")
     return out
 
 
