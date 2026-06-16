@@ -125,7 +125,7 @@
           }
         },
         "gold": {
-          "label": "金",
+          "label": "金（GLD）",
           "asset": "gold",
           "restricted": true,
           "status": "ok",
@@ -243,7 +243,7 @@
           }
         },
         "gold": {
-          "label": "金",
+          "label": "金（GLD）",
           "asset": "gold",
           "restricted": true,
           "status": "ok",
@@ -365,7 +365,7 @@
           }
         },
         "gold": {
-          "label": "金",
+          "label": "金（GLD）",
           "asset": "gold",
           "restricted": true,
           "status": "ok",
@@ -484,7 +484,7 @@
           }
         },
         "gold": {
-          "label": "金",
+          "label": "金（GLD）",
           "asset": "gold",
           "restricted": true,
           "status": "ok",
@@ -607,7 +607,7 @@
           }
         },
         "gold": {
-          "label": "金",
+          "label": "金（GLD）",
           "asset": "gold",
           "restricted": true,
           "status": "ok",
@@ -728,7 +728,7 @@
           }
         },
         "gold": {
-          "label": "金",
+          "label": "金（GLD）",
           "asset": "gold",
           "restricted": true,
           "status": "ok",
@@ -856,7 +856,7 @@
           }
         },
         "gold": {
-          "label": "金",
+          "label": "金（GLD）",
           "asset": "gold",
           "restricted": true,
           "status": "ok",
@@ -983,7 +983,7 @@
           }
         },
         "gold": {
-          "label": "金",
+          "label": "金（GLD）",
           "asset": "gold",
           "restricted": true,
           "status": "ok",
@@ -1102,7 +1102,7 @@
           }
         },
         "gold": {
-          "label": "金",
+          "label": "金（GLD）",
           "asset": "gold",
           "restricted": true,
           "status": "ok",
@@ -1221,7 +1221,7 @@
           }
         },
         "gold": {
-          "label": "金",
+          "label": "金（GLD）",
           "asset": "gold",
           "restricted": true,
           "status": "ok",
