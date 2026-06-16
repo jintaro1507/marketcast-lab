@@ -171,9 +171,12 @@ def build():
             "id": ev["id"],
             "name": ev["name"],
             "date": ev["date"],
+            "category": ev.get("category"),
             "tags": ev["tags"],
             "description": ev["description"],
+            "similarity_reason": ev.get("similarity_reason", ""),
             "propagation": ev.get("propagation", []),
+            "sources": ev.get("sources", []),
             "reactions": reactions,
         })
 
@@ -182,6 +185,7 @@ def build():
     return {
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "tag_labels": events_master["tag_labels"],
+        "category_labels": events_master.get("category_labels", {}),
         "horizons": [h[0] for h in HORIZONS],
         "summary_horizon": "d30",
         "events": events_with_reactions,
