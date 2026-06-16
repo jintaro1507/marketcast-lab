@@ -98,6 +98,9 @@ def compute_reactions_for_event(event):
     assets_out = {}
     for a in ASSETS:
         entry = {"label": a["label"], "asset": a["asset"], "restricted": a["restricted"], "status": "ok", "changes": {}}
+        is_yield = (a["asset"] == "bond")
+        if is_yield:
+            entry["changes_pt"] = {}  # 利回りの絶対変化幅(pt)
         try:
             series_map = fetch_series_range(a["series"], start, end)
             base_val, used_base_date = value_on_or_before(series_map, base_date)
@@ -109,9 +112,14 @@ def compute_reactions_for_event(event):
                     fut_val, _ = value_on_or_before(series_map, base_date + dt.timedelta(days=days))
                     if fut_val is None:
                         entry["changes"][name] = None
+                        if is_yield:
+                            entry["changes_pt"][name] = None
                     else:
-                        # 金利(bond)は「利回りの変化幅(pt)」ではなく相対変化率(%)で統一
+                        # 相対変化率(%)はすべての資産で保存（表示の統一用）
                         entry["changes"][name] = round((fut_val - base_val) / abs(base_val) * 100.0, 1)
+                        # 利回りは絶対変化幅(pt)も保存（タグ判定はこちらを使う）
+                        if is_yield:
+                            entry["changes_pt"][name] = round(fut_val - base_val, 2)
         except (URLError, HTTPError, RuntimeError) as e:
             entry["status"] = "error"
             entry["error"] = str(e)
@@ -120,13 +128,19 @@ def compute_reactions_for_event(event):
 
 
 def detect_effect_tags(reactions, effect_rules, horizon="d30"):
-    """30日変化率(既定)から結果タグを自動判定する。"""
+    """30日変化(既定)から観察事実タグを自動判定する。
+    mode='pct'は相対変化率(%)、mode='abs_pt'は絶対変化幅(pt:利回り用)で判定。
+    閾値未満はタグを付けない（横ばいゾーン）。"""
     tags = []
     for tag, rule in effect_rules.items():
         a = reactions.get(rule["asset"])
         if not a or a.get("status") != "ok":
             continue
-        v = a["changes"].get(horizon)
+        mode = rule.get("mode", "pct")
+        if mode == "abs_pt":
+            v = a.get("changes_pt", {}).get(horizon)
+        else:
+            v = a.get("changes", {}).get(horizon)
         if v is None:
             continue
         op, th = rule["op"], rule["threshold"]
