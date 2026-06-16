@@ -39,6 +39,12 @@ jobs:
         run: |
           python3 scripts/fetch_and_build.py
 
+      - name: イベント反応を実データで再計算（events.json + group_metadata.json を統合）
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          python3 scripts/calculate_event_reactions.py
+
       - name: Pages 用に成果物をまとめる
         uses: actions/upload-pages-artifact@v3
         with:
