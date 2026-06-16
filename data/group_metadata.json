@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "note": "原因タグ(cause_tag)を主キーとした、グループ(集合)単位の解釈メタ情報。個々のイベント事実はevents.jsonが持つ。representative_eventsはevent_idで疎結合に参照する。中身が空(summaryが空文字)のグループはUIで非表示にする。",
+  "groups": {
+    "middle_east": {
+      "label": "中東地政学",
+      "summary": "中東地域での軍事的緊張・武力衝突・産油インフラ攻撃などを集めたグループ。原油の供給地としての性格から、市場は『現実の供給にどれだけ影響するか』を重視して反応してきた。",
+      "common_traits": [
+        "中東という主要産油地域が舞台",
+        "地政学的な不確実性が短期的に高まる",
+        "原油と金（逃避先）に注目が集まりやすい"
+      ],
+      "divergence_factors": [
+        "供給インフラへの実被害の有無（生産が現実に止まったか）",
+        "当事者が主要産油国かどうか",
+        "事態が拡大したか、早期に収束したか"
+      ],
+      "interpretation_caveat": "同じ『中東地政学』でも、原油の反応は局面ごとに大きく異なる。緊張の大きさそのものより、現実の供給が止まったか否かが反応を分けてきたため、平均値だけで判断せず代表イベントを個別に確認することを推奨する。",
+      "representative_events": ["saudi_attack_2019", "hamas_israel_2023", "us_iran_tension_2020"]
+    },
+    "war": {
+      "label": "戦争・軍事衝突",
+      "summary": "国家間・地域間の大規模な軍事衝突を集めたグループ。エネルギーや穀物などの供給網への影響を通じて、市場全体に波及することがある。",
+      "common_traits": [
+        "大規模な武力行使または戦争の勃発",
+        "供給網・物流への懸念が生じやすい",
+        "リスク回避（金など逃避先への資金移動）が起きやすい"
+      ],
+      "divergence_factors": [
+        "当事国が資源・エネルギーの主要供給国かどうか",
+        "衝突の規模と長期化の見通し",
+        "実際の供給網への被害の有無"
+      ],
+      "interpretation_caveat": "戦争・軍事衝突は、当事国の経済的な立ち位置（資源国か否か）によって市場への波及が大きく変わる。同じグループでも、供給網に直結したケースとそうでないケースが混在している点に注意。",
+      "representative_events": ["russia_ukraine_2022", "us_iran_tension_2020", "hamas_israel_2023"]
+    },
+    "monetary_easing": {
+      "label": "金融緩和",
+      "summary": "中央銀行が政策金利を引き下げる『緩和』局面を集めたグループ。金利低下を通じて株式や金に追い風となることが多いが、緩和の背景（予防的か危機対応か）で反応が異なる。",
+      "common_traits": [
+        "政策金利の引き下げ",
+        "長期金利の低下圧力",
+        "株式・金への追い風となりやすい"
+      ],
+      "divergence_factors": [
+        "予防的な利下げか、危機対応の緊急利下げか",
+        "利下げ時点での景気・市場ストレスの水準",
+        "利下げが単発か、緩和サイクルの起点か"
+      ],
+      "interpretation_caveat": "『利下げ＝株高』と単純化しやすいが、危機対応の緊急利下げ局面では実施直後に株式が急落した例もある。緩和の背景を区別せずに平均すると、性質の異なる局面を混ぜた数字になりやすい。",
+      "representative_events": ["fed_cut_start_2019", "fed_cut_start_2024", "fed_emergency_cut_2020"]
+    },
+    "monetary_tightening": {
+      "label": "金融引き締め",
+      "summary": "中央銀行が政策金利を引き上げる『引き締め』局面を集めたグループ。長期金利の上昇やグロース株への逆風が意識されるが、サイクルの開始か終盤かで市場の受け止めが変わる。",
+      "common_traits": [
+        "政策金利の引き上げ",
+        "長期金利の上昇圧力",
+        "金利に敏感なグロース株への逆風が意識されやすい"
+      ],
+      "divergence_factors": [
+        "引き締めサイクルの開始か、終盤・打ち止めか",
+        "インフレの強さと利上げペースの見通し",
+        "市場が利上げをどこまで織り込んでいたか"
+      ],
+      "interpretation_caveat": "同じ『利上げ』でも、サイクルの開始局面では金利の先高観が強く、終盤局面ではピークアウトが意識されるため、市場の反応は逆方向になりうる。段階を区別せずに集計すると傾向が打ち消し合う点に注意。",
+      "representative_events": ["fed_hike_start_2022", "fed_hike_final_2023"]
+    },
+    "supply_shock": {
+      "label": "供給ショック",
+      "summary": "",
+      "common_traits": [],
+      "divergence_factors": [],
+      "interpretation_caveat": "",
+      "representative_events": []
+    },
+    "emergency_cut": {
+      "label": "緊急利下げ",
+      "summary": "",
+      "common_traits": [],
+      "divergence_factors": [],
+      "interpretation_caveat": "",
+      "representative_events": []
+    },
+    "pandemic": {
+      "label": "パンデミック",
+      "summary": "",
+      "common_traits": [],
+      "divergence_factors": [],
+      "interpretation_caveat": "",
+      "representative_events": []
+    },
+    "terror": {
+      "label": "テロ",
+      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+    },
+    "demand_shock": {
+      "label": "需要ショック",
+      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+    },
+    "bank_crisis": {
+      "label": "銀行危機",
+      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+    },
+    "debt_crisis": {
+      "label": "債務危機",
+      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+    },
+    "currency_crisis": {
+      "label": "通貨危機",
+      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+    },
+    "natural_disaster": {
+      "label": "自然災害",
+      "summary": "", "common_traits": [], "divergence_factors": [], "interpretation_caveat": "", "representative_events": []
+    }
+  }
+}
