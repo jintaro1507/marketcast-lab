@@ -20,6 +20,7 @@ event_reactions.json として出力する。
 
 import os
 import json
+import time
 import statistics
 import datetime as dt
 from urllib.request import urlopen, Request
@@ -39,7 +40,7 @@ OUT_PATH = os.path.join(HERE, "..", "data", "event_reactions.json")
 # 金は LBMA系列(FRED)が更新停止のため、金ETF GLD(Stooq)を金価格の代理指標として使用する。
 ASSETS = [
     {"key": "wti",    "label": "WTI原油",      "source": "fred",  "series": "DCOILWTICO", "asset": "oil",    "restricted": False},
-    {"key": "gold",   "label": "金（GLD）",     "source": "stooq", "series": "gld.us",     "asset": "gold",   "restricted": True},
+    {"key": "gold",   "label": "金（GLD）",     "source": "stooq", "series": "gld.us",     "yahoo_symbol": "GLD", "asset": "gold",   "restricted": True},
     {"key": "sp500",  "label": "S&P500",        "source": "fred",  "series": "SP500",      "asset": "equity", "restricted": True},
     {"key": "ust10y", "label": "米10年債利回り","source": "fred",  "series": "DGS10",      "asset": "bond",   "restricted": False},
     {"key": "usdjpy", "label": "ドル円",        "source": "fred",  "series": "DEXJPUS",    "asset": "fx",     "restricted": False},
@@ -83,8 +84,8 @@ def fetch_series_range(series_id, start, end):
 
 def fetch_stooq_range(symbol, start, end):
     """Stooqから日次終値を {date: value} で返す。キー不要・標準ライブラリのみ。
-    例: https://stooq.com/q/d/l/?s=gld.us&d1=20220101&d2=20220401&i=d
-    返却CSV: Date,Open,High,Low,Close,Volume"""
+    ブラウザ風ヘッダとリトライ(最大3回)を入れ、データセンターIPでの取得失敗に備える。
+    例: https://stooq.com/q/d/l/?s=gld.us&d1=20220101&d2=20220401&i=d"""
     params = {
         "s": symbol,
         "d1": start.strftime("%Y%m%d"),
@@ -92,37 +93,110 @@ def fetch_stooq_range(symbol, start, end):
         "i": "d",
     }
     url = f"https://stooq.com/q/d/l/?{urlencode(params)}"
-    req = Request(url, headers={"User-Agent": "MarketcastLab/0.1"})
-    with urlopen(req, timeout=30) as resp:
-        text = resp.read().decode("utf-8")
-    out = {}
-    lines = text.strip().splitlines()
-    if not lines or not lines[0].lower().startswith("date"):
-        # データが無い場合 Stooq は "No data" 等を返すことがある
-        raise RuntimeError(f"Stooq から有効なデータが取得できませんでした: {symbol}")
-    header = lines[0].split(",")
-    try:
-        close_idx = [h.lower() for h in header].index("close")
-    except ValueError:
-        close_idx = 4
-    for line in lines[1:]:
-        cols = line.split(",")
-        if len(cols) <= close_idx:
-            continue
-        date_str = cols[0]
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        "Accept": "text/csv,text/plain,*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+    last_err = None
+    for attempt in range(1, 4):
         try:
-            out[date_str] = float(cols[close_idx])
-        except ValueError:
-            pass
+            req = Request(url, headers=headers)
+            with urlopen(req, timeout=30) as resp:
+                text = resp.read().decode("utf-8")
+            lines = text.strip().splitlines()
+            if not lines or not lines[0].lower().startswith("date"):
+                # Stooqはブロック時や無データ時に "No data" や別文言を返す
+                raise RuntimeError(f"有効なCSVヘッダなし（応答先頭: {text[:60]!r}）")
+            header = lines[0].split(",")
+            try:
+                close_idx = [h.lower() for h in header].index("close")
+            except ValueError:
+                close_idx = 4
+            out = {}
+            for line in lines[1:]:
+                cols = line.split(",")
+                if len(cols) <= close_idx:
+                    continue
+                try:
+                    out[cols[0]] = float(cols[close_idx])
+                except ValueError:
+                    pass
+            if not out:
+                raise RuntimeError("CSVは取得したがデータ行が空")
+            return out
+        except (URLError, HTTPError, RuntimeError) as e:
+            last_err = e
+            print(f"  [Stooq] {symbol} 取得失敗 (試行{attempt}/3): {e}")
+            time.sleep(2 * attempt)  # リトライ間隔を少しずつ延ばす
+    raise RuntimeError(f"Stooq取得に3回失敗: {symbol} / 最終エラー: {last_err}")
+
+
+def fetch_yahoo_range(symbol, start, end):
+    """Yahoo Financeから日次終値を {date: value} で返す（Stooq失敗時のフォールバック）。
+    yfinanceがあれば使い、無ければYahooのchart APIを直接叩く。"""
+    # まず yfinance を試す
+    try:
+        import yfinance as yf
+        df = yf.download(symbol, start=start.isoformat(),
+                         end=(end + dt.timedelta(days=1)).isoformat(),
+                         progress=False, auto_adjust=False)
+        out = {}
+        if df is not None and len(df) > 0:
+            closes = df["Close"]
+            for idx, val in closes.items():
+                try:
+                    d = idx.date().isoformat()
+                    v = float(val.iloc[0]) if hasattr(val, "iloc") else float(val)
+                    out[d] = v
+                except (ValueError, TypeError):
+                    pass
+        if out:
+            return out
+        raise RuntimeError("yfinanceの応答が空")
+    except ImportError:
+        pass  # yfinance未導入ならchart APIへ
+    except Exception as e:
+        print(f"  [Yahoo/yfinance] {symbol} 取得失敗: {e} → chart APIを試行")
+
+    # フォールバックのフォールバック: Yahoo chart APIを直接叩く
+    period1 = int(dt.datetime(start.year, start.month, start.day).timestamp())
+    period2 = int(dt.datetime(end.year, end.month, end.day).timestamp()) + 86400
+    url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+           f"?period1={period1}&period2={period2}&interval=1d")
+    headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"}
+    req = Request(url, headers=headers)
+    with urlopen(req, timeout=30) as resp:
+        payload = json.loads(resp.read().decode("utf-8"))
+    result = payload["chart"]["result"][0]
+    timestamps = result.get("timestamp", [])
+    closes = result["indicators"]["quote"][0].get("close", [])
+    out = {}
+    for ts, c in zip(timestamps, closes):
+        if c is None:
+            continue
+        d = dt.datetime.utcfromtimestamp(ts).date().isoformat()
+        out[d] = float(c)
+    if not out:
+        raise RuntimeError("Yahoo chart APIの応答が空")
     return out
 
 
 def fetch_range(asset, start, end):
-    """資産のsourceに応じて取得元を振り分ける。返却形式は {date: value} で統一。"""
+    """資産のsourceに応じて取得元を振り分ける。返却形式は {date: value} で統一。
+    金(stooq指定)はStooq→Yahooのフォールバックを行い、(値, 実際の取得元)を返す。
+    その他はFREDから取得し、取得元'fred'を返す。"""
     src = asset.get("source", "fred")
     if src == "stooq":
-        return fetch_stooq_range(asset["series"], start, end)
-    return fetch_series_range(asset["series"], start, end)
+        try:
+            return fetch_stooq_range(asset["series"], start, end), "stooq"
+        except (URLError, HTTPError, RuntimeError) as e:
+            print(f"  [フォールバック] {asset['key']}: Stooq失敗のためYahooへ切替 ({e})")
+            ysym = asset.get("yahoo_symbol", asset["series"].replace(".us", "").upper())
+            return fetch_yahoo_range(ysym, start, end), "yahoo"
+    return fetch_series_range(asset["series"], start, end), "fred"
 
 
 def value_on_or_before(series_map, target_date, max_lookback=7):
@@ -148,7 +222,8 @@ def compute_reactions_for_event(event):
         if is_yield:
             entry["changes_pt"] = {}  # 利回りの絶対変化幅(pt)
         try:
-            series_map = fetch_range(a, start, end)
+            series_map, used_source = fetch_range(a, start, end)
+            entry["source"] = used_source
             base_val, used_base_date = value_on_or_before(series_map, base_date)
             if base_val is None or base_val == 0:
                 entry["status"] = "no_data"
