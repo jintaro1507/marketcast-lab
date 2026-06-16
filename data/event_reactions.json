@@ -547,6 +547,527 @@
           "url": "https://www.investing.com/analysis/iranian-attacks-put-markets-on-edge-but-fallout-limited-200647640"
         }
       ]
+    },
+    {
+      "id": "fed_cut_start_2019",
+      "name": "FRB利下げ開始（2008年以来初）",
+      "date": "2019-07-31",
+      "category": "monetary",
+      "tags": [
+        "central_bank"
+      ],
+      "description": "FRBが政策金利を0.25%引き下げ、2008年の金融危機以来初の利下げに踏み切った局面。景気減速と低インフレへの『予防的』な利下げと位置づけられた。",
+      "similarity_reason": "景気後退入り前の『予防的利下げ』の起点。緩和サイクルの入り口で各資産がどう反応したかを見る基準点として分類する。",
+      "propagation": [
+        "予防的利下げ",
+        "長期金利 低下圧力",
+        "株式 追い風",
+        "ドル 軟化要因"
+      ],
+      "sources": [
+        {
+          "title": "CNBC: Fed cuts rates by a quarter point",
+          "url": "https://www.cnbc.com/2019/07/31/fed-cuts-rates-by-a-quarter-point.html"
+        },
+        {
+          "title": "Washington Post: Fed cuts for first time since 2008",
+          "url": "https://www.washingtonpost.com/business/2019/07/31/federal-reserve-cuts-interest-rate-quarter-point-effort-keep-economy-track/"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2019-07-31",
+          "changes": {
+            "d1": -7.9,
+            "d7": -4.2,
+            "d30": -2.1,
+            "d90": 5.6
+          }
+        },
+        "gold": {
+          "label": "金",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2019-07-31",
+          "changes": {
+            "d1": 0.4,
+            "d7": 2.1,
+            "d30": 4.8,
+            "d90": 6.9
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2019-07-31",
+          "changes": {
+            "d1": -1.1,
+            "d7": -2.9,
+            "d30": 0.8,
+            "d90": 3.2
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2019-07-31",
+          "changes": {
+            "d1": -1.2,
+            "d7": -9.8,
+            "d30": -14.2,
+            "d90": -16.1
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2019-07-31",
+          "changes": {
+            "d1": 0.3,
+            "d7": -2.1,
+            "d30": -1.4,
+            "d90": -0.8
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2019-07-31",
+          "changes": {
+            "d1": 6.4,
+            "d7": 38.2,
+            "d30": 12.1,
+            "d90": -8.4
+          }
+        }
+      }
+    },
+    {
+      "id": "fed_emergency_cut_2020",
+      "name": "FRB緊急利下げ（ゼロ金利復帰）",
+      "date": "2020-03-15",
+      "category": "monetary",
+      "tags": [
+        "central_bank",
+        "liquidity_crisis"
+      ],
+      "description": "パンデミックによる急激な景気悪化に対し、FRBが緊急会合で政策金利を実質ゼロまで引き下げ、量的緩和の再開を発表した局面。市場の流動性危機への対応だった。",
+      "similarity_reason": "危機対応としての『緊急・大幅利下げ』。通常の予防的利下げとは異なり、流動性危機とセットで起きたケースとして区別する。",
+      "propagation": [
+        "緊急利下げ・QE再開",
+        "流動性供給",
+        "金利 急低下",
+        "株式は当初急落後に反発"
+      ],
+      "sources": [
+        {
+          "title": "Federal Reserve: FOMC statement March 15 2020",
+          "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20200315a.htm"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2020-03-13",
+          "changes": {
+            "d1": -9.6,
+            "d7": -38.1,
+            "d30": -52.4,
+            "d90": 28.1
+          }
+        },
+        "gold": {
+          "label": "金",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2020-03-13",
+          "changes": {
+            "d1": -1.2,
+            "d7": -9.3,
+            "d30": 3.1,
+            "d90": 11.2
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2020-03-13",
+          "changes": {
+            "d1": -12.0,
+            "d7": -13.1,
+            "d30": 4.2,
+            "d90": 22.1
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2020-03-13",
+          "changes": {
+            "d1": -18.4,
+            "d7": 12.1,
+            "d30": 2.4,
+            "d90": -6.2
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2020-03-13",
+          "changes": {
+            "d1": 1.8,
+            "d7": -1.2,
+            "d30": -2.1,
+            "d90": -3.4
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2020-03-13",
+          "changes": {
+            "d1": 4.2,
+            "d7": 18.4,
+            "d30": -32.1,
+            "d90": -58.2
+          }
+        }
+      }
+    },
+    {
+      "id": "fed_hike_start_2022",
+      "name": "FRB利上げ開始（インフレ対応）",
+      "date": "2022-03-16",
+      "category": "monetary",
+      "tags": [
+        "central_bank",
+        "inflation_shock"
+      ],
+      "description": "高インフレを抑制するため、FRBが2018年以来となる利上げに着手した局面。以降、急ピッチの連続利上げサイクルの起点となった。",
+      "similarity_reason": "金融引き締めサイクルの『入り口』。緩和から引き締めへの転換点で各資産がどう動いたかを見る、利下げ局面の対照例として分類する。",
+      "propagation": [
+        "利上げ開始",
+        "長期金利 上昇",
+        "グロース株 逆風",
+        "ドル 強含み要因"
+      ],
+      "sources": [
+        {
+          "title": "Federal Reserve: FOMC statement March 16 2022",
+          "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20220316a.htm"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2022-03-15",
+          "changes": {
+            "d1": 2.1,
+            "d7": -6.4,
+            "d30": 8.1,
+            "d90": -3.2
+          }
+        },
+        "gold": {
+          "label": "金",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2022-03-15",
+          "changes": {
+            "d1": -1.8,
+            "d7": -3.1,
+            "d30": -2.4,
+            "d90": -6.8
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2022-03-15",
+          "changes": {
+            "d1": 2.2,
+            "d7": 5.1,
+            "d30": -1.2,
+            "d90": -9.4
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2022-03-15",
+          "changes": {
+            "d1": 3.1,
+            "d7": 8.2,
+            "d30": 18.4,
+            "d90": 28.1
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2022-03-15",
+          "changes": {
+            "d1": 0.6,
+            "d7": 3.2,
+            "d30": 8.1,
+            "d90": 14.2
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2022-03-15",
+          "changes": {
+            "d1": -8.1,
+            "d7": -18.4,
+            "d30": 2.1,
+            "d90": 21.4
+          }
+        }
+      }
+    },
+    {
+      "id": "fed_hike_final_2023",
+      "name": "FRB利上げサイクル最終（22年ぶり高水準）",
+      "date": "2023-07-26",
+      "category": "monetary",
+      "tags": [
+        "central_bank"
+      ],
+      "description": "FRBが0.25%の利上げを実施し、政策金利を5.25〜5.50%へ。結果的にこの利上げサイクルの最後の引き上げとなり、以降は据え置きが続いた局面。",
+      "similarity_reason": "引き締めサイクルの『出口・打ち止め』局面。金利のピークが意識される段階で各資産がどう反応したかを見るケースとして分類する。",
+      "propagation": [
+        "利上げサイクル終盤",
+        "金利ピーク観測",
+        "株式 一服感",
+        "ドル 高止まり"
+      ],
+      "sources": [
+        {
+          "title": "Federal Reserve: FOMC statement July 26 2023",
+          "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20230726a.htm"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2023-07-26",
+          "changes": {
+            "d1": 1.2,
+            "d7": 3.4,
+            "d30": 8.1,
+            "d90": -2.1
+          }
+        },
+        "gold": {
+          "label": "金",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2023-07-26",
+          "changes": {
+            "d1": 0.3,
+            "d7": -1.2,
+            "d30": -2.8,
+            "d90": -4.1
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2023-07-26",
+          "changes": {
+            "d1": -0.6,
+            "d7": -1.8,
+            "d30": -3.2,
+            "d90": -1.1
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2023-07-26",
+          "changes": {
+            "d1": 0.8,
+            "d7": 4.2,
+            "d30": 12.1,
+            "d90": 18.4
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2023-07-26",
+          "changes": {
+            "d1": 0.4,
+            "d7": 2.1,
+            "d30": 4.2,
+            "d90": 6.8
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2023-07-26",
+          "changes": {
+            "d1": 1.2,
+            "d7": 6.4,
+            "d30": 18.2,
+            "d90": 12.1
+          }
+        }
+      }
+    },
+    {
+      "id": "fed_cut_start_2024",
+      "name": "FRB利下げ開始（50bpの大幅利下げ）",
+      "date": "2024-09-18",
+      "category": "monetary",
+      "tags": [
+        "central_bank"
+      ],
+      "description": "インフレ鈍化と労働市場の減速を受け、FRBが0.50%の利下げを実施。2020年3月以来となる緩和サイクルの開始となった局面。",
+      "similarity_reason": "引き締め後の『緩和転換』の起点。2019年の予防的利下げと比較できる、利下げサイクルの入り口のケースとして分類する。",
+      "propagation": [
+        "緩和サイクル開始",
+        "金利 低下",
+        "株式 追い風",
+        "ドル 軟化要因"
+      ],
+      "sources": [
+        {
+          "title": "Federal Reserve: FOMC statement Sept 18 2024",
+          "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2024-09-17",
+          "changes": {
+            "d1": 1.8,
+            "d7": 4.2,
+            "d30": -3.1,
+            "d90": -6.2
+          }
+        },
+        "gold": {
+          "label": "金",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2024-09-17",
+          "changes": {
+            "d1": 0.6,
+            "d7": 1.8,
+            "d30": 5.1,
+            "d90": 8.2
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2024-09-17",
+          "changes": {
+            "d1": -0.3,
+            "d7": 1.4,
+            "d30": 3.2,
+            "d90": 6.1
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2024-09-17",
+          "changes": {
+            "d1": 1.2,
+            "d7": 4.8,
+            "d30": 8.4,
+            "d90": 14.2
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2024-09-17",
+          "changes": {
+            "d1": 0.4,
+            "d7": 1.2,
+            "d30": 4.1,
+            "d90": 8.2
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2024-09-17",
+          "changes": {
+            "d1": -2.1,
+            "d7": -6.4,
+            "d30": 12.1,
+            "d90": -4.2
+          }
+        }
+      }
     }
   ],
   "tag_summary": {
@@ -557,8 +1078,8 @@
         "count": 4,
         "up": 1,
         "down": 3,
-        "avg": -3.6,
-        "median": -5.2,
+        "avg": -4.2,
+        "median": -5.3,
         "max": 1.8,
         "min": -8.1
       },
@@ -568,8 +1089,8 @@
         "count": 4,
         "up": 4,
         "down": 0,
-        "avg": 2.6,
-        "median": 1.1,
+        "avg": 3.4,
+        "median": 2.6,
         "max": 7.3,
         "min": 0.9
       },
@@ -579,8 +1100,8 @@
         "count": 4,
         "up": 3,
         "down": 1,
-        "avg": 1.3,
-        "median": 2.4,
+        "avg": 1.2,
+        "median": 1.7,
         "max": 2.8,
         "min": -1.2
       },
@@ -601,8 +1122,8 @@
         "count": 4,
         "up": 4,
         "down": 0,
-        "avg": 1.4,
-        "median": 1.2,
+        "avg": 1.3,
+        "median": 1.1,
         "max": 2.1,
         "min": 0.9
       },
@@ -610,79 +1131,11 @@
         "label": "VIX",
         "asset": "equity",
         "count": 4,
-        "up": 0,
-        "down": 4,
-        "avg": -15.7,
-        "median": -14.2,
-        "max": -12.1,
-        "min": -22.1
-      }
-    },
-    "military_conflict": {
-      "wti": {
-        "label": "WTI原油",
-        "asset": "oil",
-        "count": 4,
         "up": 1,
         "down": 3,
-        "avg": -0.7,
-        "median": -5.3,
-        "max": 16.1,
-        "min": -8.1
-      },
-      "gold": {
-        "label": "金",
-        "asset": "gold",
-        "count": 4,
-        "up": 4,
-        "down": 0,
-        "avg": 3.7,
-        "median": 2.1,
-        "max": 7.3,
-        "min": 1.1
-      },
-      "sp500": {
-        "label": "S&P500",
-        "asset": "equity",
-        "count": 4,
-        "up": 3,
-        "down": 1,
-        "avg": 2.1,
-        "median": 2.8,
-        "max": 5.2,
-        "min": -1.2
-      },
-      "ust10y": {
-        "label": "米10年債利回り",
-        "asset": "bond",
-        "count": 4,
-        "up": 1,
-        "down": 3,
-        "avg": 0.6,
-        "median": -1.8,
-        "max": 18.4,
-        "min": -12.4
-      },
-      "usdjpy": {
-        "label": "ドル円",
-        "asset": "fx",
-        "count": 4,
-        "up": 4,
-        "down": 0,
-        "avg": 2.3,
-        "median": 1.7,
-        "max": 5.1,
-        "min": 0.9
-      },
-      "vix": {
-        "label": "VIX",
-        "asset": "equity",
-        "count": 4,
-        "up": 0,
-        "down": 4,
-        "avg": -14.1,
-        "median": -16.2,
-        "max": -14.2,
+        "avg": -9.8,
+        "median": -13.1,
+        "max": 9.1,
         "min": -22.1
       }
     },
@@ -715,8 +1168,8 @@
         "count": 2,
         "up": 2,
         "down": 0,
-        "avg": 3.6,
-        "median": 3.6,
+        "avg": 3.5,
+        "median": 3.5,
         "max": 5.2,
         "min": 1.9
       },
@@ -748,51 +1201,119 @@
         "count": 2,
         "up": 0,
         "down": 2,
-        "avg": -15.2,
-        "median": -15.2,
+        "avg": -15.1,
+        "median": -15.1,
         "max": -12.1,
         "min": -18.2
+      }
+    },
+    "military_conflict": {
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 4,
+        "up": 1,
+        "down": 3,
+        "avg": -0.6,
+        "median": -5.3,
+        "max": 16.1,
+        "min": -8.1
+      },
+      "gold": {
+        "label": "金",
+        "asset": "gold",
+        "count": 4,
+        "up": 4,
+        "down": 0,
+        "avg": 3.6,
+        "median": 3.1,
+        "max": 7.3,
+        "min": 1.1
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 4,
+        "up": 3,
+        "down": 1,
+        "avg": 2.1,
+        "median": 2.1,
+        "max": 5.2,
+        "min": -1.2
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 4,
+        "up": 1,
+        "down": 3,
+        "avg": 0.6,
+        "median": -1.8,
+        "max": 18.4,
+        "min": -12.4
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 4,
+        "up": 4,
+        "down": 0,
+        "avg": 2.3,
+        "median": 1.6,
+        "max": 5.1,
+        "min": 0.9
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 4,
+        "up": 1,
+        "down": 3,
+        "avg": -11.3,
+        "median": -16.2,
+        "max": 9.1,
+        "min": -22.1
       }
     },
     "inflation_shock": {
       "wti": {
         "label": "WTI原油",
         "asset": "oil",
-        "count": 1,
-        "up": 1,
+        "count": 2,
+        "up": 2,
         "down": 0,
-        "avg": 16.1,
-        "median": 16.1,
+        "avg": 12.1,
+        "median": 12.1,
         "max": 16.1,
-        "min": 16.1
+        "min": 8.1
       },
       "gold": {
         "label": "金",
         "asset": "gold",
-        "count": 1,
+        "count": 2,
         "up": 1,
-        "down": 0,
-        "avg": 2.1,
-        "median": 2.1,
+        "down": 1,
+        "avg": -0.1,
+        "median": -0.1,
         "max": 2.1,
-        "min": 2.1
+        "min": -2.4
       },
       "sp500": {
         "label": "S&P500",
         "asset": "equity",
-        "count": 1,
+        "count": 2,
         "up": 1,
-        "down": 0,
-        "avg": 5.2,
-        "median": 5.2,
+        "down": 1,
+        "avg": 2.0,
+        "median": 2.0,
         "max": 5.2,
-        "min": 5.2
+        "min": -1.2
       },
       "ust10y": {
         "label": "米10年債利回り",
         "asset": "bond",
-        "count": 1,
-        "up": 1,
+        "count": 2,
+        "up": 2,
         "down": 0,
         "avg": 18.4,
         "median": 18.4,
@@ -802,13 +1323,149 @@
       "usdjpy": {
         "label": "ドル円",
         "asset": "fx",
+        "count": 2,
+        "up": 2,
+        "down": 0,
+        "avg": 6.6,
+        "median": 6.6,
+        "max": 8.1,
+        "min": 5.1
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 2,
+        "up": 1,
+        "down": 1,
+        "avg": -8.0,
+        "median": -8.0,
+        "max": 2.1,
+        "min": -18.2
+      }
+    },
+    "central_bank": {
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 5,
+        "up": 2,
+        "down": 3,
+        "avg": -8.3,
+        "median": -2.1,
+        "max": 8.1,
+        "min": -52.4
+      },
+      "gold": {
+        "label": "金",
+        "asset": "gold",
+        "count": 5,
+        "up": 3,
+        "down": 2,
+        "avg": 1.6,
+        "median": 3.1,
+        "max": 5.1,
+        "min": -2.8
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 5,
+        "up": 3,
+        "down": 2,
+        "avg": 0.8,
+        "median": 0.8,
+        "max": 4.2,
+        "min": -3.2
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 5,
+        "up": 4,
+        "down": 1,
+        "avg": 5.4,
+        "median": 8.4,
+        "max": 18.4,
+        "min": -14.2
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 5,
+        "up": 3,
+        "down": 2,
+        "avg": 2.6,
+        "median": 4.1,
+        "max": 8.1,
+        "min": -2.1
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 5,
+        "up": 4,
+        "down": 1,
+        "avg": 2.5,
+        "median": 12.1,
+        "max": 18.2,
+        "min": -32.1
+      }
+    },
+    "liquidity_crisis": {
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -52.4,
+        "median": -52.4,
+        "max": -52.4,
+        "min": -52.4
+      },
+      "gold": {
+        "label": "金",
+        "asset": "gold",
         "count": 1,
         "up": 1,
         "down": 0,
-        "avg": 5.1,
-        "median": 5.1,
-        "max": 5.1,
-        "min": 5.1
+        "avg": 3.1,
+        "median": 3.1,
+        "max": 3.1,
+        "min": 3.1
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 4.2,
+        "median": 4.2,
+        "max": 4.2,
+        "min": 4.2
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 2.4,
+        "median": 2.4,
+        "max": 2.4,
+        "min": 2.4
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -2.1,
+        "median": -2.1,
+        "max": -2.1,
+        "min": -2.1
       },
       "vix": {
         "label": "VIX",
@@ -816,10 +1473,10 @@
         "count": 1,
         "up": 0,
         "down": 1,
-        "avg": -18.2,
-        "median": -18.2,
-        "max": -18.2,
-        "min": -18.2
+        "avg": -32.1,
+        "median": -32.1,
+        "max": -32.1,
+        "min": -32.1
       }
     }
   },
