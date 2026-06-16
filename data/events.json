@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "note": "過去イベントのマスターデータ。日付(date)を起点にFREDから各資産の変化率を計算する。タグ(tags)が類似局面のグルーピングに使われる。",
+  "schema_version": 2,
+  "note": "過去イベントのマスターデータ。日付(date)を起点にFREDから各資産の変化率を計算する。tagsが類似局面のグルーピングに使われる。similarity_reasonは『なぜ類似局面と見なすか』の編集者視点の説明。",
   "tag_labels": {
     "middle_east": "中東リスク",
     "oil_supply": "原油供給不安",
@@ -11,46 +11,80 @@
     "inflation_shock": "インフレショック",
     "liquidity_crisis": "流動性危機"
   },
+  "category_labels": {
+    "geopolitics": "地政学",
+    "macro": "マクロ経済",
+    "monetary": "金融政策",
+    "health": "公衆衛生"
+  },
+  "target_assets": ["wti", "gold", "sp500", "ust10y", "usdjpy", "vix"],
   "events": [
     {
       "id": "saudi_attack_2019",
       "name": "サウジアラビア石油施設への攻撃",
       "date": "2019-09-14",
+      "category": "geopolitics",
       "tags": ["middle_east", "oil_supply"],
-      "description": "サウジアラビアの主要石油施設が攻撃を受け、世界の原油供給の一部に影響が及ぶとの報道から、供給不安が一気に意識された局面。",
-      "propagation": ["原油供給不安", "原油先物 上昇", "エネルギー株 上昇", "航空・物流株 下落"]
+      "description": "サウジアラビアの主要石油施設アブカイクとクライス油田がドローン・ミサイル攻撃を受け、同国の原油生産の約半分、世界供給の約5%が一時的に停止した。供給不安から原油価格が記録的に急騰した局面。",
+      "similarity_reason": "中東の主要産油インフラが物理的に損傷し、現実の供給が止まったケース。『供給ショック型』の地政学リスクの典型例として、後続の供給途絶懸念イベントと比較する基準点になる。",
+      "propagation": ["原油供給インフラ損傷", "原油先物 急騰", "エネルギー株 上昇", "航空・物流株 下落"],
+      "sources": [
+        {"title": "U.S. EIA: Saudi Arabia crude oil production outage", "url": "https://www.eia.gov/todayinenergy/detail.php?id=41413"},
+        {"title": "Al Jazeera: Aramco attack sends oil prices soaring", "url": "https://www.aljazeera.com/economy/2019/9/16/aramco-attack-worst-disruption-ever-sends-oil-prices-soaring"}
+      ]
     },
     {
       "id": "us_iran_tension_2020",
-      "name": "米イラン緊張の高まり",
+      "name": "米イラン緊張の高まり（ソレイマニ司令官殺害）",
       "date": "2020-01-03",
+      "category": "geopolitics",
       "tags": ["middle_east", "military_conflict"],
-      "description": "地域の軍事的緊張が急激に高まり、報復措置への懸念から短期的にリスク回避の動きが広がった局面。",
-      "propagation": ["地政学リスク上昇", "原油先物 上昇", "金 上昇", "株式 下落"]
+      "description": "イランの軍事指導者が殺害され、報復への懸念から中東情勢の軍事的緊張が急激に高まった局面。実際の供給途絶は限定的だったが、短期的にリスク回避の動きが広がった。",
+      "similarity_reason": "供給インフラ自体は無傷だが『報復・戦争への懸念』が主役となった、緊張先行型の中東リスク。実害より心理的リスクが価格を動かしたケースとして分類する。",
+      "propagation": ["軍事的緊張の高まり", "原油先物 上昇", "金 上昇（逃避）", "株式 一時下落"],
+      "sources": [
+        {"title": "CNBC: Oil prices jump after US airstrike", "url": "https://www.cnbc.com/2020/01/03/oil-prices-jump-after-us-airstrike-kills-irans-soleimani.html"}
+      ]
     },
     {
       "id": "russia_ukraine_2022",
       "name": "ロシアによるウクライナ侵攻",
       "date": "2022-02-24",
+      "category": "geopolitics",
       "tags": ["military_conflict", "oil_supply", "inflation_shock"],
-      "description": "大規模な軍事侵攻が始まり、エネルギー・穀物の供給網への懸念から商品価格が急騰、世界的なインフレ圧力が強まった局面。",
-      "propagation": ["軍事衝突", "エネルギー・穀物 供給不安", "商品価格 急騰", "インフレ圧力 上昇"]
+      "description": "大規模な軍事侵攻が始まり、エネルギー・穀物の供給網への懸念から商品価格が急騰。世界的なインフレ圧力と各国中央銀行の利上げ加速につながった局面。",
+      "similarity_reason": "中東ではないが、エネルギー大国が当事者となった大規模軍事衝突。供給不安とインフレ波及という点で中東の供給ショック型と構造が重なるため、横断比較の対象とする。",
+      "propagation": ["大規模軍事侵攻", "エネルギー・穀物 供給不安", "商品価格 急騰", "インフレ圧力 上昇", "利上げ加速"],
+      "sources": [
+        {"title": "Reuters: Oil tops $100 as Russia attacks Ukraine", "url": "https://www.reuters.com/business/energy/oil-tops-100-first-time-since-2014-russia-attacks-ukraine-2022-02-24/"}
+      ]
     },
     {
       "id": "hamas_israel_2023",
       "name": "ハマス・イスラエル衝突",
       "date": "2023-10-07",
+      "category": "geopolitics",
       "tags": ["middle_east", "military_conflict"],
-      "description": "中東地域で大規模な武力衝突が発生し、地域情勢の不確実性が一気に高まった局面。",
-      "propagation": ["中東リスク上昇", "原油先物 上昇", "金 上昇"]
+      "description": "中東地域で大規模な武力衝突が発生し、地域情勢の不確実性が一気に高まった局面。直接の産油国が当事者ではなかったため、原油の反応は当初想定より限定的だった。",
+      "similarity_reason": "中東の軍事衝突だが、主要産油インフラへの直接的な打撃を伴わなかったケース。『地政学リスクの高まり＝必ず原油急騰』ではないことを示す対照例として重要。",
+      "propagation": ["中東での武力衝突", "地政学リスク上昇", "金 上昇（逃避）", "原油は限定的反応"],
+      "sources": [
+        {"title": "Reuters: Global markets after Hamas attack on Israel", "url": "https://www.reuters.com/markets/global-markets-themes-2023-10-09/"}
+      ]
     },
     {
       "id": "iran_israel_strike_2024",
       "name": "イランによるイスラエルへの攻撃",
       "date": "2024-04-13",
+      "category": "geopolitics",
       "tags": ["middle_east", "military_conflict"],
-      "description": "地域間の直接的な軍事的応酬が報じられ、事態の拡大が警戒された局面。事態の限定的な収束が見えた後、市場の反応は比較的短期間で収まった。",
-      "propagation": ["中東リスク上昇", "原油先物 上昇", "金 上昇", "防衛関連株 上昇"]
+      "description": "イランがイスラエル領土へ直接、大規模なドローン・ミサイル攻撃を実施。多くが迎撃され実害が限定的だったため、市場は当初の警戒から比較的早く落ち着いた。",
+      "similarity_reason": "中東の直接的な軍事的応酬だが、攻撃が大きく迎撃され『拡大しなかった』ケース。緊張が高まっても短期間で織り込みが進むパターンの代表例として分類する。",
+      "propagation": ["直接的な軍事的応酬", "原油・金 一時上昇", "迎撃成功で警戒後退", "反応は短期間で収束"],
+      "sources": [
+        {"title": "CNBC: Oil prices after Iran attack on Israel", "url": "https://www.cnbc.com/2024/04/14/oil-prices-are-set-to-rise-as-market-braces-for-israel-response-to-irans-missile-and-drone-barrage.html"},
+        {"title": "Investing.com: Iranian attacks put markets on edge", "url": "https://www.investing.com/analysis/iranian-attacks-put-markets-on-edge-but-fallout-limited-200647640"}
+      ]
     }
   ]
 }
