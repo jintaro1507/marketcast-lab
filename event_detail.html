@@ -38,6 +38,10 @@
   .ev-head .tags{display:flex;gap:6px;flex-wrap:wrap;}
   .ev-head .tags a{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);border:1px solid var(--line-rule);padding:3px 9px;border-radius:2px;}
   .ev-head .tags a:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .ev-head .tag-block{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;}
+  .ev-head .tag-label{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--ink-soft);min-width:auto;}
+  .ev-head .effects{display:flex;gap:6px;flex-wrap:wrap;}
+  .ev-head .effect-chip{font-family:var(--mono);font-size:10.5px;color:var(--down);border:1px solid var(--line-rule);background:var(--paper-deep);padding:3px 9px;border-radius:2px;}
 
   .section-label{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);padding:32px 5vw 0;}
 
@@ -130,13 +134,21 @@
     content.innerHTML = '<div class="empty">データを読み込めませんでした。</div>'; return;
   }
 
-  const tagLabels = data.tag_labels || {};
+  const causeLabels = data.cause_tag_labels || {};
+  const effectLabels = data.effect_tag_labels || {};
   const ev = (data.events||[]).find(e => e.id === id) || data.events[0];
   if(!ev){ content.innerHTML = '<div class="empty">イベントが見つかりませんでした。</div>'; return; }
 
   document.title = ev.name + ' ｜ Marketcast Lab';
 
-  const tagsHtml = ev.tags.map(t=>`<a href="similar_events.html?tag=${t}">${tagLabels[t]||t}</a>`).join('');
+  const causeTags = ev.cause_tags || [];
+  const effectTags = ev.effect_tags || [];
+  const primaryCause = causeTags[0] || '';
+
+  const causeHtml = causeTags.map(t=>`<a href="similar_events.html?tag=${t}">${causeLabels[t]||t}</a>`).join('');
+  const effectHtml = effectTags.length
+    ? effectTags.map(t=>`<span class="effect-chip">${effectLabels[t]||t}</span>`).join('')
+    : '<span style="color:var(--ink-soft);font-size:12.5px;">該当する結果タグはありません</span>';
 
   // 伝播フロー
   const flowHtml = (ev.propagation||[]).map((n,i)=>
@@ -165,11 +177,11 @@
     return `<tr><th>資産</th>${thHorizons}</tr>${rows}`;
   }
 
-  // 同タグの他イベント（＝この局面グループ）
-  const related = (data.events||[]).filter(e=>e.id!==ev.id && e.tags.some(t=>ev.tags.includes(t)));
+  // 同じ原因タグを持つ他イベント（＝この局面グループ）
+  const related = (data.events||[]).filter(e=>e.id!==ev.id && (e.cause_tags||[]).some(t=>causeTags.includes(t)));
   const relatedHtml = related.length
     ? related.map(e=>`<a href="event_detail.html?id=${e.id}">${e.date} ${e.name}</a>`).join(' ')
-    : '<span style="color:var(--ink-soft);font-size:13px;">同じタグの他イベントはまだ登録されていません。</span>';
+    : '<span style="color:var(--ink-soft);font-size:13px;">同じ原因タグの他イベントはまだ登録されていません。</span>';
 
   // 参照元
   const sources = ev.sources || [];
@@ -185,14 +197,21 @@
     : '';
 
   content.innerHTML = `
-    <div class="breadcrumb"><a href="index.html">トップ</a> ／ <a href="similar_events.html?tag=${ev.tags[0]}">${tagLabels[ev.tags[0]]||ev.tags[0]}</a> ／ ${ev.name}</div>
+    <div class="breadcrumb"><a href="index.html">トップ</a> ／ <a href="similar_events.html?tag=${primaryCause}">${causeLabels[primaryCause]||primaryCause}</a> ／ ${ev.name}</div>
 
     <div class="ev-head">
       <div class="date">発生日: ${ev.date}</div>
       ${catBadge}
       <h1>${ev.name}</h1>
       <p>${ev.description}</p>
-      <div class="tags">${tagsHtml}</div>
+      <div class="tag-block">
+        <span class="tag-label">原因</span>
+        <div class="tags">${causeHtml}</div>
+      </div>
+      <div class="tag-block">
+        <span class="tag-label">結果（実データから自動判定・30日後基準）</span>
+        <div class="effects">${effectHtml}</div>
+      </div>
     </div>
 
     <div class="section-label">想定される伝播パターン</div>
@@ -209,15 +228,15 @@
     </div>
     <div class="react-note">基準日: ${ev.date} 時点（休場の場合は直前の取引日）。数値は基準日からのおおよその変化率。一部系列は再配布制限のため派生値のみ。出典: FRED 等。</div>
 
-    <div class="section-label">この局面が属する類似グループ</div>
+    <div class="section-label">この局面が属する類似グループ（同じ原因）</div>
     <div class="related">${relatedHtml}</div>
 
     <div class="section-label">参照元</div>
     <div class="sources">${sourcesHtml}</div>
 
     <footer>
-      <a class="back" href="similar_events.html?tag=${ev.tags[0]}">← ${tagLabels[ev.tags[0]]||ev.tags[0]} の一覧へ</a>
-      <div class="disclaimer">本ページの数値は過去の事実の記録であり、将来の値動きを示すものでも、特定の取引・銘柄・商品を推奨するものでもありません。各イベントの前提条件は異なり、同様の結果が将来も再現される保証はありません。</div>
+      <a class="back" href="similar_events.html?tag=${primaryCause}">← ${causeLabels[primaryCause]||primaryCause} の一覧へ</a>
+      <div class="disclaimer">本ページの数値は過去の事実の記録であり、将来の値動きを示すものでも、特定の取引・銘柄・商品を推奨するものでもありません。各イベントの前提条件は異なり、同様の結果が将来も再現される保証はありません。結果タグは30日後の変化率から機械的に判定したものです。</div>
     </footer>
   `;
 
