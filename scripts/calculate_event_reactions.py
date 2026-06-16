@@ -31,6 +31,7 @@ FRED_BASE = "https://api.stlouisfed.org/fred/series/observations"
 
 HERE = os.path.dirname(__file__)
 EVENTS_PATH = os.path.join(HERE, "..", "data", "events.json")
+GROUP_META_PATH = os.path.join(HERE, "..", "data", "group_metadata.json")
 OUT_PATH = os.path.join(HERE, "..", "data", "event_reactions.json")
 
 # 対象資産（FRED系列ID）。restricted=Trueは再配布制限ありとして扱う
@@ -223,6 +224,12 @@ def build():
 
     summary = summarize_by_cause(events_with_reactions, horizon="d30", conf_levels=conf_levels)
 
+    # グループメタ情報を合流（存在すれば）。中身が空(summary空)のグループも含めて渡し、表示判定はUI側で行う。
+    group_meta = {}
+    if os.path.exists(GROUP_META_PATH):
+        with open(GROUP_META_PATH, encoding="utf-8") as f:
+            group_meta = json.load(f).get("groups", {})
+
     return {
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "cause_tag_labels": events_master.get("cause_tag_labels", {}),
@@ -234,6 +241,7 @@ def build():
         "events": events_with_reactions,
         "event_names": {e["id"]: e["name"] for e in events_with_reactions},
         "cause_summary": summary,
+        "group_metadata": group_meta,
         "disclaimer": "本データは過去の同種イベント発生後の市場反応を記録・整理したものであり、将来の値動きを示すものでも、売買を推奨するものでもありません。",
     }
 
