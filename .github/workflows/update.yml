@@ -32,6 +32,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: 依存パッケージをインストール（金データのYahooフォールバック用）
+        run: pip install yfinance --quiet
+
       - name: 市場データを取得・生成
         env:
           # FREDキーは下のSecretsから安全に注入される（コードには書かない）
