@@ -34,14 +34,16 @@ EVENTS_PATH = os.path.join(HERE, "..", "data", "events.json")
 GROUP_META_PATH = os.path.join(HERE, "..", "data", "group_metadata.json")
 OUT_PATH = os.path.join(HERE, "..", "data", "event_reactions.json")
 
-# 対象資産（FRED系列ID）。restricted=Trueは再配布制限ありとして扱う
+# 対象資産。source=fred は FRED API、source=stooq は Stooq から取得。
+# restricted=Trueは再配布制限があるため生値を出さず変化率/派生値のみ表示。
+# 金は LBMA系列(FRED)が更新停止のため、金ETF GLD(Stooq)を金価格の代理指標として使用する。
 ASSETS = [
-    {"key": "wti",    "label": "WTI原油",      "series": "DCOILWTICO", "asset": "oil",    "restricted": False},
-    {"key": "gold",   "label": "金",            "series": "GOLDPMGBD228NLBM", "asset": "gold", "restricted": True},
-    {"key": "sp500",  "label": "S&P500",        "series": "SP500",      "asset": "equity", "restricted": True},
-    {"key": "ust10y", "label": "米10年債利回り","series": "DGS10",      "asset": "bond",   "restricted": False},
-    {"key": "usdjpy", "label": "ドル円",        "series": "DEXJPUS",    "asset": "fx",     "restricted": False},
-    {"key": "vix",    "label": "VIX",           "series": "VIXCLS",     "asset": "equity", "restricted": False},
+    {"key": "wti",    "label": "WTI原油",      "source": "fred",  "series": "DCOILWTICO", "asset": "oil",    "restricted": False},
+    {"key": "gold",   "label": "金（GLD）",     "source": "stooq", "series": "gld.us",     "asset": "gold",   "restricted": True},
+    {"key": "sp500",  "label": "S&P500",        "source": "fred",  "series": "SP500",      "asset": "equity", "restricted": True},
+    {"key": "ust10y", "label": "米10年債利回り","source": "fred",  "series": "DGS10",      "asset": "bond",   "restricted": False},
+    {"key": "usdjpy", "label": "ドル円",        "source": "fred",  "series": "DEXJPUS",    "asset": "fx",     "restricted": False},
+    {"key": "vix",    "label": "VIX",           "source": "fred",  "series": "VIXCLS",     "asset": "equity", "restricted": False},
 ]
 
 HORIZONS = [
@@ -79,6 +81,50 @@ def fetch_series_range(series_id, start, end):
     return out
 
 
+def fetch_stooq_range(symbol, start, end):
+    """Stooqから日次終値を {date: value} で返す。キー不要・標準ライブラリのみ。
+    例: https://stooq.com/q/d/l/?s=gld.us&d1=20220101&d2=20220401&i=d
+    返却CSV: Date,Open,High,Low,Close,Volume"""
+    params = {
+        "s": symbol,
+        "d1": start.strftime("%Y%m%d"),
+        "d2": end.strftime("%Y%m%d"),
+        "i": "d",
+    }
+    url = f"https://stooq.com/q/d/l/?{urlencode(params)}"
+    req = Request(url, headers={"User-Agent": "MarketcastLab/0.1"})
+    with urlopen(req, timeout=30) as resp:
+        text = resp.read().decode("utf-8")
+    out = {}
+    lines = text.strip().splitlines()
+    if not lines or not lines[0].lower().startswith("date"):
+        # データが無い場合 Stooq は "No data" 等を返すことがある
+        raise RuntimeError(f"Stooq から有効なデータが取得できませんでした: {symbol}")
+    header = lines[0].split(",")
+    try:
+        close_idx = [h.lower() for h in header].index("close")
+    except ValueError:
+        close_idx = 4
+    for line in lines[1:]:
+        cols = line.split(",")
+        if len(cols) <= close_idx:
+            continue
+        date_str = cols[0]
+        try:
+            out[date_str] = float(cols[close_idx])
+        except ValueError:
+            pass
+    return out
+
+
+def fetch_range(asset, start, end):
+    """資産のsourceに応じて取得元を振り分ける。返却形式は {date: value} で統一。"""
+    src = asset.get("source", "fred")
+    if src == "stooq":
+        return fetch_stooq_range(asset["series"], start, end)
+    return fetch_series_range(asset["series"], start, end)
+
+
 def value_on_or_before(series_map, target_date, max_lookback=7):
     """target_date 当日、なければ直前の取引日の値を返す（最大max_lookback日遡る）。"""
     for back in range(0, max_lookback + 1):
@@ -102,7 +148,7 @@ def compute_reactions_for_event(event):
         if is_yield:
             entry["changes_pt"] = {}  # 利回りの絶対変化幅(pt)
         try:
-            series_map = fetch_series_range(a["series"], start, end)
+            series_map = fetch_range(a, start, end)
             base_val, used_base_date = value_on_or_before(series_map, base_date)
             if base_val is None or base_val == 0:
                 entry["status"] = "no_data"
