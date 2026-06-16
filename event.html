@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中東地域の緊張、再び高まる ｜ Marketcast Lab</title>
+<style>
+  :root{
+    --paper: #F2EFE8;
+    --paper-deep: #E8E3D7;
+    --ink: #1C1A16;
+    --ink-soft: #5B564B;
+    --line-rule: #cfc7b6;
+    --oil: #B5703A;
+    --gold: #9C7A2E;
+    --equity: #38456B;
+    --crypto: #6B4A8A;
+    --accent-up: #8A3B2E;
+    --accent-down: #2F5D4E;
+    --display: "Shippori Mincho", "Noto Serif JP", serif;
+    --body: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+    --mono: "JetBrains Mono", "Courier New", monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.75;
+  }
+  a{color:inherit;text-decoration:none;}
+
+  .strip{
+    background:var(--ink);
+    color:var(--paper);
+    font-size:12px;
+    padding:8px 5vw;
+  }
+  header{
+    border-bottom:1px solid var(--line-rule);
+    padding:18px 5vw 16px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .brand{font-family:var(--display); font-size:20px;}
+  .brand .mark{
+    font-family:var(--mono); font-size:11px; color:var(--ink-soft);
+    border:1px solid var(--line-rule); padding:2px 6px; border-radius:2px; margin-left:8px;
+  }
+  nav{display:flex; gap:24px; font-size:13px; color:var(--ink-soft);}
+
+  .breadcrumb{
+    padding:22px 5vw 0;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+  .article-head{
+    padding:14px 5vw 30px;
+    border-bottom:1px solid var(--line-rule);
+  }
+  .tag-row{display:flex; gap:10px; align-items:center; margin-bottom:16px;}
+  .event-tag{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--ink-soft); display:flex; align-items:center; gap:6px;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--oil);display:inline-block;}
+  .article-head h1{
+    font-family:var(--display);
+    font-size:clamp(26px,3.6vw,40px);
+    margin:0 0 16px;
+    max-width:30ch;
+    line-height:1.45;
+  }
+  .article-head .summary{
+    max-width:60ch;
+    color:var(--ink-soft);
+    font-size:14.5px;
+  }
+  .meta-row{
+    display:flex;
+    gap:30px;
+    margin-top:22px;
+    flex-wrap:wrap;
+  }
+  .meta-item{font-size:12px;}
+  .meta-item .k{font-family:var(--mono); color:var(--ink-soft); font-size:10.5px; display:block; margin-bottom:4px; letter-spacing:0.05em;}
+  .meta-item .v{font-size:13.5px;}
+
+  .layout{
+    display:grid;
+    grid-template-columns:1fr 300px;
+    gap:0;
+  }
+  main{padding:0 5vw 0 5vw; border-right:1px solid var(--line-rule);}
+  aside{padding:0 24px;}
+
+  .block{padding:36px 0; border-bottom:1px solid var(--line-rule);}
+  .block h2{
+    font-family:var(--display);
+    font-size:18px;
+    margin:0 0 16px;
+    display:flex; align-items:baseline; gap:10px;
+  }
+  .block h2 .eyebrow{font-family:var(--mono); font-size:11px; color:var(--ink-soft);}
+  .block p{font-size:14px; color:var(--ink); max-width:62ch;}
+  .block p.note{color:var(--ink-soft); font-size:12.5px;}
+
+  /* historical case cards */
+  .cases{display:flex; flex-direction:column; gap:0;}
+  .case{
+    display:grid;
+    grid-template-columns:120px 1fr 200px;
+    gap:20px;
+    padding:18px 0;
+    border-top:1px dashed var(--line-rule);
+    align-items:start;
+  }
+  .case:first-child{border-top:none;}
+  .case .date{font-family:var(--mono); font-size:12px; color:var(--ink-soft); padding-top:2px;}
+  .case .desc h4{font-family:var(--display); font-size:14.5px; margin:0 0 6px;}
+  .case .desc p{font-size:12.5px; color:var(--ink-soft); margin:0;}
+  .case .impact{display:flex; flex-direction:column; gap:6px; font-size:12px;}
+  .impact-row{display:flex; justify-content:space-between; gap:10px;}
+  .impact-row .asset{display:flex; align-items:center; gap:6px; color:var(--ink-soft);}
+  .swatch{width:8px;height:8px;border-radius:2px;display:inline-block;}
+  .swatch.oil{background:var(--oil);}
+  .swatch.gold{background:var(--gold);}
+  .swatch.equity{background:var(--equity);}
+  .swatch.crypto{background:var(--crypto);}
+  .pct.up{color:var(--accent-up); font-family:var(--mono);}
+  .pct.down{color:var(--accent-down); font-family:var(--mono);}
+
+  /* aside */
+  .side-card{
+    border:1px solid var(--line-rule);
+    background:var(--paper-deep);
+    padding:18px;
+    margin-bottom:20px;
+  }
+  .side-card h3{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+  }
+  .gauge{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .gauge-row{display:flex; align-items:center; gap:10px; font-size:12.5px;}
+  .gauge-row .label{width:78px; flex-shrink:0; color:var(--ink-soft);}
+  .gauge-track{flex:1; height:6px; background:var(--line-rule); position:relative; border-radius:2px;}
+  .gauge-fill{position:absolute; left:0; top:0; height:100%; border-radius:2px;}
+  .gauge-fill.oil{background:var(--oil);}
+  .gauge-fill.gold{background:var(--gold);}
+  .gauge-fill.equity{background:var(--equity);}
+  .gauge-fill.crypto{background:var(--crypto);}
+  .gauge-val{font-family:var(--mono); font-size:11px; width:34px; text-align:right;}
+
+  .disclaimer-box{
+    border:1px solid var(--line-rule);
+    padding:16px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    line-height:1.8;
+  }
+  .disclaimer-box b{color:var(--ink); display:block; margin-bottom:6px; font-size:12px;}
+
+  footer{
+    margin-top:0;
+    padding:30px 5vw 50px;
+    border-top:1px solid var(--line-rule);
+    font-size:12px;
+    color:var(--ink-soft);
+    max-width:70ch;
+  }
+
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr;}
+    main{border-right:none;}
+    .case{grid-template-columns:1fr; gap:8px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="strip"><b>本サイトは情報提供・教育目的です。</b> 個別の投資助言ではありません。</div>
+
+<header>
+  <div class="brand">Marketcast Lab <span class="mark">観測所</span></div>
+  <nav>
+    <a href="index.html">イベント観測</a>
+    <a href="#">資産別反応史</a>
+    <a href="#">用語解説</a>
+  </nav>
+</header>
+
+<div class="breadcrumb">
+  <a href="index.html">トップ</a> ／ 地政学リスク ／ 中東地域の緊張
+</div>
+
+<div class="article-head">
+  <div class="tag-row">
+    <span class="event-tag"><span class="dot"></span>地政学リスク</span>
+  </div>
+  <h1>中東地域の緊張、再び高まる</h1>
+  <p class="summary">
+    主要産油国周辺での軍事的緊張に関する報道が増加し、供給不安が市場で意識されている。現時点では確定的な軍事衝突は報じられていないが、過去の類似局面では資産価格に明確な反応パターンが見られた。
+  </p>
+  <div class="meta-row">
+    <div class="meta-item"><span class="k">観測開始</span><span class="v">2026年6月14日</span></div>
+    <div class="meta-item"><span class="k">情報源件数</span><span class="v">公開ニュース 23件</span></div>
+    <div class="meta-item"><span class="k">過去の類似局面</span><span class="v">6件（1990–2024）</span></div>
+    <div class="meta-item"><span class="k">最終更新</span><span class="v">11分前</span></div>
+  </div>
+</div>
+
+<div class="layout">
+<main>
+
+  <div class="block">
+    <h2><span class="eyebrow">①</span>何が起きているか（事実ベース）</h2>
+    <p>
+      複数の公開報道により、当該地域での軍事的な緊張が高まっていることが確認されている。原油タンカーの航行や主要航路への影響が懸念材料として報じられており、供給網への波及が市場関係者の間で意識されている状況。
+    </p>
+    <p class="note">※ この時点では特定の結果を予測するものではなく、報道されている事実の要約です。</p>
+  </div>
+
+  <div class="block">
+    <h2><span class="eyebrow">②</span>過去の類似局面で何が起きたか</h2>
+    <p style="margin-bottom:20px;">中東地域における地政学的緊張の高まりが報じられた過去6回の局面で、発生から30日後までの主要資産の変化を記録したものです。</p>
+
+    <div class="cases">
+      <div class="case">
+        <div class="date">2019年9月<br>サウジ石油施設攻撃</div>
+        <div class="desc">
+          <h4>サウジアラビア石油施設への攻撃報道</h4>
+          <p>世界の原油供給の一部に影響が及ぶとの報道を受け、市場が反応した局面。</p>
+        </div>
+        <div class="impact">
+          <div class="impact-row"><span class="asset"><span class="swatch oil"></span>原油先物</span><span class="pct up">+14.7%</span></div>
+          <div class="impact-row"><span class="asset"><span class="swatch gold"></span>金</span><span class="pct up">+1.2%</span></div>
+          <div class="impact-row"><span class="asset"><span class="swatch equity"></span>航空株(JP)</span><span class="pct down">−4.1%</span></div>
+        </div>
+      </div>
+
+      <div class="case">
+        <div class="date">2020年1月<br>地域指揮官殺害報道</div>
+        <div class="desc">
+          <h4>軍事的緊張の急激な高まり</h4>
+          <p>報復措置への懸念から、短期的にリスク回避の動きが広がった局面。</p>
+        </div>
+        <div class="impact">
+          <div class="impact-row"><span class="asset"><span class="swatch oil"></span>原油先物</span><span class="pct up">+3.6%</span></div>
+          <div class="impact-row"><span class="asset"><span class="swatch gold"></span>金</span><span class="pct up">+2.9%</span></div>
+          <div class="impact-row"><span class="asset"><span class="swatch equity"></span>日経平均</span><span class="pct down">−1.9%</span></div>
+        </div>
+      </div>
+
+      <div class="case">
+        <div class="date">2024年4月<br>地域間の直接的応酬報道</div>
+        <div class="desc">
+          <h4>報復攻撃に関する報道</h4>
+          <p>事態の限定的な収束が見えた後、市場の反応は比較的短期間で収まった局面。</p>
+        </div>
+        <div class="impact">
+          <div class="impact-row"><span class="asset"><span class="swatch oil"></span>原油先物</span><span class="pct up">+4.2%</span></div>
+          <div class="impact-row"><span class="asset"><span class="swatch gold"></span>金</span><span class="pct up">+1.6%</span></div>
+          <div class="impact-row"><span class="asset"><span class="swatch equity"></span>防衛関連株(US)</span><span class="pct up">+5.3%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top:18px;">※ 表示数値は過去の記録であり、今回の局面で同様の結果になるとは限りません。各局面の前提条件（供給規模・市場環境）は異なります。</p>
+  </div>
+
+  <div class="block" style="border-bottom:none;">
+    <h2><span class="eyebrow">③</span>関連する資産クラスの解説</h2>
+    <p>
+      地政学的リスクが供給網に関わる場合、過去の局面では原油先物が短期的に反応しやすい傾向が確認されています。同時に、不確実性の高まりから金などへの資金シフトが起きた局面も複数記録されています。一方で、航空・物流など燃料コストに敏感な業種は下落しやすい傾向が見られます。これらはあくまで過去の傾向であり、将来の値動きを保証するものではありません。
+    </p>
+  </div>
+
+</main>
+
+<aside>
+  <div class="side-card">
+    <h3>過去6局面の平均反応（30日後）</h3>
+    <div class="gauge">
+      <div class="gauge-row">
+        <span class="label">原油先物</span>
+        <div class="gauge-track"><div class="gauge-fill oil" style="width:72%;"></div></div>
+        <span class="gauge-val">+7.2%</span>
+      </div>
+      <div class="gauge-row">
+        <span class="label">金</span>
+        <div class="gauge-track"><div class="gauge-fill gold" style="width:38%;"></div></div>
+        <span class="gauge-val">+1.9%</span>
+      </div>
+      <div class="gauge-row">
+        <span class="label">主要株価指数</span>
+        <div class="gauge-track"><div class="gauge-fill equity" style="width:22%;"></div></div>
+        <span class="gauge-val">−1.1%</span>
+      </div>
+      <div class="gauge-row">
+        <span class="label">暗号資産</span>
+        <div class="gauge-track"><div class="gauge-fill crypto" style="width:14%;"></div></div>
+        <span class="gauge-val">不一致</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-card">
+    <h3>関連する用語</h3>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 8px;">・供給ショックとは何か</p>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 8px;">・「逃避先資産」の考え方</p>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0;">・先物価格と現物価格の違い</p>
+  </div>
+
+  <div class="disclaimer-box">
+    <b>このページについて</b>
+    記載内容は公開情報と過去データに基づく傾向の整理であり、特定の取引や銘柄を推奨するものではありません。投資判断は自己責任で行ってください。
+  </div>
+</aside>
+</div>
+
+<footer>
+  本サイトは金融商品取引法上の投資助言を行うものではありません。掲載情報は教育・参考目的の一般的な情報提供です。
+</footer>
+
+</body>
+</html>
