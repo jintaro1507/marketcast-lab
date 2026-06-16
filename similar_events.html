@@ -163,6 +163,14 @@
   const causeLabels = data.cause_tag_labels || {};
   const effectLabels = data.effect_tag_labels || {};
 
+  // period情報付きのタグラベル生成（event_detail.htmlと共通の方針）
+  const PERIOD_LABELS = {d1:'1日', d7:'7日', d30:'30日'};
+  function effectChipLabel(tag, details){
+    const base = effectLabels[tag] || tag;
+    const periods = ((details||{})[tag] || []).map(p => PERIOD_LABELS[p] || p);
+    return periods.length ? `${base}（${periods.join('・')}）` : base;
+  }
+
   // デフォルトタグ：URL指定 → なければ件数が最も多い原因タグ
   let activeTag = params.get('tag');
   if(!activeTag || !causeLabels[activeTag]){
@@ -286,7 +294,7 @@
         return `<div class="row"><span class="a"><span class="swatch ${r[k].asset}"></span>${r[k].label}</span><span class="v ${cls(c)}">${c!==null?(c>0?'▲':'▼')+' '+pct(c):'—'}</span></div>`;
       }).join('');
       const causeChips = (e.cause_tags||[]).map(t=>`<span class="cause">${causeLabels[t]||t}</span>`).join('');
-      const effectChips = (e.effect_tags||[]).map(t=>`<span class="effect">${effectLabels[t]||t}</span>`).join('');
+      const effectChips = (e.effect_tags||[]).map(t=>`<span class="effect">${effectChipLabel(t, e.effect_tag_details)}</span>`).join('');
       return `<div class="ev">
         <div class="ev-date">${e.date}</div>
         <div class="ev-body">
