@@ -614,7 +614,15 @@
     const warnBox = document.getElementById('conf-warning');
     if(overallConf && overallConf.level === 'reference'){
       warnBox.style.display = 'block';
-      warnBox.textContent = '※ 件数が少ないため、平均・中央値などは統計的な傾向ではなく参考値としてご覧ください。';
+      // pandemicは追加の注意書き（30日後に政策対応の反発が混在している旨）
+      if(activeTag === 'pandemic'){
+        warnBox.innerHTML =
+          '※ 件数が1件のため、統計的な傾向ではなく2020年3月の記録として参照してください。' +
+          '<br>30日後の数値には危機による下落と、FRBの緊急対応後の急反発が混在しています。' +
+          '7日後時点ではVIXが急騰・S&P500が大幅下落していた点を個別イベントの記録で確認してください。';
+      } else {
+        warnBox.textContent = '※ 件数が少ないため、平均・中央値などは統計的な傾向ではなく参考値としてご覧ください。';
+      }
     }else{
       warnBox.style.display = 'none';
     }
