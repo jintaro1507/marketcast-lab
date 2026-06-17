@@ -203,7 +203,27 @@
           "d1",
           "d7"
         ]
-      }
+      },
+      "reverse_contrast": [
+        {
+          "from": "oil_shock_1973",
+          "from_name": "第一次石油危機（OAPEC石油禁輸）",
+          "axis": "供給停止の継続期間と意図（一時的被害か組織的禁輸か）",
+          "this_side": "施設攻撃による一時的停止（数週間以内に復旧）",
+          "other_side": "組織的・政治的禁輸（数ヶ月単位）",
+          "outcome_note": "サウジ攻撃は数週間で供給が回復し原油の上昇も一時的だったのに対し、1973年の禁輸は数ヶ月続きスタグフレーションを招いた。供給停止の継続期間が、市場へのダメージの深さを分ける要因だったことが読み取れる。",
+          "type": "structural_contrast"
+        },
+        {
+          "from": "libya_civil_war_2011",
+          "from_name": "リビア内戦による原油供給停止",
+          "axis": "供給停止の規模（世界シェア）と市場インパクトの関係",
+          "this_side": "世界シェア約5%の一時停止だが、短期で回復し長期インパクトは限定的",
+          "other_side": "世界シェア約2%の停止だが、特定市場（欧州）への集中で大きなインパクト",
+          "outcome_note": "世界シェアの大きさだけでなく、停止の継続期間と代替供給の調達難易度が市場インパクトを左右した傾向が読み取れる。リビアは規模は小さいが継続期間が長く、サウジは規模が大きいが短期で回復した対照例となる。",
+          "type": "structural_contrast"
+        }
+      ]
     },
     {
       "id": "us_iran_tension_2020",
@@ -591,7 +611,27 @@
         "gold_up": [
           "d30"
         ]
-      }
+      },
+      "reverse_contrast": [
+        {
+          "from": "saudi_attack_2019",
+          "from_name": "サウジアラビア石油施設への攻撃",
+          "axis": "供給インフラへの実被害の有無",
+          "this_side": "実被害なし（生産は継続）",
+          "other_side": "実被害あり（生産が現実に停止）",
+          "outcome_note": "サウジ攻撃では原油が急騰した一方、ハマス衝突では原油の反応は限定的だった。地政学的緊張の大きさそのものよりも、現実の供給が止まったか否かが、原油の反応を分ける要因だったことが読み取れる。",
+          "type": "structural_contrast"
+        },
+        {
+          "from": "gulf_war_1990",
+          "from_name": "イラクのクウェート侵攻（湾岸戦争）",
+          "axis": "当事国に主要産油国が含まれるかどうか",
+          "this_side": "非産油国間の衝突（産油インフラへの影響なし）",
+          "other_side": "主要産油国（イラク・クウェート）が直接当事者",
+          "outcome_note": "湾岸戦争では主要産油国2カ国の供給が失われ原油が急騰した。ハマス衝突では産油インフラへの影響がなく原油反応は限定的だった。同じ中東の軍事衝突でも、産油国が当事者かどうかが原油反応の規模を分けた要因として読み取れる。",
+          "type": "structural_contrast"
+        }
+      ]
     },
     {
       "id": "iran_israel_strike_2024",
@@ -860,7 +900,18 @@
         "yield_down": [
           "d30"
         ]
-      }
+      },
+      "reverse_contrast": [
+        {
+          "from": "fed_emergency_cut_2020",
+          "from_name": "FRB緊急利下げ（ゼロ金利復帰）",
+          "axis": "予防的利下げか、危機対応の緊急利下げか",
+          "this_side": "予防的利下げ（景気減速への先回り）",
+          "other_side": "危機対応の緊急利下げ（流動性危機下）",
+          "outcome_note": "2019年の予防的利下げは比較的落ち着いた環境で行われた一方、2020年の緊急利下げは流動性危機のさなかで、利下げ直後も市場の動揺が続いた。同じ『利下げ』でも、平時の予防か危機対応かで市場の反応は大きく異なっていたことが読み取れる。",
+          "type": "structural_contrast"
+        }
+      ]
     },
     {
       "id": "fed_emergency_cut_2020",
@@ -1157,7 +1208,18 @@
         "yield_up": [
           "d30"
         ]
-      }
+      },
+      "reverse_contrast": [
+        {
+          "from": "fed_hike_final_2023",
+          "from_name": "FRB利上げサイクル最終（22年ぶり高水準）",
+          "axis": "金融引き締めサイクルの開始か終盤か",
+          "this_side": "サイクルの開始（これから引き締まる）",
+          "other_side": "サイクルの終盤（打ち止めが近い）",
+          "outcome_note": "利上げ開始局面では金利の先高観が強く、グロース株への逆風が意識された。一方、利上げ最終局面では金利のピークアウトが意識され始め、同じ『利上げ』でも市場の受け止めは異なっていたことが読み取れる。引き締めサイクルのどの段階にいるかが、市場反応を分ける要因だった。",
+          "type": "structural_contrast"
+        }
+      ]
     },
     {
       "id": "fed_hike_final_2023",
@@ -1296,7 +1358,18 @@
         "yield_up": [
           "d30"
         ]
-      }
+      },
+      "reverse_contrast": [
+        {
+          "from": "fed_hike_start_2022",
+          "from_name": "FRB利上げ開始（インフレ対応）",
+          "axis": "金融引き締めサイクルの開始か終盤か",
+          "this_side": "サイクルの終盤（引き締めの打ち止めが近い）",
+          "other_side": "サイクルの開始（これから引き締まる）",
+          "outcome_note": "開始局面では金利の先高観が市場を支配しやすかった一方、終盤局面では金利のピークアウトが意識され、同じ『利上げ』でも市場の受け止めは異なっていたことが読み取れる。",
+          "type": "structural_contrast"
+        }
+      ]
     },
     {
       "id": "fed_cut_start_2024",
@@ -2010,7 +2083,18 @@
             "d90": -12.1
           }
         }
-      }
+      },
+      "reverse_contrast": [
+        {
+          "from": "asian_crisis_1997",
+          "from_name": "アジア通貨危機（タイバーツ切り下げ）",
+          "axis": "固定相場制の制約下での危機で通貨切り下げという出口があったかどうか",
+          "this_side": "ユーロ圏内での通貨切り下げが不可能で緊縮一辺倒を迫られ回復が長期化",
+          "other_side": "ペッグ放棄→通貨安という調整機能が働き数年で回復に向かった",
+          "outcome_note": "アジア通貨危機ではペッグ放棄後に通貨安という調整機能が働き、数年で回復に向かった。欧州債務危機ではユーロ圏という制約から通貨切り下げという出口がなく、ECBのOMT宣言が出るまで2年以上不安が続いた。固定相場制の制約下の危機でも、通貨切り下げという出口の有無が回復速度を分けた傾向が読み取れる。",
+          "type": "structural_contrast"
+        }
+      ]
     },
     {
       "id": "asian_crisis_1997",
@@ -2153,6 +2237,516 @@
           }
         }
       }
+    },
+    {
+      "id": "ltcm_crisis_1998",
+      "name": "LTCMショック（ヘッジファンド救済）",
+      "date": "1998-09-02",
+      "category": "financial",
+      "cause_tags": [
+        "bank_crisis",
+        "liquidity_crisis"
+      ],
+      "effect_tags": [
+        "equity_down",
+        "oil_down",
+        "usd_weak",
+        "vix_up",
+        "yield_down"
+      ],
+      "effect_tag_details": {
+        "oil_down": [
+          "d7",
+          "d30"
+        ],
+        "equity_down": [
+          "d7"
+        ],
+        "vix_up": [
+          "d30"
+        ],
+        "usd_weak": [
+          "d7",
+          "d30"
+        ],
+        "yield_down": [
+          "d30"
+        ]
+      },
+      "causal_chain": [],
+      "context_snapshot": {
+        "vix_level": 37.0,
+        "oil_price_wti": 14.0,
+        "cpi_yoy": null,
+        "fed_funds_rate": 5.5,
+        "ust10y_yield": 5.1
+      },
+      "description": "ノーベル賞受賞者も参加した超高レバレッジのヘッジファンドLTCMが、ロシアのデフォルト（1998年8月）をきっかけに崩壊寸前となった局面。9月2日にLTCMが投資家宛の書簡で損失（年初来−52%）を開示し、問題が市場に広く認知された。FRBニューヨーク連銀が14の大手金融機関を説得して36億ドルの協調救済を主導し、9月23日に合意が成立。公的資金は使わず民間主導で収束した。",
+      "similarity_reason": "規制対象外のヘッジファンドが引き起こした流動性危機の原型局面。FRBが『調整役』として民間救済を成功させた事例で、リーマン（救済なし）との対比で『介入があれば市場の動揺が短期で収束しやすい』という構造を示す最初の事例として位置づけられる。一方で救済成功がその後の過剰リスクテイクを生んだという評価もあり、LTCM→リーマンという教訓の失敗の系譜として重要。",
+      "why_reaction": "ロシアのデフォルトがLTCMの収束ベット（スプレッド縮小予測）を悉く裏切り、高レバレッジゆえに損失が雪だるま式に拡大した。カウンターパーティの大手金融機関への連鎖リスクが意識され、8月末から9月にかけてS&P500が急落した。9月23日にFRBが調整した民間救済が成立し、市場の不安は比較的速やかに後退した。FRBはその後10月・11月に利下げを実施し、年末にかけて市場は回復した。",
+      "key_insight": "中央銀行が早期に調整役として動き民間主導の救済が成立した局面では、危機が比較的短期間で収束した傾向が過去データで観察された。ただし救済成功が次の大型危機（リーマンショック）における過剰リスクテイクを誘発したという見方も歴史的記録として残っている。",
+      "contrast": [],
+      "propagation": [
+        "ロシアデフォルトがLTCMの収束ベットを裏切る",
+        "超高レバレッジで損失が急拡大",
+        "FRBが民間銀行14行の協調救済を調整",
+        "9月23日 救済合意で市場の不安が後退",
+        "FRBが10月・11月に利下げ"
+      ],
+      "sources": [
+        {
+          "title": "Federal Reserve History: Near Failure of Long-Term Capital Management",
+          "url": "https://www.federalreservehistory.org/essays/ltcm-near-failure"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "1998-09-02",
+          "changes": {
+            "d1": -3.2,
+            "d7": -8.1,
+            "d30": -14.1,
+            "d90": -22.8
+          }
+        },
+        "gold": {
+          "label": "金（GLD）",
+          "asset": "gold",
+          "restricted": true,
+          "status": "no_data",
+          "changes": {}
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "1998-09-02",
+          "changes": {
+            "d1": -1.8,
+            "d7": -11.3,
+            "d30": -4.2,
+            "d90": 21.8
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "1998-09-02",
+          "changes": {
+            "d1": -1.1,
+            "d7": -4.2,
+            "d30": -11.8,
+            "d90": -3.4
+          },
+          "changes_pt": {
+            "d1": -0.06,
+            "d7": -0.22,
+            "d30": -0.61,
+            "d90": -0.18
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "1998-09-02",
+          "changes": {
+            "d1": -1.4,
+            "d7": -3.8,
+            "d30": -7.2,
+            "d90": 4.8
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "1998-09-02",
+          "changes": {
+            "d1": 8.1,
+            "d7": 18.4,
+            "d30": 41.2,
+            "d90": -22.1
+          }
+        }
+      },
+      "reverse_contrast": [
+        {
+          "from": "eurozone_crisis_2010",
+          "from_name": "欧州債務危機（ギリシャJunk格下げ）",
+          "axis": "中央銀行が即座に動けたかどうか（制度的制約の有無）",
+          "this_side": "FRBは即日調整役として動き民間救済を短期間で組成",
+          "other_side": "ECBはユーロ圏の制度的制約で国債購入に踏み切れず対応が長期化",
+          "outcome_note": "LTCMはFRBが素早く動いたことで危機が数週間で収束したのに対し、欧州債務危機はECBの対応が制度的に制約されたため不安が2年以上続いた。危機対応能力は中央銀行の意思だけでなく制度設計にも左右されることが過去データから読み取れる。",
+          "type": "structural_contrast"
+        },
+        {
+          "from": "lehman_shock_2008",
+          "from_name": "リーマンブラザーズ破綻（リーマンショック）",
+          "axis": "救済・介入の有無と介入の形式",
+          "this_side": "FRB主導で民間銀行の協調救済が成立",
+          "other_side": "救済なし（市場任せで破綻）",
+          "outcome_note": "LTCMはFRBが調整役として動き民間主導の救済が成立したため、危機は比較的短期間で収束した。リーマンは救済が見送られ信用市場が凍結、世界的な金融危機へと発展した。同じ過剰レバレッジによる流動性危機でも、当局の介入有無が市場への波及を決定的に変えたことが過去データから読み取れる。",
+          "type": "structural_contrast"
+        }
+      ]
+    },
+    {
+      "id": "lehman_shock_2008",
+      "name": "リーマンブラザーズ破綻（リーマンショック）",
+      "date": "2008-09-15",
+      "category": "financial",
+      "cause_tags": [
+        "bank_crisis",
+        "liquidity_crisis"
+      ],
+      "effect_tags": [
+        "equity_down",
+        "oil_down",
+        "usd_weak",
+        "vix_up",
+        "yield_down"
+      ],
+      "effect_tag_details": {
+        "oil_down": [
+          "d1",
+          "d7",
+          "d30"
+        ],
+        "equity_down": [
+          "d7",
+          "d30"
+        ],
+        "vix_up": [
+          "d1",
+          "d7",
+          "d30"
+        ],
+        "usd_weak": [
+          "d7",
+          "d30"
+        ],
+        "yield_down": [
+          "d30"
+        ]
+      },
+      "causal_chain": [],
+      "context_snapshot": {
+        "vix_level": 31.7,
+        "oil_price_wti": 95.7,
+        "cpi_yoy": null,
+        "fed_funds_rate": 2.0,
+        "ust10y_yield": 3.45
+      },
+      "description": "米国第4位の投資銀行リーマンブラザーズが6,390億ドルの負債を抱えて破産申請し、史上最大の破綻となった局面。サブプライムローンを担保にした証券の価格崩壊が引き金となり、信用市場が機能停止に陥った。FRBと財務省は救済に動かず（翌日にAIGは救済という矛盾が不確実性を拡大）、金融恐慌が世界に波及した。",
+      "similarity_reason": "金融システム全体に波及したグローバル規模の銀行危機の最大事例。LTCMと比較すると『FRBが介入したケース（LTCM）』と『介入しなかったケース（リーマン）』という対照例として機能する。SVBと比較すると『政策対応が遅れ不明確だったケース』として、同じ銀行破綻でも対応速度の違いが結果を変えることを示す。",
+      "why_reaction": "破綻申請は『政府は大型金融機関を救わない』というシグナルを市場に送り、翌日のAIG救済との矛盾がさらなる不信感を生んだ。MMF（マネーマーケットファンド）が元本割れを起こし、信用市場が凍結してTEDスプレッドが急拡大した。株式は1日後に約5%下落し、30日後にも下落が続いた。VIXは発生後も上昇し続け、FRBのゼロ金利・量的緩和と財政出動の組み合わせが底打ちをもたらすまで数ヶ月を要した。",
+      "key_insight": "大型金融機関への救済が見送られ、かつその判断が不透明だった局面では、信用市場の機能停止が長引き、株式の回復に数ヶ月以上を要した傾向が過去データで観察された。政策対応の有無と一貫性が危機の深さを左右した事例として記録されている。",
+      "contrast": [
+        {
+          "with": "ltcm_crisis_1998",
+          "axis": "救済・介入の有無と介入の形式",
+          "this_side": "救済なし（市場任せで破綻）",
+          "other_side": "FRB主導で民間銀行の協調救済が成立",
+          "outcome_note": "LTCMはFRBが調整役として動き民間主導の救済が成立したため、危機は比較的短期間で収束した。リーマンは救済が見送られ信用市場が凍結、世界的な金融危機へと発展した。同じ過剰レバレッジによる流動性危機でも、当局の介入有無が市場への波及を決定的に変えたことが過去データから読み取れる。",
+          "type": "structural_contrast"
+        }
+      ],
+      "propagation": [
+        "破産申請・救済見送り",
+        "翌日AIG救済との矛盾が不確実性を拡大",
+        "MMFが元本割れ・信用市場が凍結",
+        "VIX 継続上昇・株式 長期下落",
+        "FRB ゼロ金利・QE導入で底打ち"
+      ],
+      "sources": [
+        {
+          "title": "HISTORY: Lehman Brothers declares bankruptcy September 15 2008",
+          "url": "https://www.history.com/this-day-in-history/september-15/lehman-brothers-collapses"
+        },
+        {
+          "title": "Federal Reserve History: The 2007-08 Financial Crisis in Review",
+          "url": "https://www.federalreservehistory.org/essays/financial-crisis-in-review"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2008-09-15",
+          "changes": {
+            "d1": -5.8,
+            "d7": -12.4,
+            "d30": -31.2,
+            "d90": -54.8
+          }
+        },
+        "gold": {
+          "label": "金（GLD）",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2008-09-15",
+          "changes": {
+            "d1": -1.8,
+            "d7": -4.8,
+            "d30": 2.1,
+            "d90": 8.4
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2008-09-15",
+          "changes": {
+            "d1": -4.8,
+            "d7": -15.1,
+            "d30": -28.4,
+            "d90": -42.3
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2008-09-15",
+          "changes": {
+            "d1": 2.8,
+            "d7": -6.2,
+            "d30": -18.4,
+            "d90": -32.1
+          },
+          "changes_pt": {
+            "d1": 0.11,
+            "d7": -0.24,
+            "d30": -0.71,
+            "d90": -1.24
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2008-09-15",
+          "changes": {
+            "d1": -1.2,
+            "d7": -6.4,
+            "d30": -11.8,
+            "d90": -18.4
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2008-09-15",
+          "changes": {
+            "d1": 28.4,
+            "d7": 42.1,
+            "d30": 88.4,
+            "d90": 48.2
+          }
+        }
+      },
+      "reverse_contrast": [
+        {
+          "from": "svb_collapse_2023",
+          "from_name": "シリコンバレー銀行（SVB）破綻",
+          "axis": "政策対応の速度と初動の範囲",
+          "this_side": "救済せず破綻させ、翌日AIG救済との矛盾が不確実性を拡大",
+          "other_side": "破綻翌々日（週末中）に全預金者保護を決定",
+          "outcome_note": "SVBは週末中に全預金保護が決まり月曜から通常業務が継続できたため、30日後の株式市場の下落は限定的だった。リーマンは救済見送りと翌日のAIG救済という矛盾が不信感を増幅し、株式は30日後も大幅下落が続いた。同じ金融機関の破綻でも、政策の初動速度と明確さが市場への波及の深さを左右したことが過去データから読み取れる。",
+          "type": "structural_contrast"
+        }
+      ]
+    },
+    {
+      "id": "svb_collapse_2023",
+      "name": "シリコンバレー銀行（SVB）破綻",
+      "date": "2023-03-10",
+      "category": "financial",
+      "cause_tags": [
+        "bank_crisis"
+      ],
+      "effect_tags": [
+        "gold_up",
+        "oil_down",
+        "usd_weak",
+        "yield_down"
+      ],
+      "effect_tag_details": {
+        "oil_down": [
+          "d7"
+        ],
+        "gold_up": [
+          "d30"
+        ],
+        "usd_weak": [
+          "d7",
+          "d30"
+        ],
+        "yield_down": [
+          "d7",
+          "d30"
+        ]
+      },
+      "causal_chain": [],
+      "context_snapshot": {
+        "vix_level": 19.1,
+        "oil_price_wti": 76.7,
+        "cpi_yoy": null,
+        "fed_funds_rate": 4.58,
+        "ust10y_yield": 3.69
+      },
+      "description": "テック系スタートアップに特化したシリコンバレー銀行（資産2,090億ドル）がFDICに接収された。FRBの急速な利上げで長期国債ポートフォリオに多額の含み損が発生し、増資失敗の報道がSNSを通じた取り付けを誘発した。1日で420億ドルの預金引き出しが殺到し、翌3月12日には当局が全預金者を保護すると発表。同日、シグネチャー銀行も破綻した。",
+      "similarity_reason": "SNSが加速させた現代型の銀行取り付けの初事例。リーマン（2008年）と比較すると規模は格段に小さく、当局の初動対応が素早かったため全体への波及は限定的だった。同じ『銀行破綻』でも、政策対応の速度と範囲が市場反応をどれだけ変えうるかを示す事例。",
+      "why_reaction": "利上げ環境下で長期債を大量保有するという固有のビジネスモデルの脆弱性が、SNSによる情報拡散で一気に顕在化した。ただし当局が週末中に全預金保護を決定し、月曜朝から通常業務が継続できる措置が取られたことで、信用市場の凍結は起きなかった。VIXは一時上昇したが30日後には落ち着いた。金は逃避先として買われ、利下げ期待の高まりから米国債利回りは低下した。株式は個別銀行株に打撃が集中し、市場全体への波及はリーマン時と比べて限定的だった。",
+      "key_insight": "金融当局が初動で全預金者保護を決定した局面では、銀行危機の伝染が限定的にとどまった傾向が過去データで観察された。SNSによる情報拡散が危機の速度を増幅した一方、政策対応の速度もそれに対応して速くなった構造が読み取れる。同じ銀行危機でも政策初動の速さが結果を分けた事例として記録されている。",
+      "contrast": [
+        {
+          "with": "lehman_shock_2008",
+          "axis": "政策対応の速度と初動の範囲",
+          "this_side": "破綻翌々日（週末中）に全預金者保護を決定",
+          "other_side": "救済せず破綻させ、翌日AIG救済との矛盾が不確実性を拡大",
+          "outcome_note": "SVBは週末中に全預金保護が決まり月曜から通常業務が継続できたため、30日後の株式市場の下落は限定的だった。リーマンは救済見送りと翌日のAIG救済という矛盾が不信感を増幅し、株式は30日後も大幅下落が続いた。同じ金融機関の破綻でも、政策の初動速度と明確さが市場への波及の深さを左右したことが過去データから読み取れる。",
+          "type": "structural_contrast"
+        }
+      ],
+      "propagation": [
+        "利上げ環境下での長期債含み損",
+        "SNSによる情報拡散・取り付け加速",
+        "当局が週末中に全預金者保護を決定",
+        "信用不安は限定的・逃避需要で金・米国債が上昇"
+      ],
+      "sources": [
+        {
+          "title": "FDIC: Failed Bank Information - Silicon Valley Bank",
+          "url": "https://www.fdic.gov/resources/resolutions/bank-failures/failed-bank-list/silicon-valley.html"
+        },
+        {
+          "title": "CNBC: Silicon Valley Bank is shut down by regulators",
+          "url": "https://www.cnbc.com/2023/03/10/silicon-valley-bank-is-shut-down-by-regulators-fdic-to-protect-insured-deposits.html"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2023-03-10",
+          "changes": {
+            "d1": -2.8,
+            "d7": -5.1,
+            "d30": 1.8,
+            "d90": 12.4
+          }
+        },
+        "gold": {
+          "label": "金（GLD）",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2023-03-10",
+          "changes": {
+            "d1": 1.2,
+            "d7": 4.8,
+            "d30": 8.4,
+            "d90": 3.2
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2023-03-10",
+          "changes": {
+            "d1": -1.4,
+            "d7": -3.2,
+            "d30": 3.8,
+            "d90": 14.1
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2023-03-10",
+          "changes": {
+            "d1": -4.8,
+            "d7": -11.4,
+            "d30": -14.8,
+            "d90": -4.2
+          },
+          "changes_pt": {
+            "d1": -0.24,
+            "d7": -0.58,
+            "d30": -0.74,
+            "d90": -0.21
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2023-03-10",
+          "changes": {
+            "d1": -0.8,
+            "d7": -2.1,
+            "d30": -3.4,
+            "d90": 8.1
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2023-03-10",
+          "changes": {
+            "d1": 12.4,
+            "d7": 18.1,
+            "d30": 4.8,
+            "d90": -22.4
+          }
+        }
+      }
     }
   ],
   "event_names": {
@@ -2170,7 +2764,10 @@
     "gulf_war_1990": "イラクのクウェート侵攻（湾岸戦争）",
     "libya_civil_war_2011": "リビア内戦による原油供給停止",
     "eurozone_crisis_2010": "欧州債務危機（ギリシャJunk格下げ）",
-    "asian_crisis_1997": "アジア通貨危機（タイバーツ切り下げ）"
+    "asian_crisis_1997": "アジア通貨危機（タイバーツ切り下げ）",
+    "ltcm_crisis_1998": "LTCMショック（ヘッジファンド救済）",
+    "lehman_shock_2008": "リーマンブラザーズ破綻（リーマンショック）",
+    "svb_collapse_2023": "シリコンバレー銀行（SVB）破綻"
   },
   "cause_summary": {
     "middle_east": {
@@ -2863,97 +3460,97 @@
       "wti": {
         "label": "WTI原油",
         "asset": "oil",
-        "count": 2,
-        "up": 0,
-        "down": 2,
-        "avg": -2.6,
-        "median": -2.6,
-        "max": -1.8,
-        "min": -3.4,
+        "count": 5,
+        "up": 1,
+        "down": 4,
+        "avg": -9.7,
+        "median": -3.4,
+        "max": 1.8,
+        "min": -31.2,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "gold": {
         "label": "金（GLD）",
         "asset": "gold",
-        "count": 1,
-        "up": 1,
+        "count": 3,
+        "up": 3,
         "down": 0,
-        "avg": 5.8,
+        "avg": 5.4,
         "median": 5.8,
-        "max": 5.8,
-        "min": 5.8,
+        "max": 8.4,
+        "min": 2.1,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "low",
+          "label": "信頼性：低",
+          "note": "件数が少なめです"
         }
       },
       "sp500": {
         "label": "S&P500",
         "asset": "equity",
-        "count": 2,
-        "up": 0,
-        "down": 2,
-        "avg": -5.6,
-        "median": -5.6,
-        "max": -2.8,
-        "min": -8.4,
+        "count": 5,
+        "up": 1,
+        "down": 4,
+        "avg": -8.0,
+        "median": -4.2,
+        "max": 3.8,
+        "min": -28.4,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "ust10y": {
         "label": "米10年債利回り",
         "asset": "bond",
-        "count": 2,
+        "count": 5,
         "up": 0,
-        "down": 2,
-        "avg": -4.5,
-        "median": -4.5,
+        "down": 5,
+        "avg": -10.8,
+        "median": -11.8,
         "max": -3.2,
-        "min": -5.8,
+        "min": -18.4,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "usdjpy": {
         "label": "ドル円",
         "asset": "fx",
-        "count": 2,
+        "count": 5,
         "up": 0,
-        "down": 2,
-        "avg": -2.8,
-        "median": -2.8,
+        "down": 5,
+        "avg": -5.6,
+        "median": -3.4,
         "max": -2.4,
-        "min": -3.2,
+        "min": -11.8,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "vix": {
         "label": "VIX",
         "asset": "equity",
-        "count": 2,
-        "up": 2,
+        "count": 5,
+        "up": 5,
         "down": 0,
-        "avg": 18.4,
-        "median": 18.4,
-        "max": 24.8,
-        "min": 12.1,
+        "avg": 34.3,
+        "median": 24.8,
+        "max": 88.4,
+        "min": 4.8,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       }
     },
@@ -3130,6 +3727,104 @@
         "median": 12.1,
         "max": 12.1,
         "min": 12.1,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      }
+    },
+    "liquidity_crisis": {
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 2,
+        "up": 0,
+        "down": 2,
+        "avg": -22.6,
+        "median": -22.6,
+        "max": -14.1,
+        "min": -31.2,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 2,
+        "up": 0,
+        "down": 2,
+        "avg": -16.3,
+        "median": -16.3,
+        "max": -4.2,
+        "min": -28.4,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 2,
+        "up": 0,
+        "down": 2,
+        "avg": -15.1,
+        "median": -15.1,
+        "max": -11.8,
+        "min": -18.4,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 2,
+        "up": 0,
+        "down": 2,
+        "avg": -9.5,
+        "median": -9.5,
+        "max": -7.2,
+        "min": -11.8,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 2,
+        "up": 2,
+        "down": 0,
+        "avg": 64.8,
+        "median": 64.8,
+        "max": 88.4,
+        "min": 41.2,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "gold": {
+        "label": "金（GLD）",
+        "asset": "gold",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 2.1,
+        "median": 2.1,
+        "max": 2.1,
+        "min": 2.1,
         "confidence": {
           "level": "reference",
           "label": "参考値",
