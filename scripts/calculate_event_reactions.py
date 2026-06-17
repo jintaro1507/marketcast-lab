@@ -364,11 +364,62 @@ def build():
     effect_rules = events_master.get("effect_rules", {})
     conf_levels = events_master.get("confidence_levels", [])
 
+    # ===== Task 3: context_snapshot 自動入力 =====
+    # events.jsonでnullの項目をFREDから取得して補完する
+    # CPI(cpi_yoy)は月次のため対象外（手動入力を維持）
+    CS_SERIES = {
+        "vix_level":     "VIXCLS",
+        "oil_price_wti": "DCOILWTICO",
+        "fed_funds_rate": "DFF",
+        "ust10y_yield":  "DGS10",
+    }
+    # 系列キャッシュ（同一系列を複数イベントで再利用）
+    _cs_cache = {}
+
+    def fetch_cs_value(series_id, base_date):
+        """イベント日時点のFRED値を取得（キャッシュあり、休日は前営業日を使用）"""
+        cache_key = series_id
+        if cache_key not in _cs_cache:
+            start = base_date - dt.timedelta(days=15)
+            end   = base_date + dt.timedelta(days=3)
+            try:
+                _cs_cache[cache_key] = fetch_series_range(series_id, start, end)
+            except Exception as e:
+                print(f"  [context_snapshot] {series_id} 取得失敗: {e}")
+                _cs_cache[cache_key] = {}
+        series_map = _cs_cache[cache_key]
+        val, _ = value_on_or_before(series_map, base_date)
+        return round(val, 4) if val is not None else None
+
+    def auto_fill_context_snapshot(ev):
+        """
+        events.jsonのcontext_snapshotがnullの項目をFREDから自動補完。
+        既入力の値は上書きしない。cpi_yoyは手動入力のため対象外。
+        """
+        cs = dict(ev.get("context_snapshot") or {})
+        # 5項目を確実に保持
+        for f in ["vix_level","oil_price_wti","cpi_yoy","fed_funds_rate","ust10y_yield"]:
+            cs.setdefault(f, None)
+
+        base_date = dt.date.fromisoformat(ev["date"])
+        # nullの項目だけ取得
+        for field, series_id in CS_SERIES.items():
+            if cs.get(field) is None:
+                # キャッシュはイベントごとにリセット（期間が異なるため）
+                _cs_cache.clear()
+                cs[field] = fetch_cs_value(series_id, base_date)
+                if cs[field] is not None:
+                    print(f"  [context_snapshot] {ev['id']} {field}={cs[field]} (自動取得)")
+        return cs
+
     events_with_reactions = []
     for ev in events_master["events"]:
         reactions = compute_reactions_for_event(ev)
-        # 結果タグは全期間(1日/7日/30日/90日)のいずれかで閾値超えなら付与（全期間チェック方式）
         effect_tags, effect_tag_details = detect_effect_tags(reactions, effect_rules)
+
+        # context_snapshot: nullをFREDで自動補完
+        filled_cs = auto_fill_context_snapshot(ev)
+
         events_with_reactions.append({
             "id": ev["id"],
             "name": ev["name"],
@@ -378,13 +429,7 @@ def build():
             "effect_tags": effect_tags,
             "effect_tag_details": effect_tag_details,
             "causal_chain": ev.get("causal_chain", []),
-            "context_snapshot": {
-                "vix_level": ev.get("context_snapshot", {}).get("vix_level"),
-                "oil_price_wti": ev.get("context_snapshot", {}).get("oil_price_wti"),
-                "cpi_yoy": ev.get("context_snapshot", {}).get("cpi_yoy"),
-                "fed_funds_rate": ev.get("context_snapshot", {}).get("fed_funds_rate"),
-                "ust10y_yield": ev.get("context_snapshot", {}).get("ust10y_yield"),
-            },
+            "context_snapshot": filled_cs,
             "description": ev["description"],
             "similarity_reason": ev.get("similarity_reason", ""),
             "why_reaction": ev.get("why_reaction", ""),
@@ -400,11 +445,39 @@ def build():
 
     summary = summarize_by_cause(events_with_reactions, horizon="d30", conf_levels=conf_levels)
 
-    # グループメタ情報を合流（存在すれば）。中身が空(summary空)のグループも含めて渡し、表示判定はUI側で行う。
+    # グループメタ情報を合流
     group_meta = {}
     if os.path.exists(GROUP_META_PATH):
         with open(GROUP_META_PATH, encoding="utf-8") as f:
             group_meta = json.load(f).get("groups", {})
+
+    # ===== Task 2: reverse_contrast 逆引きインデックス生成 =====
+    # 「AがBをwithとして参照している」とき、B側に逆参照を追加。
+    # this_side / other_side を逆転させることでB視点のcontrastとして表示できる。
+    reverse_contrast = {}  # { referenced_id: [{from_id, axis, this_side, other_side, outcome_note, type}] }
+    for ev_r in events_with_reactions:
+        for c in ev_r.get("contrast", []):
+            target_id = c.get("with")
+            if not target_id:
+                continue
+            if target_id not in reverse_contrast:
+                reverse_contrast[target_id] = []
+            reverse_contrast[target_id].append({
+                "from": ev_r["id"],
+                "from_name": ev_r["name"],
+                "axis": c.get("axis", ""),
+                # 視点を逆転（B側から見ると this/other が入れ替わる）
+                "this_side": c.get("other_side", ""),
+                "other_side": c.get("this_side", ""),
+                "outcome_note": c.get("outcome_note", ""),
+                "type": c.get("type", "structural_contrast"),
+            })
+
+    # events_with_reactions に reverse_contrast を付与
+    rc_map = {e["id"]: e for e in events_with_reactions}
+    for eid, rc_list in reverse_contrast.items():
+        if eid in rc_map:
+            rc_map[eid]["reverse_contrast"] = rc_list
 
     return {
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
