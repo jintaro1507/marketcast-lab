@@ -243,31 +243,46 @@
        <div class="why"><p>${ev.why_reaction}</p></div>`
     : '';
 
-  // 結果が分かれた局面との対比（片方向：このイベントに記述があるときのみ）
+  // 結果が分かれた局面との対比（双方向：正引き＋逆引き）
   const eventNames = data.event_names || {};
+
+  function renderContrastCard(c, thisName, thisId, otherName, otherId) {
+    return `<div class="contrast"><div class="contrast-card">
+      <div class="contrast-axis">分岐の軸： <b>${c.axis}</b></div>
+      <div class="contrast-sides">
+        <div class="contrast-side this">
+          <div class="role">このイベント</div>
+          <div class="ev-name">${thisName}</div>
+          <div class="side-axis">${c.this_side||''}</div>
+        </div>
+        <div class="contrast-mid">⇄</div>
+        <div class="contrast-side">
+          <div class="role">対照イベント</div>
+          <div class="ev-name"><a href="event_detail.html?id=${otherId}">${otherName}</a></div>
+          <div class="side-axis">${c.other_side||''}</div>
+        </div>
+      </div>
+      <div class="contrast-outcome">${c.outcome_note||''}</div>
+    </div></div>`;
+  }
+
+  // 正引きcontrast（このイベントに書いてある対比）
   const contrastList = ev.contrast || [];
-  const contrastHtml = contrastList.length
-    ? `<div class="section-label">結果が分かれた局面との対比</div>` +
-      contrastList.map(c=>{
-        const otherName = eventNames[c.with] || c.with;
-        return `<div class="contrast"><div class="contrast-card">
-          <div class="contrast-axis">分岐の軸： <b>${c.axis}</b></div>
-          <div class="contrast-sides">
-            <div class="contrast-side this">
-              <div class="role">このイベント</div>
-              <div class="ev-name">${ev.name}</div>
-              <div class="side-axis">${c.this_side||''}</div>
-            </div>
-            <div class="contrast-mid">⇄</div>
-            <div class="contrast-side">
-              <div class="role">対照イベント</div>
-              <div class="ev-name"><a href="event_detail.html?id=${c.with}">${otherName}</a></div>
-              <div class="side-axis">${c.other_side||''}</div>
-            </div>
-          </div>
-          <div class="contrast-outcome">${c.outcome_note||''}</div>
-        </div></div>`;
-      }).join('')
+  const forwardCards = contrastList.map(c => {
+    const otherName = eventNames[c.with] || c.with;
+    return renderContrastCard(c, ev.name, ev.id, otherName, c.with);
+  });
+
+  // 逆引きcontrast（他のイベントがこのイベントをwithとして参照しているもの）
+  const reverseList = ev.reverse_contrast || [];
+  const reverseCards = reverseList.map(c => {
+    const otherName = eventNames[c.from] || c.from_name || c.from;
+    return renderContrastCard(c, ev.name, ev.id, otherName, c.from);
+  });
+
+  const allCards = [...forwardCards, ...reverseCards];
+  const contrastHtml = allCards.length
+    ? `<div class="section-label">結果が分かれた局面との対比</div>` + allCards.join('')
     : '';
 
   // 過去データから読み取れる傾向（key_insight）。注記を必ず付ける。
