@@ -290,16 +290,39 @@
   // ===== 観察ノート生成 =====
   // 仕様：
   //   - 全グループ平均は件数2件以上のグループの単純平均（重み付けなし）
-  //   - 差分±5pt以上の資産のみ表示（最大1コメント）
-  //   - 方向一致率≥80%または≤20%（件数5件以上のグループのみ、最大1コメント）
-  //   - 末尾に注記を常時表示
-  //   - 件数2件未満では「件数不足」を表示
+  //   - Step 2: 注目資産マップ（重み付き）内で差分スコア最大の資産を選択
+  //             注目資産内に±5pt以上がなければ全資産にフォールバック
+  //   - Step 3: 方向一致率は注目資産内のみ（件数5件以上のグループ）
+  //   - 末尾に注記を常時表示 / 件数2件未満は「件数不足」
 
-  const INSIGHT_ASSETS = ['wti','sp500','vix','gold','ust10y','usdjpy'];
   const INSIGHT_ASSET_LABELS = {
     wti:'WTI原油', sp500:'S&P500', vix:'VIX',
     gold:'金（GLD）', ust10y:'米10年債利回り', usdjpy:'ドル円'
   };
+  // 全資産（グローバル平均計算・フォールバック用）
+  const ALL_INSIGHT_ASSETS = ['wti','sp500','vix','gold','ust10y','usdjpy'];
+
+  // グループ別注目資産（重み付きオブジェクト）
+  // スコア = 差分絶対値 × weight で資産を選択
+  // 現時点は全weight=1.0。将来「銀行危機でVIXを優先 → vix:1.5」と変えるだけで拡張可能
+  const GROUP_FOCUS_ASSETS = {
+    supply_shock:        { wti:1.0, gold:1.0, vix:1.0 },
+    bank_crisis:         { sp500:1.0, vix:1.0, gold:1.0 },
+    monetary_tightening: { ust10y:1.0, sp500:1.0, usdjpy:1.0 },
+    monetary_easing:     { sp500:1.0, ust10y:1.0, gold:1.0 },
+    emergency_cut:       { sp500:1.0, vix:1.0, gold:1.0 },
+    war:                 { gold:1.0, wti:1.0, vix:1.0 },
+    middle_east:         { wti:1.0, gold:1.0, vix:1.0 },
+    pandemic:            { sp500:1.0, wti:1.0, vix:1.0 },
+    debt_crisis:         { sp500:1.0, ust10y:1.0, usdjpy:1.0 },
+    currency_crisis:     { usdjpy:1.0, sp500:1.0, gold:1.0 },
+    liquidity_crisis:    { sp500:1.0, vix:1.0, gold:1.0 },
+    _default:            { wti:1.0, sp500:1.0, vix:1.0, gold:1.0 }
+  };
+
+  function getFocusAssets(tag){
+    return GROUP_FOCUS_ASSETS[tag] || GROUP_FOCUS_ASSETS['_default'];
+  }
 
   function generateInsights(activeTag, summary, tagCounts){
     const groupN = tagCounts[activeTag] || 0;
@@ -308,9 +331,9 @@
 
     if(groupN < 2) return { items: [], tooFew: true };
 
-    // Step 1: 件数2件以上のグループで各資産の単純平均を計算
+    // Step 1: 全資産のグローバル平均（件数2件以上のグループのみ、単純平均）
     const globalAvg = {};
-    INSIGHT_ASSETS.forEach(akey => {
+    ALL_INSIGHT_ASSETS.forEach(akey => {
       const vals = [];
       Object.keys(summary).forEach(tag => {
         if((tagCounts[tag]||0) < 2) return;
@@ -322,30 +345,40 @@
       globalAvg[akey] = vals.length > 0 ? vals.reduce((a,b)=>a+b,0) / vals.length : null;
     });
 
-    // Step 2: 差分が最大の資産を1つ抽出（絶対値±5pt以上のみ）
-    let topDiff = null;
-    let topDiffAbs = 0;
-    if(activeS){
-      INSIGHT_ASSETS.forEach(akey => {
+    // Step 2: 注目資産マップ内でスコア（差分絶対値×weight）最大を選択
+    // ±5pt未満は除外。注目資産内に該当なければ全資産でフォールバック
+    const focusMap = getFocusAssets(activeTag);
+
+    function pickTopDiff(assetMap){
+      // assetMapは { akey: weight } または配列（フォールバック用）
+      const isMap = !Array.isArray(assetMap);
+      let top = null, topScore = 0;
+      if(!activeS) return null;
+      const keys = isMap ? Object.keys(assetMap) : assetMap;
+      keys.forEach(akey => {
+        const weight = isMap ? (assetMap[akey] || 1.0) : 1.0;
         const med = activeS[akey] ? activeS[akey].median : null;
         const avg = globalAvg[akey];
         if(med === null || avg === null) return;
         const diff = med - avg;
-        if(Math.abs(diff) >= 5 && Math.abs(diff) > topDiffAbs){
-          topDiff = { akey, med, avg, diff };
-          topDiffAbs = Math.abs(diff);
+        const score = Math.abs(diff) * weight;
+        if(Math.abs(diff) >= 5 && score > topScore){
+          top = { akey, med, avg, diff };
+          topScore = score;
         }
       });
+      return top;
     }
+
+    let topDiff = pickTopDiff(focusMap);                   // まず注目資産内で探す
+    if(!topDiff) topDiff = pickTopDiff(ALL_INSIGHT_ASSETS); // なければ全資産でフォールバック
 
     if(topDiff){
       const lbl = INSIGHT_ASSET_LABELS[topDiff.akey] || topDiff.akey;
       const absDiff = Math.abs(topDiff.diff).toFixed(0);
       const avgStr = (topDiff.avg >= 0 ? '+' : '') + topDiff.avg.toFixed(1) + '%';
       const medStr = (topDiff.med >= 0 ? '+' : '') + topDiff.med.toFixed(1) + '%';
-      const isFew = groupN < 5;
-      const fewNote = isFew ? '（件数が少なく参考値）' : '';
-      // 上振れ・下振れどちらかを明示するより「他グループと比べて〇〇だった」の形に
+      const fewNote = groupN < 5 ? '（件数が少なく参考値）' : '';
       if(topDiff.diff > 0){
         insights.push(
           `${lbl}の中央値（${medStr}）が他グループ平均（${avgStr}）より約${absDiff}pt高く、` +
@@ -359,18 +392,18 @@
       }
     }
 
-    // Step 3: 方向一致率（件数5件以上のグループのみ）
+    // Step 3: 方向一致率（件数5件以上・注目資産内のみ）
     if(activeS && groupN >= 5 && insights.length < 2){
-      let bestWinrate = null;
-      let bestScore = 0;
-      INSIGHT_ASSETS.forEach(akey => {
+      let bestWinrate = null, bestScore = 0;
+      Object.keys(focusMap).forEach(akey => {
         const s = activeS[akey];
         if(!s || !s.count || s.count === 0) return;
         const rate = s.up / s.count;
         const dist = Math.abs(rate - 0.5);
-        if(dist > bestScore && (rate >= 0.8 || rate <= 0.2)){
+        const score = dist * (focusMap[akey] || 1.0);
+        if(score > bestScore && (rate >= 0.8 || rate <= 0.2)){
           bestWinrate = { akey, up: s.up, count: s.count, rate };
-          bestScore = dist;
+          bestScore = score;
         }
       });
       if(bestWinrate){
@@ -393,7 +426,7 @@
     return { items: insights, tooFew: false, n: groupN };
   }
 
-  function renderInsights(activeTag, summary, tagCounts){
+    function renderInsights(activeTag, summary, tagCounts){
     const el = document.getElementById('insight-note');
     if(!el) return;
     const { items, tooFew } = generateInsights(activeTag, summary, tagCounts);
