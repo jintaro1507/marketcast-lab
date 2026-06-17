@@ -48,6 +48,14 @@
   .cross-card .cross-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;}
   .cross-card .cross-intro{font-size:13px;color:var(--ink-soft);line-height:1.75;margin-bottom:12px;max-width:72ch;}
   .cross-card .cross-note{font-size:10.5px;color:var(--ink-soft);margin-top:10px;line-height:1.6;opacity:0.8;}
+
+  /* 観察ノート */
+  #insight-note{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line-rule);}
+  .insight-note-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;}
+  .insight-note-items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+  .insight-note-items li{font-size:12.5px;color:var(--ink);line-height:1.7;padding-left:14px;position:relative;}
+  .insight-note-items li::before{content:"・";position:absolute;left:0;color:var(--ink-soft);}
+  .insight-note-caution{font-size:11px;color:var(--ink-soft);margin-top:10px;line-height:1.6;padding-left:14px;}
   table.cross{width:100%;border-collapse:collapse;font-size:12.5px;}
   table.cross th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-soft);padding:6px 10px;text-align:right;border-bottom:1px solid var(--line-rule);}
   table.cross th:first-child{text-align:left;}
@@ -188,6 +196,7 @@
       <table class="cross" id="cross-table"><tbody></tbody></table>
     </div>
     <div class="cross-note">件数が少ないグループ（2〜4件）は参考値です。数値は各グループのイベント発生後30日の変化率の中央値。</div>
+    <div id="insight-note" style="display:none;"></div>
   </div>
 </div>
 
@@ -278,6 +287,135 @@
   }
 
   // ===== 横断比較パネル =====
+  // ===== 観察ノート生成 =====
+  // 仕様：
+  //   - 全グループ平均は件数2件以上のグループの単純平均（重み付けなし）
+  //   - 差分±5pt以上の資産のみ表示（最大1コメント）
+  //   - 方向一致率≥80%または≤20%（件数5件以上のグループのみ、最大1コメント）
+  //   - 末尾に注記を常時表示
+  //   - 件数2件未満では「件数不足」を表示
+
+  const INSIGHT_ASSETS = ['wti','sp500','vix','gold','ust10y','usdjpy'];
+  const INSIGHT_ASSET_LABELS = {
+    wti:'WTI原油', sp500:'S&P500', vix:'VIX',
+    gold:'金（GLD）', ust10y:'米10年債利回り', usdjpy:'ドル円'
+  };
+
+  function generateInsights(activeTag, summary, tagCounts){
+    const groupN = tagCounts[activeTag] || 0;
+    const activeS = summary[activeTag];
+    const insights = [];
+
+    if(groupN < 2) return { items: [], tooFew: true };
+
+    // Step 1: 件数2件以上のグループで各資産の単純平均を計算
+    const globalAvg = {};
+    INSIGHT_ASSETS.forEach(akey => {
+      const vals = [];
+      Object.keys(summary).forEach(tag => {
+        if((tagCounts[tag]||0) < 2) return;
+        const s = summary[tag];
+        if(s && s[akey] && s[akey].median !== null && s[akey].median !== undefined){
+          vals.push(s[akey].median);
+        }
+      });
+      globalAvg[akey] = vals.length > 0 ? vals.reduce((a,b)=>a+b,0) / vals.length : null;
+    });
+
+    // Step 2: 差分が最大の資産を1つ抽出（絶対値±5pt以上のみ）
+    let topDiff = null;
+    let topDiffAbs = 0;
+    if(activeS){
+      INSIGHT_ASSETS.forEach(akey => {
+        const med = activeS[akey] ? activeS[akey].median : null;
+        const avg = globalAvg[akey];
+        if(med === null || avg === null) return;
+        const diff = med - avg;
+        if(Math.abs(diff) >= 5 && Math.abs(diff) > topDiffAbs){
+          topDiff = { akey, med, avg, diff };
+          topDiffAbs = Math.abs(diff);
+        }
+      });
+    }
+
+    if(topDiff){
+      const lbl = INSIGHT_ASSET_LABELS[topDiff.akey] || topDiff.akey;
+      const absDiff = Math.abs(topDiff.diff).toFixed(0);
+      const avgStr = (topDiff.avg >= 0 ? '+' : '') + topDiff.avg.toFixed(1) + '%';
+      const medStr = (topDiff.med >= 0 ? '+' : '') + topDiff.med.toFixed(1) + '%';
+      const isFew = groupN < 5;
+      const fewNote = isFew ? '（件数が少なく参考値）' : '';
+      // 上振れ・下振れどちらかを明示するより「他グループと比べて〇〇だった」の形に
+      if(topDiff.diff > 0){
+        insights.push(
+          `${lbl}の中央値（${medStr}）が他グループ平均（${avgStr}）より約${absDiff}pt高く、` +
+          `このグループでは${lbl}が上昇しやすい傾向が過去データで観察されています。${fewNote}`
+        );
+      } else {
+        insights.push(
+          `${lbl}の中央値（${medStr}）が他グループ平均（${avgStr}）より約${absDiff}pt低く、` +
+          `このグループでは${lbl}の上昇が抑制される傾向が過去データで観察されています。${fewNote}`
+        );
+      }
+    }
+
+    // Step 3: 方向一致率（件数5件以上のグループのみ）
+    if(activeS && groupN >= 5 && insights.length < 2){
+      let bestWinrate = null;
+      let bestScore = 0;
+      INSIGHT_ASSETS.forEach(akey => {
+        const s = activeS[akey];
+        if(!s || !s.count || s.count === 0) return;
+        const rate = s.up / s.count;
+        const dist = Math.abs(rate - 0.5);
+        if(dist > bestScore && (rate >= 0.8 || rate <= 0.2)){
+          bestWinrate = { akey, up: s.up, count: s.count, rate };
+          bestScore = dist;
+        }
+      });
+      if(bestWinrate){
+        const lbl = INSIGHT_ASSET_LABELS[bestWinrate.akey] || bestWinrate.akey;
+        if(bestWinrate.rate >= 0.8){
+          insights.push(
+            `${lbl}は${bestWinrate.count}件中${bestWinrate.up}件で上昇しており、` +
+            `このグループでは方向が比較的一致しています。`
+          );
+        } else {
+          const down = bestWinrate.count - bestWinrate.up;
+          insights.push(
+            `${lbl}は${bestWinrate.count}件中${down}件で下落しており、` +
+            `このグループでは上昇が限定的な傾向がありました。`
+          );
+        }
+      }
+    }
+
+    return { items: insights, tooFew: false, n: groupN };
+  }
+
+  function renderInsights(activeTag, summary, tagCounts){
+    const el = document.getElementById('insight-note');
+    if(!el) return;
+    const { items, tooFew } = generateInsights(activeTag, summary, tagCounts);
+
+    if(tooFew){
+      el.innerHTML = `
+        <div class="insight-note-label">観察ノート</div>
+        <ul class="insight-note-items">
+          <li style="color:var(--ink-soft);">件数が1件のみのため、統計的な観察コメントを生成できません。</li>
+        </ul>`;
+      el.style.display = 'block';
+      return;
+    }
+    if(items.length === 0){ el.style.display = 'none'; return; }
+
+    el.innerHTML = `
+      <div class="insight-note-label">観察ノート</div>
+      <ul class="insight-note-items">${items.map(t=>`<li>${t}</li>`).join('')}</ul>
+      <p class="insight-note-caution">※ これは過去データの観察であり、将来の値動きを示すものではありません。</p>`;
+    el.style.display = 'block';
+  }
+
   // 表示対象：件数2件以上かつgroup_metadataあり
   // 表示資産：WTI, S&P500, VIX, 金(GLD)の4資産
   const CROSS_ASSETS = ['wti','sp500','vix','gold'];
@@ -334,6 +472,9 @@
     }).join('');
 
     document.getElementById('cross-table').querySelector('tbody').innerHTML = headerRow + dataRows;
+
+    // 観察ノートを生成（比較パネル直下）
+    renderInsights(activeTag, summary, tagCounts);
   }
 
   // ===== メイン描画 =====
