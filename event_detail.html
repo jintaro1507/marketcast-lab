@@ -215,12 +215,23 @@
     const thHorizons = horizons.map(h=>`<th class="${h===activeH?'hl':''}">${horizonLabels[h]||h}</th>`).join('');
     const rows = order.filter(k=>ev.reactions[k]).map(k=>{
       const a = ev.reactions[k];
+      const isYield = a.asset === 'bond'; // 利回りはpt表示
       const cells = horizons.map(h=>{
-        const v = a.status==='ok' ? a.changes[h] : null;
-        return `<td class="${cls(v)} ${h===activeH?'hl':''}">${a.status==='ok'?pct(v):'—'}</td>`;
+        let v = null;
+        if(a.status === 'ok'){
+          // 利回りはchanges_pt（絶対変化幅pt）を優先、なければchanges（相対%）
+          v = isYield && a.changes_pt && a.changes_pt[h] !== undefined
+            ? a.changes_pt[h]
+            : a.changes[h];
+        }
+        const suffix = isYield ? 'pt' : '%';
+        const fmt = (v) => v === null || v === undefined ? '—'
+          : (v > 0 ? '+' : '') + v.toFixed(2) + suffix;
+        return `<td class="${cls(v)} ${h===activeH?'hl':''}">${a.status==='ok' ? fmt(v) : '—'}</td>`;
       }).join('');
       const rnote = a.restricted ? ' <span class="restricted-note">(派生値)</span>' : '';
-      return `<tr><td><span class="asset-name"><span class="swatch ${a.asset}"></span>${a.label}${rnote}</span></td>${cells}</tr>`;
+      const yieldNote = isYield ? ' <span class="restricted-note">(変化幅pt)</span>' : '';
+      return `<tr><td><span class="asset-name"><span class="swatch ${a.asset}"></span>${a.label}${rnote}${yieldNote}</span></td>${cells}</tr>`;
     }).join('');
     return `<tr><th>資産</th>${thHorizons}</tr>${rows}`;
   }
