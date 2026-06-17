@@ -1852,6 +1852,307 @@
           }
         }
       }
+    },
+    {
+      "id": "eurozone_crisis_2010",
+      "name": "欧州債務危機（ギリシャJunk格下げ）",
+      "date": "2010-04-27",
+      "category": "financial",
+      "cause_tags": [
+        "bank_crisis",
+        "debt_crisis"
+      ],
+      "effect_tags": [
+        "equity_down",
+        "gold_up",
+        "usd_weak",
+        "vix_up"
+      ],
+      "effect_tag_details": {
+        "gold_up": [
+          "d30"
+        ],
+        "equity_down": [
+          "d7",
+          "d30"
+        ],
+        "vix_up": [
+          "d30"
+        ],
+        "usd_weak": [
+          "d7",
+          "d30"
+        ]
+      },
+      "causal_chain": [],
+      "context_snapshot": {
+        "vix_level": 22.0,
+        "oil_price_wti": 82.6,
+        "cpi_yoy": null,
+        "fed_funds_rate": 0.2,
+        "ust10y_yield": 3.83
+      },
+      "description": "S&PがギリシャをBB+（投機的等級）に格下げし欧州債務危機が本格化した局面。ギリシャのGDP比13.6%という財政赤字が露呈し、スペイン・ポルトガル・イタリアへの波及懸念が市場を動揺させた。欧州銀行が大量のソブリン債を保有していたため財政危機と銀行危機が連動した。ユーロ圏の単一通貨という制約が、各国が独自の金融政策で対応できない構造的問題を浮き彫りにした。",
+      "similarity_reason": "財政危機が銀行危機に転化した事例。純粋な金融機関の破綻（LTCM・リーマン・SVB）とは異なり、国家の債務問題が銀行システムに波及した点で、銀行危機グループ内で『実物供給の停止』でも『金融機関の直接破綻』でもない第三の経路——信用の停止が国家財政から始まる——を担う。ECBがユーロ圏の制度的制約から国債購入に踏み切るまでに時間を要した点が、FRBが即日動けたLTCMとの重要な対比になる。",
+      "why_reaction": "ギリシャの格下げはユーロ圏全体の財政脆弱国への不信感を呼び起こした。欧州銀行が大量のソブリン債を保有していたため、国債価格の下落が銀行の資本毀損懸念につながった。ユーロ安・株安・金買いが同時進行した。ECBは制度的制約から独自の国債購入に踏み込めず危機は拡大した。ECBのOMT（無制限国債購入）宣言が2012年7月に出るまで市場の不安は断続的に続いた。",
+      "key_insight": "財政危機が銀行危機に転化した局面では、中央銀行が積極的な市場介入に踏み切るまで市場の不安が持続した傾向が過去データで観察された。単一通貨圏という制度的制約が危機対応の選択肢を狭め、解決までの期間を長くした例として記録されている。",
+      "contrast": [
+        {
+          "type": "structural_contrast",
+          "with": "ltcm_crisis_1998",
+          "axis": "中央銀行が即座に動けたかどうか（制度的制約の有無）",
+          "this_side": "ECBはユーロ圏の制度的制約で国債購入に踏み切れず対応が長期化",
+          "other_side": "FRBは即日調整役として動き民間救済を短期間で組成",
+          "outcome_note": "LTCMはFRBが素早く動いたことで危機が数週間で収束したのに対し、欧州債務危機はECBの対応が制度的に制約されたため不安が2年以上続いた。危機対応能力は中央銀行の意思だけでなく制度設計にも左右されることが過去データから読み取れる。"
+        }
+      ],
+      "propagation": [
+        "ギリシャ財政赤字の露呈・格下げ",
+        "欧州ソブリン債 下落",
+        "欧州銀行の資本毀損懸念",
+        "ユーロ安・株安・金買い",
+        "ECBのOMT宣言（2012年）で収束"
+      ],
+      "sources": [
+        {
+          "title": "CFA Institute: European Sovereign Debt Crisis Timeline",
+          "url": "https://blogs.cfainstitute.org/investor/2011/11/21/european-sovereign-debt-crisis-overview-analysis-and-timeline-of-major-events/"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "source": "fred",
+          "base_date": "2010-04-27",
+          "changes": {
+            "d1": -1.2,
+            "d7": -4.8,
+            "d30": -3.4,
+            "d90": -8.2
+          }
+        },
+        "gold": {
+          "label": "金（GLD）",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "source": "fred",
+          "base_date": "2010-04-27",
+          "changes": {
+            "d1": 2.1,
+            "d7": 4.2,
+            "d30": 5.8,
+            "d90": 10.4
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "source": "fred",
+          "base_date": "2010-04-27",
+          "changes": {
+            "d1": -1.8,
+            "d7": -5.2,
+            "d30": -8.4,
+            "d90": -2.1
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "source": "fred",
+          "base_date": "2010-04-27",
+          "changes": {
+            "d1": -1.4,
+            "d7": -3.2,
+            "d30": -5.8,
+            "d90": -12.1
+          },
+          "changes_pt": {
+            "d1": -0.05,
+            "d7": -0.12,
+            "d30": -0.22,
+            "d90": -0.46
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "source": "fred",
+          "base_date": "2010-04-27",
+          "changes": {
+            "d1": -0.8,
+            "d7": -2.4,
+            "d30": -3.2,
+            "d90": -1.8
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "source": "fred",
+          "base_date": "2010-04-27",
+          "changes": {
+            "d1": 8.4,
+            "d7": 18.2,
+            "d30": 24.8,
+            "d90": -12.1
+          }
+        }
+      }
+    },
+    {
+      "id": "asian_crisis_1997",
+      "name": "アジア通貨危機（タイバーツ切り下げ）",
+      "date": "1997-07-02",
+      "category": "financial",
+      "cause_tags": [
+        "bank_crisis",
+        "currency_crisis"
+      ],
+      "effect_tags": [
+        "usd_weak"
+      ],
+      "effect_tag_details": {
+        "usd_weak": [
+          "d30"
+        ]
+      },
+      "causal_chain": [],
+      "context_snapshot": {
+        "vix_level": 18.5,
+        "oil_price_wti": 19.2,
+        "cpi_yoy": null,
+        "fed_funds_rate": 5.5,
+        "ust10y_yield": 6.69
+      },
+      "description": "タイが14年間維持したドルペッグを放棄しバーツが急落した局面。マレーシア・フィリピン・インドネシア・韓国へ連鎖し、アジア全域の通貨・株式・銀行システムが崩壊した。ドル建て短期借入への過度な依存と不動産バブル崩壊という構造的脆弱性に国際的な投機攻撃が重なり、通貨危機と銀行危機が同時進行する「ツイン・クライシス」となった。",
+      "similarity_reason": "通貨危機と銀行危機が同時進行した「ツイン・クライシス」の典型例。銀行危機グループ内で通貨ペッグという固定相場制の崩壊が引き金になった唯一の事例として、欧州債務危機（ユーロという固定相場への縛り）との構造比較に使える。ただし、米国市場（S&P500・VIX）への直接的な波及は限定的であり、本イベントの変化率は他の銀行危機イベントより小さく出る可能性がある。震源はアジア市場であり、LTCMショックを通じた翌年の波及と合わせて読む必要がある。金（GLD）は2004年設定のためデータ取得不可。",
+      "why_reaction": "バーツのペッグ放棄は市場のドミノ的不信感を引き起こした。アジア諸国の銀行がドル建て短期債務でファイナンスしていたため、通貨下落が負債の実質増大を招き銀行危機と通貨危機が同時進行した。IMFの介入条件（緊縮財政）が当初景気を悪化させ株式と通貨への圧力が長引いた。S&P500・VIXへの直接的な打撃は限定的で、本格的な波及は翌年のロシアデフォルト→LTCMショックの連鎖を通じて起きた。",
+      "key_insight": "ドルペッグへの依存と過剰な短期外貨借入という脆弱性を抱えた国では、通貨危機と銀行危機が連鎖して増幅された傾向が過去データで観察された。震源から遠い米国市場への直接的な波及は翌年のLTCMショックまで限定的だった例として記録されている。",
+      "contrast": [
+        {
+          "type": "structural_contrast",
+          "with": "eurozone_crisis_2010",
+          "axis": "固定相場制の制約下での危機で通貨切り下げという出口があったかどうか",
+          "this_side": "ペッグ放棄→通貨安という調整機能が働き数年で回復に向かった",
+          "other_side": "ユーロ圏内での通貨切り下げが不可能で緊縮一辺倒を迫られ回復が長期化",
+          "outcome_note": "アジア通貨危機ではペッグ放棄後に通貨安という調整機能が働き、数年で回復に向かった。欧州債務危機ではユーロ圏という制約から通貨切り下げという出口がなく、ECBのOMT宣言が出るまで2年以上不安が続いた。固定相場制の制約下の危機でも、通貨切り下げという出口の有無が回復速度を分けた傾向が読み取れる。"
+        }
+      ],
+      "propagation": [
+        "タイバーツ ペッグ放棄・急落",
+        "アジア各国の通貨・株式に連鎖",
+        "ドル建て短期債務の実質増大→通貨危機と銀行危機が同時進行",
+        "IMF介入・緊縮財政で景気悪化が長期化",
+        "米国市場への直接波及は翌年LTCMショックを通じて顕在化"
+      ],
+      "sources": [
+        {
+          "title": "Federal Reserve History: Asian Financial Crisis",
+          "url": "https://www.federalreservehistory.org/essays/asian-financial-crisis"
+        },
+        {
+          "title": "Federal Reserve Bank of San Francisco: Lessons from Thailand",
+          "url": "https://www.frbsf.org/research-and-insights/publications/economic-letter/1997/11/lessons-from-thailand/"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "source": "fred",
+          "base_date": "1997-07-02",
+          "changes": {
+            "d1": 0.2,
+            "d7": -0.5,
+            "d30": -1.8,
+            "d90": -3.1
+          }
+        },
+        "gold": {
+          "label": "金（GLD）",
+          "asset": "gold",
+          "restricted": true,
+          "status": "no_data",
+          "changes": {}
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "source": "fred",
+          "base_date": "1997-07-02",
+          "changes": {
+            "d1": -0.4,
+            "d7": -1.2,
+            "d30": -2.8,
+            "d90": -8.1
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "source": "fred",
+          "base_date": "1997-07-02",
+          "changes": {
+            "d1": -0.8,
+            "d7": -1.4,
+            "d30": -3.2,
+            "d90": -8.4
+          },
+          "changes_pt": {
+            "d1": -0.05,
+            "d7": -0.09,
+            "d30": -0.22,
+            "d90": -0.56
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "source": "fred",
+          "base_date": "1997-07-02",
+          "changes": {
+            "d1": -0.4,
+            "d7": -1.1,
+            "d30": -2.4,
+            "d90": -4.8
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "source": "fred",
+          "base_date": "1997-07-02",
+          "changes": {
+            "d1": 2.1,
+            "d7": 8.4,
+            "d30": 12.1,
+            "d90": 18.2
+          }
+        }
+      }
     }
   ],
   "event_names": {
@@ -1867,7 +2168,9 @@
     "fed_cut_start_2024": "FRB利下げ開始（50bpの大幅利下げ）",
     "oil_shock_1973": "第一次石油危機（OAPEC石油禁輸）",
     "gulf_war_1990": "イラクのクウェート侵攻（湾岸戦争）",
-    "libya_civil_war_2011": "リビア内戦による原油供給停止"
+    "libya_civil_war_2011": "リビア内戦による原油供給停止",
+    "eurozone_crisis_2010": "欧州債務危機（ギリシャJunk格下げ）",
+    "asian_crisis_1997": "アジア通貨危機（タイバーツ切り下げ）"
   },
   "cause_summary": {
     "middle_east": {
@@ -2555,6 +2858,284 @@
           "note": "件数が少なく統計的な意味は限定的です"
         }
       }
+    },
+    "bank_crisis": {
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 2,
+        "up": 0,
+        "down": 2,
+        "avg": -2.6,
+        "median": -2.6,
+        "max": -1.8,
+        "min": -3.4,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "gold": {
+        "label": "金（GLD）",
+        "asset": "gold",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 5.8,
+        "median": 5.8,
+        "max": 5.8,
+        "min": 5.8,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 2,
+        "up": 0,
+        "down": 2,
+        "avg": -5.6,
+        "median": -5.6,
+        "max": -2.8,
+        "min": -8.4,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 2,
+        "up": 0,
+        "down": 2,
+        "avg": -4.5,
+        "median": -4.5,
+        "max": -3.2,
+        "min": -5.8,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 2,
+        "up": 0,
+        "down": 2,
+        "avg": -2.8,
+        "median": -2.8,
+        "max": -2.4,
+        "min": -3.2,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 2,
+        "up": 2,
+        "down": 0,
+        "avg": 18.4,
+        "median": 18.4,
+        "max": 24.8,
+        "min": 12.1,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      }
+    },
+    "debt_crisis": {
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -3.4,
+        "median": -3.4,
+        "max": -3.4,
+        "min": -3.4,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "gold": {
+        "label": "金（GLD）",
+        "asset": "gold",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 5.8,
+        "median": 5.8,
+        "max": 5.8,
+        "min": 5.8,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -8.4,
+        "median": -8.4,
+        "max": -8.4,
+        "min": -8.4,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -5.8,
+        "median": -5.8,
+        "max": -5.8,
+        "min": -5.8,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -3.2,
+        "median": -3.2,
+        "max": -3.2,
+        "min": -3.2,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 24.8,
+        "median": 24.8,
+        "max": 24.8,
+        "min": 24.8,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      }
+    },
+    "currency_crisis": {
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -1.8,
+        "median": -1.8,
+        "max": -1.8,
+        "min": -1.8,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -2.8,
+        "median": -2.8,
+        "max": -2.8,
+        "min": -2.8,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -3.2,
+        "median": -3.2,
+        "max": -3.2,
+        "min": -3.2,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -2.4,
+        "median": -2.4,
+        "max": -2.4,
+        "min": -2.4,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 12.1,
+        "median": 12.1,
+        "max": 12.1,
+        "min": 12.1,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      }
     }
   },
   "group_metadata": {
@@ -2615,6 +3196,14 @@
       "representative_events": [
         "fed_cut_start_2019",
         "fed_cut_start_2024"
+      ],
+      "preferred_asset_order": [
+        "sp500",
+        "ust10y",
+        "gold",
+        "usdjpy",
+        "vix",
+        "wti"
       ]
     },
     "monetary_tightening": {
@@ -2634,6 +3223,14 @@
       "representative_events": [
         "fed_hike_start_2022",
         "fed_hike_final_2023"
+      ],
+      "preferred_asset_order": [
+        "sp500",
+        "ust10y",
+        "usdjpy",
+        "gold",
+        "vix",
+        "wti"
       ]
     },
     "supply_shock": {
@@ -2658,6 +3255,14 @@
         "russia_ukraine_2022",
         "saudi_attack_2019",
         "libya_civil_war_2011"
+      ],
+      "preferred_asset_order": [
+        "wti",
+        "gold",
+        "sp500",
+        "vix",
+        "ust10y",
+        "usdjpy"
       ]
     },
     "emergency_cut": {
@@ -2666,7 +3271,15 @@
       "common_traits": [],
       "divergence_factors": [],
       "interpretation_caveat": "",
-      "representative_events": []
+      "representative_events": [],
+      "preferred_asset_order": [
+        "sp500",
+        "ust10y",
+        "gold",
+        "usdjpy",
+        "vix",
+        "wti"
+      ]
     },
     "pandemic": {
       "label": "パンデミック",
@@ -2674,7 +3287,15 @@
       "common_traits": [],
       "divergence_factors": [],
       "interpretation_caveat": "",
-      "representative_events": []
+      "representative_events": [],
+      "preferred_asset_order": [
+        "sp500",
+        "wti",
+        "gold",
+        "vix",
+        "ust10y",
+        "usdjpy"
+      ]
     },
     "terror": {
       "label": "テロ",
@@ -2694,11 +3315,36 @@
     },
     "bank_crisis": {
       "label": "銀行危機",
-      "summary": "",
-      "common_traits": [],
-      "divergence_factors": [],
-      "interpretation_caveat": "",
-      "representative_events": []
+      "summary": "銀行・ヘッジファンド・投資銀行の経営危機が信用市場の収縮を通じて市場全体に波及した局面を集めたグループ。供給ショックとの根本的な違いは、危機の起点が実物経済の外側（金融システムの内部）にあることだ。原油や穀物の供給が止まるのではなく、お金の流れ（信用）そのものが止まりかけることで実体経済が傷つく伝播経路をたどった。共通の起点は『過剰レバレッジと信用への不信』だが、中央銀行・政府が介入したかどうか、どれだけ速く動いたかによって、市場への波及の深さと回復速度は大きく分かれた。このグループには純粋な金融機関の破綻（LTCM・リーマン・SVB）だけでなく、財政危機が銀行危機に転化したケース（欧州債務危機）、通貨危機と銀行危機が同時進行したケース（アジア通貨危機）も含まれ、『信用の停止』に至る複数の経路を記録している。",
+      "common_traits": [
+        "金融機関・国家・通貨への信用が急速に失われたことが引き金になった",
+        "信用市場の収縮（貸し渋り・流動性の枯渇）が他の金融機関・国家・市場に波及した",
+        "株式が急落しやすく、回復に時間がかかる傾向があった",
+        "安全資産（米国債・金）への逃避が起きやすかった",
+        "中央銀行・政府の対応速度と制度的制約が市場の落ち着きを左右した"
+      ],
+      "divergence_factors": [
+        "中央銀行・政府が救済・介入に動いたかどうか、どれだけ速く動いたか",
+        "危機が『流動性危機（一時的な資金繰り問題）』か『ソルベンシー危機（資産価値の構造的毀損）』か",
+        "危機の震源の範囲（1機関・1国・グローバルか）",
+        "中央銀行が即座に動けたかどうか（制度的制約の有無）",
+        "固定相場制など制度的制約が通貨調整という出口を塞いでいたかどうか",
+        "危機発生時のマクロ環境（金利水準・インフレ・景気局面）"
+      ],
+      "interpretation_caveat": "銀行危機後の市場反応は、政策対応の有無と速度に大きく左右される。同じ『銀行危機』でも、LTCM（民間救済成立・短期収束）・リーマン（救済なし・長期波及）・SVB（即日保護決定・限定的波及）・欧州債務危機（制度的制約で長期化）・アジア通貨危機（米国市場への直接波及は限定的）と、反応パターンは大きく異なる。平均値はその違いを均してしまうため、個別イベントの確認を推奨する。また、銀行危機と供給ショックでは伝播経路が根本的に異なる。供給ショックが実物の流れを止めて価格に直撃するのに対し、銀行危機は信用の流れを止めることで実体経済に遅れて波及する。この伝播の遅さが、事後にようやく事態の深刻さが分かるという特徴を生んでいる。",
+      "representative_events": [
+        "ltcm_crisis_1998",
+        "lehman_shock_2008",
+        "svb_collapse_2023"
+      ],
+      "preferred_asset_order": [
+        "sp500",
+        "vix",
+        "gold",
+        "ust10y",
+        "usdjpy",
+        "wti"
+      ]
     },
     "debt_crisis": {
       "label": "債務危機",
@@ -2799,5 +3445,30 @@
       "threshold": -0.25
     }
   },
-  "disclaimer": "本データは過去の同種イベント発生後の市場反応を記録・整理したものであり、将来の値動きを示すものでも、売買を推奨するものでもありません。"
+  "disclaimer": "本データは過去の同種イベント発生後の市場反応を記録・整理したものであり、将来の値動きを示すものでも、売買を推奨するものでもありません。",
+  "cause_tag_hierarchy": {
+    "financial": [
+      "bank_crisis",
+      "liquidity_crisis",
+      "debt_crisis",
+      "currency_crisis"
+    ],
+    "geopolitical": [
+      "war",
+      "terror",
+      "middle_east"
+    ],
+    "commodity": [
+      "supply_shock",
+      "demand_shock"
+    ],
+    "health": [
+      "pandemic"
+    ],
+    "monetary": [
+      "monetary_easing",
+      "monetary_tightening",
+      "emergency_cut"
+    ]
+  }
 }
