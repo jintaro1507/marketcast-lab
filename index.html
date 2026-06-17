@@ -117,6 +117,119 @@
     margin-bottom:0;
   }
 
+  /* ===== Current Situation Navigator ===== */
+  .csn-section{
+    padding:40px 5vw 0;
+    border-bottom:1px solid var(--line-rule);
+    padding-bottom:36px;
+  }
+  .csn-head{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    margin-bottom:6px;
+  }
+  .csn-head h2{
+    font-family:var(--display);
+    font-size:20px;
+    margin:0;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .csn-lead{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 24px;
+    max-width:56ch;
+    line-height:1.7;
+  }
+  .csn-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+  }
+  .csn-card{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    border:1px solid var(--line-rule);
+    background:var(--paper);
+    padding:16px 16px 14px;
+    cursor:pointer;
+    text-decoration:none;
+    color:var(--ink);
+    transition:border-color 0.15s, background 0.15s;
+    position:relative;
+  }
+  .csn-card:hover{
+    border-color:var(--ink-soft);
+    background:var(--paper-deep);
+  }
+  .csn-card-symbol{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .csn-card-symbol .sym-dot{
+    width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0;
+  }
+  .csn-card h3{
+    font-family:var(--display);
+    font-size:14.5px;
+    margin:0;
+    line-height:1.45;
+  }
+  .csn-card p{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin:0;
+    line-height:1.6;
+    flex:1;
+  }
+  .csn-card-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-top:1px dashed var(--line-rule);
+    padding-top:8px;
+    margin-top:2px;
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--ink-soft);
+  }
+  /* 参考値・準備中スタイル */
+  .csn-card.few{opacity:0.65;}
+  .csn-card.sparse{opacity:0.45;}
+  .csn-badge{
+    font-family:var(--mono);
+    font-size:9.5px;
+    border:1px solid var(--line-rule);
+    padding:1px 6px;
+    border-radius:2px;
+    color:var(--ink-soft);
+    letter-spacing:0.04em;
+  }
+  .csn-note{
+    margin-top:16px;
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--ink-soft);
+    line-height:1.6;
+    opacity:0.8;
+  }
+  @media(max-width:900px){
+    .csn-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:540px){
+    .csn-grid{grid-template-columns:1fr;}
+  }
+
   /* ===== Section heading ===== */
   .section-head{
     display:flex;
@@ -418,6 +531,121 @@
   <p class="lead">
     地政学・経済指標・金融政策のニュースを集約し、過去の似た局面で各資産クラスがどう反応してきたかを可視化します。未来の予測や推奨ではなく、構造と記録に基づく観測情報です。
   </p>
+</section>
+
+<!-- ===== Current Situation Navigator ===== -->
+<section class="csn-section">
+  <div class="csn-head">
+    <h2><span class="eyebrow" style="font-family:var(--mono);font-size:11px;color:var(--ink-soft);letter-spacing:0.1em;">今の状況から探す</span> 類似局面を選ぶ</h2>
+  </div>
+  <p class="csn-lead">今、市場や経済で起きていることに近い状況を選んでください。過去に似た局面で各資産がどう動いたかを確認できます。</p>
+  <div class="csn-grid">
+
+    <!-- 供給ショック：5件・通常 -->
+    <a class="csn-card" href="similar_events.html?tag=supply_shock">
+      <div class="csn-card-symbol">
+        <span class="sym-dot" style="background:var(--oil);"></span>エネルギー・資源
+      </div>
+      <h3>原油・エネルギーが急騰している</h3>
+      <p>産油国の減産・地政学リスクなどで原油価格やエネルギー供給への不安が高まっている局面。</p>
+      <div class="csn-card-footer">
+        <span>過去の類似局面 5件</span>
+        <span>供給ショック →</span>
+      </div>
+    </a>
+
+    <!-- 銀行危機：2件・参考値 -->
+    <a class="csn-card few" href="similar_events.html?tag=bank_crisis">
+      <div class="csn-card-symbol">
+        <span class="sym-dot" style="background:var(--equity);"></span>金融システム
+      </div>
+      <h3>銀行・金融機関に不安がある</h3>
+      <p>銀行破綻・信用収縮・流動性危機が意識され、金融システムへの不信感が高まっている局面。</p>
+      <div class="csn-card-footer">
+        <span>過去の類似局面 5件</span>
+        <span class="csn-badge">実装中</span>
+      </div>
+    </a>
+
+    <!-- 戦争：6件・通常 -->
+    <a class="csn-card" href="similar_events.html?tag=war">
+      <div class="csn-card-symbol">
+        <span class="sym-dot" style="background:var(--ink-soft);"></span>地政学
+      </div>
+      <h3>地政学的緊張・軍事衝突が起きている</h3>
+      <p>大規模な軍事衝突・戦争が勃発・拡大し、グローバルなリスク回避が意識される局面。</p>
+      <div class="csn-card-footer">
+        <span>過去の類似局面 6件</span>
+        <span>戦争・軍事衝突 →</span>
+      </div>
+    </a>
+
+    <!-- 中東地政学：7件・通常 -->
+    <a class="csn-card" href="similar_events.html?tag=middle_east">
+      <div class="csn-card-symbol">
+        <span class="sym-dot" style="background:var(--oil);"></span>地政学・中東
+      </div>
+      <h3>中東情勢が不安定になっている</h3>
+      <p>中東の産油国周辺で軍事的緊張・攻撃・内戦などが発生し、供給不安と地政学リスクが重なる局面。</p>
+      <div class="csn-card-footer">
+        <span>過去の類似局面 7件</span>
+        <span>中東地政学 →</span>
+      </div>
+    </a>
+
+    <!-- 金融引き締め：2件・参考値 -->
+    <a class="csn-card few" href="similar_events.html?tag=monetary_tightening">
+      <div class="csn-card-symbol">
+        <span class="sym-dot" style="background:var(--equity);"></span>金融政策
+      </div>
+      <h3>中央銀行が利上げ・引き締めをしている</h3>
+      <p>インフレ対応などで中央銀行が利上げサイクルに入り、金利上昇・流動性縮小が意識される局面。</p>
+      <div class="csn-card-footer">
+        <span>過去の類似局面 2件</span>
+        <span class="csn-badge">参考値</span>
+      </div>
+    </a>
+
+    <!-- 金融緩和：2件・参考値 -->
+    <a class="csn-card few" href="similar_events.html?tag=monetary_easing">
+      <div class="csn-card-symbol">
+        <span class="sym-dot" style="background:var(--equity);"></span>金融政策
+      </div>
+      <h3>中央銀行が利下げ・緩和をしている</h3>
+      <p>景気支援や危機対応のため中央銀行が利下げに転じ、金融緩和が株式・債券に影響を与える局面。</p>
+      <div class="csn-card-footer">
+        <span>過去の類似局面 2件</span>
+        <span class="csn-badge">参考値</span>
+      </div>
+    </a>
+
+    <!-- 緊急利下げ：1件・準備中 -->
+    <a class="csn-card sparse" href="similar_events.html?tag=emergency_cut">
+      <div class="csn-card-symbol">
+        <span class="sym-dot" style="background:var(--equity);"></span>金融政策
+      </div>
+      <h3>中央銀行が緊急の大幅利下げをした</h3>
+      <p>経済危機・市場の急変に対応し、中央銀行が通常の会合外で緊急の大幅利下げを実施した局面。</p>
+      <div class="csn-card-footer">
+        <span>過去の類似局面 1件</span>
+        <span class="csn-badge">準備中</span>
+      </div>
+    </a>
+
+    <!-- パンデミック：1件・準備中 -->
+    <a class="csn-card sparse" href="similar_events.html?tag=pandemic">
+      <div class="csn-card-symbol">
+        <span class="sym-dot" style="background:var(--gold);"></span>公衆衛生
+      </div>
+      <h3>感染症・パンデミックが経済を直撃している</h3>
+      <p>世界的な感染症の拡大が経済活動を停滞させ、需要急減と供給寸断が同時に発生する局面。</p>
+      <div class="csn-card-footer">
+        <span>過去の類似局面 1件</span>
+        <span class="csn-badge">準備中</span>
+      </div>
+    </a>
+
+  </div>
 </section>
 
 <div class="section-head">
