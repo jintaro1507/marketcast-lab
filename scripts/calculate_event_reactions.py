@@ -378,12 +378,21 @@ def build():
             "effect_tags": effect_tags,
             "effect_tag_details": effect_tag_details,
             "causal_chain": ev.get("causal_chain", []),
-            "context_snapshot": ev.get("context_snapshot", {}),
+            "context_snapshot": {
+                "vix_level": ev.get("context_snapshot", {}).get("vix_level"),
+                "oil_price_wti": ev.get("context_snapshot", {}).get("oil_price_wti"),
+                "cpi_yoy": ev.get("context_snapshot", {}).get("cpi_yoy"),
+                "fed_funds_rate": ev.get("context_snapshot", {}).get("fed_funds_rate"),
+                "ust10y_yield": ev.get("context_snapshot", {}).get("ust10y_yield"),
+            },
             "description": ev["description"],
             "similarity_reason": ev.get("similarity_reason", ""),
             "why_reaction": ev.get("why_reaction", ""),
             "key_insight": ev.get("key_insight", ""),
-            "contrast": ev.get("contrast", []),
+            "contrast": [
+                dict(c, type=c.get("type", "structural_contrast"))
+                for c in ev.get("contrast", [])
+            ],
             "propagation": ev.get("propagation", []),
             "sources": ev.get("sources", []),
             "reactions": reactions,
@@ -400,6 +409,7 @@ def build():
     return {
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "cause_tag_labels": events_master.get("cause_tag_labels", {}),
+        "cause_tag_hierarchy": events_master.get("cause_tag_hierarchy", {}),
         "effect_tag_labels": events_master.get("effect_tag_labels", {}),
         "category_labels": events_master.get("category_labels", {}),
         "confidence_levels": conf_levels,
