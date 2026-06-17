@@ -68,20 +68,25 @@
   .rep-events .r-list a{font-size:12.5px;border:1px solid var(--line-rule);background:var(--paper);padding:7px 13px;border-radius:2px;color:var(--ink);}
   .rep-events .r-list a:hover{border-color:var(--ink-soft);}
   .rep-events .r-list a .r-date{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-right:6px;}
-  /* 詳細折りたたみ：ボタン風UI */
-  .group-details-toggle{
-    background:var(--paper);border:1px solid var(--line-rule);
-    padding:10px 18px;cursor:pointer;
-    font-family:var(--body);font-size:13.5px;color:var(--ink);
-    letter-spacing:0;margin-top:16px;
-    display:inline-flex;align-items:center;gap:8px;
-    border-radius:2px;width:100%;max-width:360px;
-    transition:background 0.15s, border-color 0.15s;
+  /* 解説カード：「なぜ結果が分かれたのか」 */
+  .insight-card{
+    margin-top:18px;
+    border:1px solid var(--line-rule);
+    border-left:3px solid var(--ink-soft);
+    background:var(--paper-deep);
+    padding:14px 18px 14px 20px;
+    cursor:pointer;
+    transition:border-left-color 0.15s, background 0.15s;
+    max-width:600px;
   }
-  .group-details-toggle:hover{background:var(--paper-deep);border-color:var(--ink-soft);}
-  .group-details-toggle.open{border-color:var(--ink-soft);}
-  .group-details-toggle .toggle-icon{font-size:11px;transition:transform 0.2s;color:var(--ink-soft);}
-  .group-details-toggle.open .toggle-icon{transform:rotate(90deg);}
+  .insight-card:hover{border-left-color:var(--ink);background:#e2dcd2;}
+  .insight-card.open{border-left-color:var(--ink);}
+  .insight-card-head{display:flex;align-items:center;gap:10px;}
+  .insight-card-icon{font-size:15px;flex-shrink:0;line-height:1;}
+  .insight-card-title{font-family:var(--body);font-size:14.5px;font-weight:600;color:var(--ink);letter-spacing:0;}
+  .insight-card-sub{font-size:12px;color:var(--ink-soft);margin-top:5px;line-height:1.6;padding-left:25px;}
+  .insight-card-arrow{margin-left:auto;font-size:11px;color:var(--ink-soft);transition:transform 0.2s;flex-shrink:0;}
+  .insight-card.open .insight-card-arrow{transform:rotate(90deg);}
   .group-details{display:none;margin-top:16px;border-top:1px solid var(--line-rule);padding-top:16px;}
   .group-details.open{display:block;}
   .group-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
@@ -243,16 +248,18 @@
     document.getElementById('maxmin-toggle').textContent = maxminVisible ? '最大・最小を隠す' : '最大・最小を表示';
   });
 
-  // ===== グループ説明の折りたたみトグル =====
+  // ===== 解説カードの開閉トグル =====
   function attachGroupToggle(){
-    const btn = document.getElementById('group-details-btn');
+    const card = document.getElementById('group-details-btn');
     const det = document.getElementById('group-details');
-    if(!btn || !det) return;
-    btn.addEventListener('click', ()=>{
+    if(!card || !det) return;
+    function toggle(){
       const open = det.classList.toggle('open');
-      btn.classList.toggle('open', open);
-      btn.querySelector('.toggle-text').textContent = open ? '閉じる' : 'なぜ結果が分かれたのかを見る';
-    });
+      card.classList.toggle('open', open);
+      card.querySelector('.insight-card-arrow').textContent = open ? '▼' : '▶';
+    }
+    card.addEventListener('click', toggle);
+    card.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
   }
 
   // ===== effect_tagsラベル（期間付き） =====
@@ -385,12 +392,22 @@
       const summaryRestHtml = summaryRest
         ? `<p style="font-size:13.5px;color:var(--ink-soft);line-height:1.8;margin:0 0 12px;">${summaryRest}</p>` : '';
 
-      // 折りたたみ詳細部分（残りのsummary＋共通点・分岐要因・注意点）
+      // 解説カード：「なぜ結果が分かれたのか」
+      // サブテキストはgroup_metadataのdivergence_factorsの件数に応じて変える
+      const nFactors = (meta.divergence_factors||[]).length;
+      const subText = nFactors
+        ? `${nFactors}つの分岐要因と、共通点・注意点を記録しています。`
+        : '共通点と結果が分かれた要因を記録しています。';
+
       const detailsHtml = (traits || factors || caveat || summaryRest) ? `
-        <button class="group-details-toggle" id="group-details-btn">
-          <span class="toggle-icon">▶</span>
-          <span class="toggle-text">なぜ結果が分かれたのかを見る</span>
-        </button>
+        <div class="insight-card" id="group-details-btn" role="button" tabindex="0">
+          <div class="insight-card-head">
+            <span class="insight-card-icon">💡</span>
+            <span class="insight-card-title">なぜ結果が分かれたのか？</span>
+            <span class="insight-card-arrow">▶</span>
+          </div>
+          <div class="insight-card-sub">${subText}</div>
+        </div>
         <div class="group-details" id="group-details">
           ${summaryRestHtml}
           ${traits || factors ? `<div class="group-cols">
