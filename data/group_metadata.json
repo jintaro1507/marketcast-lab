@@ -59,6 +59,14 @@
       "representative_events": [
         "fed_cut_start_2019",
         "fed_cut_start_2024"
+      ],
+      "preferred_asset_order": [
+        "sp500",
+        "ust10y",
+        "gold",
+        "usdjpy",
+        "vix",
+        "wti"
       ]
     },
     "monetary_tightening": {
@@ -78,6 +86,14 @@
       "representative_events": [
         "fed_hike_start_2022",
         "fed_hike_final_2023"
+      ],
+      "preferred_asset_order": [
+        "sp500",
+        "ust10y",
+        "usdjpy",
+        "gold",
+        "vix",
+        "wti"
       ]
     },
     "supply_shock": {
@@ -102,6 +118,14 @@
         "russia_ukraine_2022",
         "saudi_attack_2019",
         "libya_civil_war_2011"
+      ],
+      "preferred_asset_order": [
+        "wti",
+        "gold",
+        "sp500",
+        "vix",
+        "ust10y",
+        "usdjpy"
       ]
     },
     "emergency_cut": {
@@ -110,7 +134,15 @@
       "common_traits": [],
       "divergence_factors": [],
       "interpretation_caveat": "",
-      "representative_events": []
+      "representative_events": [],
+      "preferred_asset_order": [
+        "sp500",
+        "ust10y",
+        "gold",
+        "usdjpy",
+        "vix",
+        "wti"
+      ]
     },
     "pandemic": {
       "label": "パンデミック",
@@ -118,7 +150,15 @@
       "common_traits": [],
       "divergence_factors": [],
       "interpretation_caveat": "",
-      "representative_events": []
+      "representative_events": [],
+      "preferred_asset_order": [
+        "sp500",
+        "wti",
+        "gold",
+        "vix",
+        "ust10y",
+        "usdjpy"
+      ]
     },
     "terror": {
       "label": "テロ",
@@ -159,6 +199,14 @@
         "ltcm_crisis_1998",
         "lehman_shock_2008",
         "svb_collapse_2023"
+      ],
+      "preferred_asset_order": [
+        "sp500",
+        "vix",
+        "gold",
+        "ust10y",
+        "usdjpy",
+        "wti"
       ]
     },
     "debt_crisis": {
