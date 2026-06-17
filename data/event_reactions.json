@@ -2779,13 +2779,16 @@
         "equity_down",
         "gold_down",
         "oil_down",
-        "usd_weak",
+        "oil_up",
+        "usd_strong",
         "vix_down",
         "vix_up"
       ],
       "effect_tag_details": {
+        "oil_up": [
+          "d1"
+        ],
         "oil_down": [
-          "d1",
           "d7",
           "d30"
         ],
@@ -2793,9 +2796,7 @@
           "d7"
         ],
         "equity_down": [
-          "d1",
-          "d7",
-          "d30"
+          "d7"
         ],
         "vix_up": [
           "d7"
@@ -2803,8 +2804,9 @@
         "vix_down": [
           "d30"
         ],
-        "usd_weak": [
-          "d7"
+        "usd_strong": [
+          "d7",
+          "d30"
         ]
       },
       "causal_chain": [
@@ -2866,13 +2868,13 @@
           "asset": "oil",
           "restricted": false,
           "status": "ok",
-          "source": "sample_pending_actions",
+          "source": "fred",
           "base_date": "2020-03-09",
           "changes": {
-            "d1": -9.9,
-            "d7": -24.8,
-            "d30": -49.2,
-            "d90": -60.8
+            "d1": 11.0,
+            "d7": -6.7,
+            "d30": -19.6,
+            "d90": 27.2
           }
         },
         "gold": {
@@ -2880,13 +2882,13 @@
           "asset": "gold",
           "restricted": true,
           "status": "ok",
-          "source": "sample_pending_actions",
+          "source": "fred",
           "base_date": "2020-03-09",
           "changes": {
-            "d1": -1.8,
-            "d7": -8.4,
-            "d30": 4.2,
-            "d90": 15.8
+            "d1": -2.1,
+            "d7": -10.2,
+            "d30": -2.0,
+            "d90": 0.1
           }
         },
         "sp500": {
@@ -2894,13 +2896,13 @@
           "asset": "equity",
           "restricted": true,
           "status": "ok",
-          "source": "sample_pending_actions",
+          "source": "fred",
           "base_date": "2020-03-09",
           "changes": {
-            "d1": -5.2,
-            "d7": -19.8,
-            "d30": -14.4,
-            "d90": 28.4
+            "d1": 4.9,
+            "d7": -13.1,
+            "d30": 0.1,
+            "d90": 16.3
           }
         },
         "ust10y": {
@@ -2908,13 +2910,13 @@
           "asset": "bond",
           "restricted": false,
           "status": "ok",
-          "source": "sample_pending_actions",
+          "source": "fred",
           "base_date": "2020-03-09",
           "changes": {
-            "d1": -6.8,
-            "d7": -18.4,
-            "d30": -28.1,
-            "d90": -24.8
+            "d1": 40.7,
+            "d7": 35.2,
+            "d30": 42.6,
+            "d90": 68.5
           },
           "changes_pt": {
             "d1": -0.04,
@@ -2928,13 +2930,13 @@
           "asset": "fx",
           "restricted": false,
           "status": "ok",
-          "source": "sample_pending_actions",
+          "source": "fred",
           "base_date": "2020-03-09",
           "changes": {
-            "d1": -0.4,
-            "d7": -2.8,
-            "d30": 0.8,
-            "d90": -3.2
+            "d1": 1.2,
+            "d7": 3.0,
+            "d30": 6.0,
+            "d90": 7.0
           }
         },
         "vix": {
@@ -2942,13 +2944,13 @@
           "asset": "equity",
           "restricted": false,
           "status": "ok",
-          "source": "sample_pending_actions",
+          "source": "fred",
           "base_date": "2020-03-09",
           "changes": {
-            "d1": 12.4,
-            "d7": 48.1,
-            "d30": -22.8,
-            "d90": -58.4
+            "d1": -13.1,
+            "d7": 51.8,
+            "d30": -20.4,
+            "d90": -55.0
           }
         }
       }
@@ -3947,10 +3949,10 @@
         "count": 1,
         "up": 0,
         "down": 1,
-        "avg": -49.2,
-        "median": -49.2,
-        "max": -49.2,
-        "min": -49.2,
+        "avg": -19.6,
+        "median": -19.6,
+        "max": -19.6,
+        "min": -19.6,
         "confidence": {
           "level": "reference",
           "label": "参考値",
@@ -3961,12 +3963,12 @@
         "label": "金（GLD）",
         "asset": "gold",
         "count": 1,
-        "up": 1,
-        "down": 0,
-        "avg": 4.2,
-        "median": 4.2,
-        "max": 4.2,
-        "min": 4.2,
+        "up": 0,
+        "down": 1,
+        "avg": -2.0,
+        "median": -2.0,
+        "max": -2.0,
+        "min": -2.0,
         "confidence": {
           "level": "reference",
           "label": "参考値",
@@ -3977,12 +3979,12 @@
         "label": "S&P500",
         "asset": "equity",
         "count": 1,
-        "up": 0,
-        "down": 1,
-        "avg": -14.4,
-        "median": -14.4,
-        "max": -14.4,
-        "min": -14.4,
+        "up": 1,
+        "down": 0,
+        "avg": 0.1,
+        "median": 0.1,
+        "max": 0.1,
+        "min": 0.1,
         "confidence": {
           "level": "reference",
           "label": "参考値",
@@ -3993,12 +3995,12 @@
         "label": "米10年債利回り",
         "asset": "bond",
         "count": 1,
-        "up": 0,
-        "down": 1,
-        "avg": -28.1,
-        "median": -28.1,
-        "max": -28.1,
-        "min": -28.1,
+        "up": 1,
+        "down": 0,
+        "avg": 42.6,
+        "median": 42.6,
+        "max": 42.6,
+        "min": 42.6,
         "confidence": {
           "level": "reference",
           "label": "参考値",
@@ -4011,10 +4013,10 @@
         "count": 1,
         "up": 1,
         "down": 0,
-        "avg": 0.8,
-        "median": 0.8,
-        "max": 0.8,
-        "min": 0.8,
+        "avg": 6.0,
+        "median": 6.0,
+        "max": 6.0,
+        "min": 6.0,
         "confidence": {
           "level": "reference",
           "label": "参考値",
@@ -4027,10 +4029,10 @@
         "count": 1,
         "up": 0,
         "down": 1,
-        "avg": -22.8,
-        "median": -22.8,
-        "max": -22.8,
-        "min": -22.8,
+        "avg": -20.4,
+        "median": -20.4,
+        "max": -20.4,
+        "min": -20.4,
         "confidence": {
           "level": "reference",
           "label": "参考値",
