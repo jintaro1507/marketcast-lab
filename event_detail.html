@@ -187,9 +187,16 @@
   }
 
   const causeHtml = causeTags.map(t=>`<a href="similar_events.html?tag=${t}">${causeLabels[t]||t}</a>`).join('');
+
+  // effect_tags：同一資産の上昇・下落が共存する場合（例: vix_up + vix_down）を検出
+  const hasVixBoth = effectTags.includes('vix_up') && effectTags.includes('vix_down');
   const effectHtml = effectTags.length
     ? effectTags.map(t=>`<span class="effect-chip">${effectChipLabel(t)}</span>`).join('')
     : '<span style="color:var(--ink-soft);font-size:12.5px;">該当する結果タグはありません</span>';
+  // 上昇・下落が共存するときは時系列注記を追加
+  const effectConflictNote = hasVixBoth
+    ? `<div style="font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-top:4px;opacity:0.8;">VIXは初期に急騰（7日後）し、その後政策対応で低下（30日後）しています。括弧内の日数は各判定を超えた期間を示します。</div>`
+    : '';
 
   // 伝播フロー
   const flowHtml = (ev.propagation||[]).map((n,i)=>
@@ -309,6 +316,7 @@
       <div class="tag-block">
         <span class="tag-label">結果（実データから自動判定）</span>
         <div class="effects">${effectHtml}</div>
+        ${effectConflictNote}
         ${effectTags.length ? `<div style="font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-top:6px;opacity:0.75;">括弧内の日数は、1日後・7日後・30日後のうち、判定閾値を超えた期間を示します。</div>` : ''}
       </div>
     </div>
