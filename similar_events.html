@@ -53,8 +53,15 @@
   .swatch.equity{background:var(--equity);}.swatch.fx{background:var(--fx);}.swatch.bond{background:var(--bond);}
   .pos{color:var(--up);} .neg{color:var(--down);}
   .winrate{font-family:var(--body);font-size:12px;color:var(--ink-soft);}
+  /* 中央値列：最重要指標として目立たせる */
+  table.summary td.median-val{font-weight:600;font-size:13.5px;}
+  table.summary th.median-hd{color:var(--ink);font-weight:700;}
+  /* 平均列：補助情報として控えめに */
+  table.summary td.avg-val{color:var(--ink-soft);font-size:12px;}
+  table.summary th.avg-hd{color:var(--ink-soft);}
 
   .summary-note{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);padding:10px 5vw 0;}
+  .summary-note .avg-note{display:block;margin-top:4px;font-size:10px;color:var(--ink-soft);opacity:0.8;}
 
   /* group panel */
   #group-panel{padding:24px 5vw 0;}
@@ -134,7 +141,7 @@
 <div class="summary-wrap">
   <table class="summary" id="summary-table"><tbody></tbody></table>
 </div>
-<div class="summary-note">勝率＝上昇した回数 / 全件数。数値は各イベント発生から30日後のおおよその変化率の集計です。</div>
+<div class="summary-note">勝率＝上昇した回数 / 全件数。数値は各イベント発生から30日後のおおよその変化率の集計です。<span class="avg-note">平均値は外れ値の影響を受けるため、中央値も併せて確認してください。</span></div>
 
 <div class="section-label">個別イベントの記録</div>
 <div class="events-list" id="events-list"></div>
@@ -261,17 +268,27 @@
 
     // サマリー表（原因タグ集計）
     const summary = (data.cause_summary && data.cause_summary[activeTag]) || {};
-    const order = ['wti','gold','sp500','ust10y','usdjpy','vix'];
+
+    // グループのpreferred_asset_orderを取得（なければデフォルト順）
+    const DEFAULT_ORDER = ['wti','gold','sp500','ust10y','usdjpy','vix'];
+    const gmeta = (data.group_metadata && data.group_metadata[activeTag]) || {};
+    const order = (gmeta.preferred_asset_order && gmeta.preferred_asset_order.length)
+      ? gmeta.preferred_asset_order
+      : DEFAULT_ORDER;
+
     const isReference = overallConf && overallConf.level === 'reference';
     const rows = order.filter(k=>summary[k]).map(k=>{
       const s = summary[k];
-      // 参考値のときは平均・中央値を控えめ（グレー）に
-      const dim = isReference ? 'style="color:var(--ink-soft)"' : '';
+      // 参考値のときは中央値・平均を控えめに
+      const dimAttr = isReference ? 'style="color:var(--ink-soft)"' : '';
+      // 中央値は常に目立たせる（参考値でも構造は維持）
+      const medClass = cls(s.median) + ' median-val';
+      const avgClass = cls(s.avg) + ' avg-val';
       return `<tr>
         <td><span class="asset-name"><span class="swatch ${s.asset}"></span>${s.label}</span></td>
         <td class="winrate">${s.up}/${s.count}件 上昇</td>
-        <td class="${cls(s.avg)}" ${dim}>${pct(s.avg)}</td>
-        <td class="${cls(s.median)}" ${dim}>${pct(s.median)}</td>
+        <td class="${medClass}" ${dimAttr}>${pct(s.median)}</td>
+        <td class="${avgClass}" ${dimAttr}>${pct(s.avg)}</td>
         <td class="${cls(s.max)}">${pct(s.max)}</td>
         <td class="${cls(s.min)}">${pct(s.min)}</td>
       </tr>`;
@@ -279,7 +296,7 @@
     const tbl = document.getElementById('summary-table');
     if(rows){
       tbl.querySelector('tbody').innerHTML =
-        `<tr><th>資産</th><th>勝率</th><th>平均</th><th>中央値</th><th>最大</th><th>最小</th></tr>` + rows;
+        `<tr><th>資産</th><th>勝率</th><th class="median-hd">中央値</th><th class="avg-hd">平均</th><th>最大</th><th>最小</th></tr>` + rows;
     }else{
       tbl.querySelector('tbody').innerHTML = `<tr><td colspan="6" style="color:var(--ink-soft)">この原因タグの集計データはまだありません。</td></tr>`;
     }
