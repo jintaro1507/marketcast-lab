@@ -1427,6 +1427,431 @@
           "d30"
         ]
       }
+    },
+    {
+      "id": "oil_shock_1973",
+      "name": "第一次石油危機（OAPEC石油禁輸）",
+      "date": "1973-10-17",
+      "category": "geopolitics",
+      "cause_tags": [
+        "supply_shock",
+        "middle_east"
+      ],
+      "effect_tags": [
+        "equity_down",
+        "usd_weak",
+        "yield_up"
+      ],
+      "effect_tag_details": {
+        "equity_down": [
+          "d30"
+        ],
+        "usd_weak": [
+          "d30"
+        ],
+        "yield_up": [
+          "d30"
+        ]
+      },
+      "causal_chain": [],
+      "context_snapshot": {},
+      "description": "OAPECが親イスラエル国向けの石油生産削減を決定し、段階的な禁輸へ発展した局面。原油価格は約4倍に急騰し、スタグフレーション（インフレと景気停滞の同時進行）という当時の経済学では想定外の事態を招いた。供給ショック型インフレの歴史的原型として位置づけられる。",
+      "similarity_reason": "政治的意図による組織的な石油禁輸という点で、供給ショックの原型局面。ただし発生から50年以上が経過しており、WTI・VIX・金（GLD）の日次データは取得不可。取得できるのはS&P500・米10年債・ドル円のみ。歴史的参考イベントとして登録し、統計集計では参照できる系列が限られることを前提とする。",
+      "why_reaction": "政治的な禁輸措置という需給を超えた強制的な供給制限が、価格を約4倍に押し上げた。同時期に高インフレが進行しており、エネルギーコスト上昇がさらに物価を押し上げる二重構造となった。米国はドルの金兌換停止（1971年）直後でドル安が進んでおり、石油代金のドル建て取引を通じたインフレ増幅も起きた。FRBの対応が後手に回り、スタグフレーションが長期化した。",
+      "key_insight": "政治的に組織された石油禁輸は、需要・供給の市場メカニズムでは価格を抑制できず、インフレが長期化した傾向が過去データで観察された。株式は発生後数ヶ月にわたり下落が続き、代替供給源が登場するまで市場の回復が遅れた例として記録されている。",
+      "contrast": [
+        {
+          "with": "saudi_attack_2019",
+          "axis": "供給停止の継続期間と意図（一時的被害か組織的禁輸か）",
+          "this_side": "組織的・政治的禁輸（数ヶ月単位）",
+          "other_side": "施設攻撃による一時的停止（数週間以内に復旧）",
+          "outcome_note": "サウジ攻撃は数週間で供給が回復し原油の上昇も一時的だったのに対し、1973年の禁輸は数ヶ月続きスタグフレーションを招いた。供給停止の継続期間が、市場へのダメージの深さを分ける要因だったことが読み取れる。"
+        }
+      ],
+      "propagation": [
+        "政治的石油禁輸",
+        "原油価格 約4倍に急騰",
+        "インフレ加速",
+        "景気後退（スタグフレーション）"
+      ],
+      "sources": [
+        {
+          "title": "Federal Reserve History: Oil Shock of 1973-74",
+          "url": "https://www.federalreservehistory.org/essays/oil-shock-of-1973-74"
+        },
+        {
+          "title": "Britannica: Arab oil embargo",
+          "url": "https://www.britannica.com/event/Arab-oil-embargo"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "no_data",
+          "changes": {}
+        },
+        "gold": {
+          "label": "金（GLD）",
+          "asset": "gold",
+          "restricted": true,
+          "status": "no_data",
+          "changes": {}
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "1973-10-17",
+          "changes": {
+            "d1": -0.7,
+            "d7": -4.2,
+            "d30": -12.1,
+            "d90": -18.4
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "1973-10-17",
+          "changes": {
+            "d1": 0.8,
+            "d7": 2.1,
+            "d30": 8.4,
+            "d90": 14.2
+          },
+          "changes_pt": {
+            "d1": 0.04,
+            "d7": 0.1,
+            "d30": 0.38,
+            "d90": 0.62
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "1973-10-17",
+          "changes": {
+            "d1": 0.2,
+            "d7": -0.8,
+            "d30": -2.1,
+            "d90": -4.8
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "no_data",
+          "changes": {}
+        }
+      }
+    },
+    {
+      "id": "gulf_war_1990",
+      "name": "イラクのクウェート侵攻（湾岸戦争）",
+      "date": "1990-08-02",
+      "category": "geopolitics",
+      "cause_tags": [
+        "supply_shock",
+        "war",
+        "middle_east"
+      ],
+      "effect_tags": [
+        "equity_down",
+        "oil_up",
+        "usd_strong",
+        "vix_up",
+        "yield_up"
+      ],
+      "effect_tag_details": {
+        "oil_up": [
+          "d1",
+          "d7",
+          "d30"
+        ],
+        "equity_down": [
+          "d7",
+          "d30"
+        ],
+        "vix_up": [
+          "d7"
+        ],
+        "usd_strong": [
+          "d7",
+          "d30"
+        ],
+        "yield_up": [
+          "d7"
+        ]
+      },
+      "causal_chain": [],
+      "context_snapshot": {},
+      "description": "イラクがOPEC加盟国のクウェートを占領し、イラク・クウェート合わせて日量430万バレルの供給が市場から失われた。原油価格は7月の17ドルから10月には36〜46ドルへ倍増した。翌1991年1月の砂漠の嵐作戦開始後、価格は急落し9ヶ月で収束した。",
+      "similarity_reason": "産油国が直接当事者となった大規模軍事衝突で、供給が現実に失われたケース。1973年の禁輸より規模は小さいが、代替増産（サウジ等）が早期に機能した点が異なる。VIX・WTIが取得可能な1990年以降の最初の大規模供給ショックとして、グループ内の基準イベントになる。",
+      "why_reaction": "イラク・クウェート2カ国分の産油が市場から消えたことで供給不安が急騰した。さらにサダム・フセインがサウジアラビアに侵攻するリスクが意識され、中東全域の供給喪失シナリオが価格を押し上げた。ただしサウジを含む他のOPEC諸国が増産して代替供給を確保したため、1973年のような長期的なスタグフレーションには至らなかった。軍事的解決の見通しが立った1991年1月以降は急落した。",
+      "key_insight": "産油国が当事者の軍事衝突では供給途絶が現実化し、原油が急騰した傾向が過去データで観察された。代替供給源（他のOPEC諸国）の存在が、1973年との違いを生んだ。軍事的解決の見通しが立った時点で価格が急落したことも、『解決可能性の認識』が市場を左右するという構造を示している。",
+      "contrast": [
+        {
+          "with": "hamas_israel_2023",
+          "axis": "当事国に主要産油国が含まれるかどうか",
+          "this_side": "主要産油国（イラク・クウェート）が直接当事者",
+          "other_side": "非産油国間の衝突（産油インフラへの影響なし）",
+          "outcome_note": "湾岸戦争では主要産油国2カ国の供給が失われ原油が急騰した。ハマス衝突では産油インフラへの影響がなく原油反応は限定的だった。同じ中東の軍事衝突でも、産油国が当事者かどうかが原油反応の規模を分けた要因として読み取れる。"
+        }
+      ],
+      "propagation": [
+        "産油国間の武力衝突",
+        "日量430万バレルの供給喪失",
+        "原油価格 倍増",
+        "株式 急落後に回復"
+      ],
+      "sources": [
+        {
+          "title": "EconLib: Who Caused the August 1990 Spike in Oil Prices?",
+          "url": "https://www.econlib.org/archives/2014/06/who_caused_the.html"
+        },
+        {
+          "title": "Wikipedia: 1990 oil price shock",
+          "url": "https://en.wikipedia.org/wiki/1990_oil_price_shock"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "1990-08-02",
+          "changes": {
+            "d1": 5.4,
+            "d7": 32.1,
+            "d30": 58.2,
+            "d90": 12.4
+          }
+        },
+        "gold": {
+          "label": "金（GLD）",
+          "asset": "gold",
+          "restricted": true,
+          "status": "no_data",
+          "changes": {}
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "1990-08-02",
+          "changes": {
+            "d1": -1.8,
+            "d7": -9.4,
+            "d30": -12.8,
+            "d90": 10.2
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "1990-08-02",
+          "changes": {
+            "d1": 1.2,
+            "d7": 4.8,
+            "d30": 2.1,
+            "d90": -8.4
+          },
+          "changes_pt": {
+            "d1": 0.1,
+            "d7": 0.4,
+            "d30": 0.18,
+            "d90": -0.72
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "1990-08-02",
+          "changes": {
+            "d1": 0.6,
+            "d7": 2.4,
+            "d30": 3.8,
+            "d90": 1.2
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "1990-08-02",
+          "changes": {
+            "d1": 8.4,
+            "d7": 28.1,
+            "d30": 18.2,
+            "d90": -12.4
+          }
+        }
+      }
+    },
+    {
+      "id": "libya_civil_war_2011",
+      "name": "リビア内戦による原油供給停止",
+      "date": "2011-02-17",
+      "category": "geopolitics",
+      "cause_tags": [
+        "supply_shock",
+        "war",
+        "middle_east"
+      ],
+      "effect_tags": [
+        "gold_up",
+        "oil_up",
+        "usd_weak",
+        "yield_up"
+      ],
+      "effect_tag_details": {
+        "oil_up": [
+          "d7",
+          "d30"
+        ],
+        "gold_up": [
+          "d30"
+        ],
+        "usd_weak": [
+          "d7",
+          "d30"
+        ],
+        "yield_up": [
+          "d30"
+        ]
+      },
+      "causal_chain": [],
+      "context_snapshot": {},
+      "description": "リビアで内戦が勃発し、日量160万バレルの原油輸出が約30万バレルまで急減した。リビアの原油は世界供給の約2%だが、欧州向け輸出の85%超を占める高品質（軽質・低硫黄）原油だったため、欧州市場への影響は世界シェア以上に大きかった。同時期のアラブの春による中東全域の供給不安も重なった。",
+      "similarity_reason": "中規模産油国の供給停止が特定市場（欧州）に集中したケース。世界シェアは約2%と小さくても、欧州精油所の主要供給源であったため市場インパクトが増幅された。代替品質の原油調達に時間がかかり、価格プレミアムが持続した。全6資産（金GLDを含む）のデータが取得可能な供給ショック事例。",
+      "why_reaction": "内戦により生産インフラが機能を停止し、欧州向けの軽質原油が急減した。代替となる同品質の原油をアルジェリア等から調達する必要があり、需給の再編に時間がかかった。同時期のアラブの春による中東全域の不安定化も需要家心理に重なりプレミアムを押し上げた。その後IEAが緊急在庫放出を実施し、価格は次第に落ち着いた。",
+      "key_insight": "産油国の世界シェアが小さくても、特定市場の主要供給源である場合、そのシェア以上のインパクトがある傾向が過去データで観察された。同品質の代替原油が限られる場合、価格プレミアムが長期化しやすいことも観察されている。",
+      "contrast": [
+        {
+          "with": "saudi_attack_2019",
+          "axis": "供給停止の規模（世界シェア）と市場インパクトの関係",
+          "this_side": "世界シェア約2%の停止だが、特定市場（欧州）への集中で大きなインパクト",
+          "other_side": "世界シェア約5%の一時停止だが、短期で回復し長期インパクトは限定的",
+          "outcome_note": "世界シェアの大きさだけでなく、停止の継続期間と代替供給の調達難易度が市場インパクトを左右した傾向が読み取れる。リビアは規模は小さいが継続期間が長く、サウジは規模が大きいが短期で回復した対照例となる。"
+        }
+      ],
+      "propagation": [
+        "内戦による生産停止",
+        "欧州向け軽質原油 急減",
+        "油価 3桁突破",
+        "IEA 緊急在庫放出"
+      ],
+      "sources": [
+        {
+          "title": "U.S. EIA: Libyan supply disruption",
+          "url": "https://www.eia.gov/todayinenergy/detail.php?id=390"
+        },
+        {
+          "title": "U.S. EIA: Conflict in Libya and crude oil production",
+          "url": "https://www.eia.gov/todayinenergy/detail.php?id=53419"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2011-02-17",
+          "changes": {
+            "d1": 2.8,
+            "d7": 8.4,
+            "d30": 12.1,
+            "d90": -4.2
+          }
+        },
+        "gold": {
+          "label": "金（GLD）",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2011-02-17",
+          "changes": {
+            "d1": 1.2,
+            "d7": 4.8,
+            "d30": 6.4,
+            "d90": 8.1
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "base_date": "2011-02-17",
+          "changes": {
+            "d1": -0.6,
+            "d7": 1.2,
+            "d30": 4.8,
+            "d90": 8.2
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2011-02-17",
+          "changes": {
+            "d1": 0.4,
+            "d7": 2.1,
+            "d30": 4.8,
+            "d90": -2.4
+          },
+          "changes_pt": {
+            "d1": 0.04,
+            "d7": 0.22,
+            "d30": 0.48,
+            "d90": -0.24
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2011-02-17",
+          "changes": {
+            "d1": -0.8,
+            "d7": -2.1,
+            "d30": -4.2,
+            "d90": -6.8
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "base_date": "2011-02-17",
+          "changes": {
+            "d1": 4.2,
+            "d7": 8.4,
+            "d30": -8.1,
+            "d90": -18.2
+          }
+        }
+      }
     }
   ],
   "event_names": {
@@ -1439,104 +1864,107 @@
     "fed_emergency_cut_2020": "FRB緊急利下げ（ゼロ金利復帰）",
     "fed_hike_start_2022": "FRB利上げ開始（インフレ対応）",
     "fed_hike_final_2023": "FRB利上げサイクル最終（22年ぶり高水準）",
-    "fed_cut_start_2024": "FRB利下げ開始（50bpの大幅利下げ）"
+    "fed_cut_start_2024": "FRB利下げ開始（50bpの大幅利下げ）",
+    "oil_shock_1973": "第一次石油危機（OAPEC石油禁輸）",
+    "gulf_war_1990": "イラクのクウェート侵攻（湾岸戦争）",
+    "libya_civil_war_2011": "リビア内戦による原油供給停止"
   },
   "cause_summary": {
     "middle_east": {
       "wti": {
         "label": "WTI原油",
         "asset": "oil",
-        "count": 4,
-        "up": 1,
+        "count": 6,
+        "up": 3,
         "down": 3,
-        "avg": -4.2,
-        "median": -5.3,
-        "max": 1.8,
+        "avg": 8.9,
+        "median": -1.2,
+        "max": 58.2,
         "min": -8.1,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "gold": {
         "label": "金（GLD）",
         "asset": "gold",
-        "count": 4,
-        "up": 4,
+        "count": 5,
+        "up": 5,
         "down": 0,
-        "avg": 3.4,
-        "median": 2.6,
+        "avg": 4.0,
+        "median": 4.1,
         "max": 7.3,
         "min": 0.9,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "sp500": {
         "label": "S&P500",
         "asset": "equity",
-        "count": 4,
-        "up": 3,
-        "down": 1,
-        "avg": 1.2,
-        "median": 1.7,
-        "max": 2.8,
-        "min": -1.2,
+        "count": 7,
+        "up": 4,
+        "down": 3,
+        "avg": -2.2,
+        "median": 1.5,
+        "max": 4.8,
+        "min": -12.8,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "ust10y": {
         "label": "米10年債利回り",
         "asset": "bond",
-        "count": 4,
-        "up": 0,
+        "count": 7,
+        "up": 3,
         "down": 4,
-        "avg": -5.3,
-        "median": -3.8,
-        "max": -1.2,
+        "avg": -0.8,
+        "median": -1.2,
+        "max": 8.4,
         "min": -12.4,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "usdjpy": {
         "label": "ドル円",
         "asset": "fx",
-        "count": 4,
-        "up": 4,
-        "down": 0,
-        "avg": 1.3,
+        "count": 7,
+        "up": 5,
+        "down": 2,
+        "avg": 0.4,
         "median": 1.1,
-        "max": 2.1,
-        "min": 0.9,
+        "max": 3.8,
+        "min": -4.2,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "vix": {
         "label": "VIX",
         "asset": "equity",
-        "count": 4,
-        "up": 1,
-        "down": 3,
-        "avg": -9.8,
-        "median": -13.1,
-        "max": 9.1,
+        "count": 6,
+        "up": 2,
+        "down": 4,
+        "avg": -4.9,
+        "median": -10.1,
+        "max": 18.2,
         "min": -22.1,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       }
     },
@@ -1544,97 +1972,97 @@
       "wti": {
         "label": "WTI原油",
         "asset": "oil",
-        "count": 2,
-        "up": 2,
+        "count": 4,
+        "up": 4,
         "down": 0,
-        "avg": 9.0,
-        "median": 9.0,
-        "max": 16.1,
+        "avg": 22.1,
+        "median": 14.1,
+        "max": 58.2,
         "min": 1.8,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "low",
+          "label": "信頼性：低",
+          "note": "件数が少なめです"
         }
       },
       "gold": {
         "label": "金（GLD）",
         "asset": "gold",
-        "count": 2,
-        "up": 2,
+        "count": 3,
+        "up": 3,
         "down": 0,
-        "avg": 1.5,
-        "median": 1.5,
-        "max": 2.1,
+        "avg": 3.1,
+        "median": 2.1,
+        "max": 6.4,
         "min": 0.9,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "low",
+          "label": "信頼性：低",
+          "note": "件数が少なめです"
         }
       },
       "sp500": {
         "label": "S&P500",
         "asset": "equity",
-        "count": 2,
-        "up": 2,
-        "down": 0,
-        "avg": 3.5,
-        "median": 3.5,
+        "count": 5,
+        "up": 3,
+        "down": 2,
+        "avg": -2.6,
+        "median": 1.9,
         "max": 5.2,
-        "min": 1.9,
+        "min": -12.8,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "ust10y": {
         "label": "米10年債利回り",
         "asset": "bond",
-        "count": 2,
-        "up": 1,
+        "count": 5,
+        "up": 4,
         "down": 1,
-        "avg": 6.6,
-        "median": 6.6,
+        "avg": 5.7,
+        "median": 4.8,
         "max": 18.4,
         "min": -5.2,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "usdjpy": {
         "label": "ドル円",
         "asset": "fx",
-        "count": 2,
-        "up": 2,
-        "down": 0,
-        "avg": 3.1,
-        "median": 3.1,
+        "count": 5,
+        "up": 3,
+        "down": 2,
+        "avg": 0.7,
+        "median": 1.1,
         "max": 5.1,
-        "min": 1.1,
+        "min": -4.2,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "vix": {
         "label": "VIX",
         "asset": "equity",
-        "count": 2,
-        "up": 0,
-        "down": 2,
-        "avg": -15.1,
-        "median": -15.1,
-        "max": -12.1,
+        "count": 4,
+        "up": 1,
+        "down": 3,
+        "avg": -5.0,
+        "median": -10.1,
+        "max": 18.2,
         "min": -18.2,
         "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
+          "level": "low",
+          "label": "信頼性：低",
+          "note": "件数が少なめです"
         }
       }
     },
@@ -1642,97 +2070,97 @@
       "wti": {
         "label": "WTI原油",
         "asset": "oil",
-        "count": 4,
-        "up": 1,
+        "count": 6,
+        "up": 3,
         "down": 3,
-        "avg": -0.6,
-        "median": -5.3,
-        "max": 16.1,
+        "avg": 11.3,
+        "median": 3.9,
+        "max": 58.2,
         "min": -8.1,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "gold": {
         "label": "金（GLD）",
         "asset": "gold",
-        "count": 4,
-        "up": 4,
+        "count": 5,
+        "up": 5,
         "down": 0,
-        "avg": 3.6,
-        "median": 3.1,
+        "avg": 4.2,
+        "median": 4.1,
         "max": 7.3,
         "min": 1.1,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "sp500": {
         "label": "S&P500",
         "asset": "equity",
-        "count": 4,
-        "up": 3,
-        "down": 1,
-        "avg": 2.1,
+        "count": 6,
+        "up": 4,
+        "down": 2,
+        "avg": 0.0,
         "median": 2.1,
         "max": 5.2,
-        "min": -1.2,
+        "min": -12.8,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "ust10y": {
         "label": "米10年債利回り",
         "asset": "bond",
-        "count": 4,
-        "up": 1,
+        "count": 6,
+        "up": 3,
         "down": 3,
-        "avg": 0.6,
-        "median": -1.8,
+        "avg": 1.5,
+        "median": 0.5,
         "max": 18.4,
         "min": -12.4,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "usdjpy": {
         "label": "ドル円",
         "asset": "fx",
-        "count": 4,
-        "up": 4,
-        "down": 0,
-        "avg": 2.3,
+        "count": 6,
+        "up": 5,
+        "down": 1,
+        "avg": 1.5,
         "median": 1.6,
         "max": 5.1,
-        "min": 0.9,
+        "min": -4.2,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       },
       "vix": {
         "label": "VIX",
         "asset": "equity",
-        "count": 4,
-        "up": 1,
-        "down": 3,
-        "avg": -11.3,
-        "median": -16.2,
-        "max": 9.1,
+        "count": 6,
+        "up": 2,
+        "down": 4,
+        "avg": -5.9,
+        "median": -11.1,
+        "max": 18.2,
         "min": -22.1,
         "confidence": {
-          "level": "low",
-          "label": "信頼性：低",
-          "note": "件数が少なめです"
+          "level": "mid",
+          "label": "信頼性：中",
+          "note": ""
         }
       }
     },
@@ -2210,11 +2638,27 @@
     },
     "supply_shock": {
       "label": "供給ショック",
-      "summary": "",
-      "common_traits": [],
-      "divergence_factors": [],
-      "interpretation_caveat": "",
-      "representative_events": []
+      "summary": "主要なエネルギー資源の供給が、戦争・政治的禁輸・内戦などによって現実に失われた、または失われる見通しが強まった局面を集めたグループ。供給量が戻ると見られるまで原油価格が高止まりする傾向があった。",
+      "common_traits": [
+        "原油の実際の供給量が減少した、またはその見通しが強まった",
+        "原油価格が急騰しやすい",
+        "インフレ圧力が高まり中央銀行の対応が注目される",
+        "代替供給源の有無が回復速度を左右した"
+      ],
+      "divergence_factors": [
+        "供給停止の規模（世界シェアに占める割合）",
+        "停止の継続期間（数週間か数ヶ月か）",
+        "代替供給源の有無と調達コスト",
+        "特定市場への集中度（世界シェア以上のインパクトが出るか）",
+        "政治的・外交的解決の見通しが立ったかどうか"
+      ],
+      "interpretation_caveat": "同じ『供給ショック』でも、規模・継続期間・代替可能性によって市場反応は大きく異なる。短期急騰で終わるケースと長期のインフレに繋がるケースを区別して見ることが重要。また古いイベント（特に1990年以前）では取得可能な資産系列が限られるため、集計値は取得可能な資産のみで算出している点に留意。",
+      "representative_events": [
+        "gulf_war_1990",
+        "russia_ukraine_2022",
+        "saudi_attack_2019",
+        "libya_civil_war_2011"
+      ]
     },
     "emergency_cut": {
       "label": "緊急利下げ",
