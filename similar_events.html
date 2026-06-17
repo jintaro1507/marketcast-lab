@@ -288,23 +288,22 @@
 
   // ===== 横断比較パネル =====
   // ===== 観察ノート生成 =====
-  // 仕様：
-  //   - 全グループ平均は件数2件以上のグループの単純平均（重み付けなし）
-  //   - Step 2: 注目資産マップ（重み付き）内で差分スコア最大の資産を選択
-  //             注目資産内に±5pt以上がなければ全資産にフォールバック
-  //   - Step 3: 方向一致率は注目資産内のみ（件数5件以上のグループ）
-  //   - 末尾に注記を常時表示 / 件数2件未満は「件数不足」
+  // 採用ロジック：
+  //   Step 2: 差分コメント採用条件 = diff >= +8pt（上振れのみ）
+  //            差分が弱い or 下振れの場合はStep 3を主役にする
+  //   Step 3: 方向一致率（件数2件以上で表示、5件未満は参考値注記）
+  //           注目資産内でスコア最大を選択
+  //   末尾注記は常時表示 / 件数2件未満は「件数不足」
 
   const INSIGHT_ASSET_LABELS = {
     wti:'WTI原油', sp500:'S&P500', vix:'VIX',
     gold:'金（GLD）', ust10y:'米10年債利回り', usdjpy:'ドル円'
   };
-  // 全資産（グローバル平均計算・フォールバック用）
   const ALL_INSIGHT_ASSETS = ['wti','sp500','vix','gold','ust10y','usdjpy'];
 
   // グループ別注目資産（重み付きオブジェクト）
-  // スコア = 差分絶対値 × weight で資産を選択
-  // 現時点は全weight=1.0。将来「銀行危機でVIXを優先 → vix:1.5」と変えるだけで拡張可能
+  // スコア = 差分絶対値 × weight / 方向一致率の偏り × weight
+  // 現時点は全weight=1.0。将来「vix:1.5」などに変えるだけで優先度を調整可能
   const GROUP_FOCUS_ASSETS = {
     supply_shock:        { wti:1.0, gold:1.0, vix:1.0 },
     bank_crisis:         { sp500:1.0, vix:1.0, gold:1.0 },
@@ -324,6 +323,9 @@
     return GROUP_FOCUS_ASSETS[tag] || GROUP_FOCUS_ASSETS['_default'];
   }
 
+  // 差分コメント採用閾値
+  const DIFF_THRESHOLD = 8; // +8pt以上の「上振れ」のみ採用
+
   function generateInsights(activeTag, summary, tagCounts){
     const groupN = tagCounts[activeTag] || 0;
     const activeS = summary[activeTag];
@@ -331,7 +333,7 @@
 
     if(groupN < 2) return { items: [], tooFew: true };
 
-    // Step 1: 全資産のグローバル平均（件数2件以上のグループのみ、単純平均）
+    // Step 1: 件数2件以上グループの全資産単純平均
     const globalAvg = {};
     ALL_INSIGHT_ASSETS.forEach(akey => {
       const vals = [];
@@ -345,12 +347,12 @@
       globalAvg[akey] = vals.length > 0 ? vals.reduce((a,b)=>a+b,0) / vals.length : null;
     });
 
-    // Step 2: 注目資産マップ内でスコア（差分絶対値×weight）最大を選択
-    // ±5pt未満は除外。注目資産内に該当なければ全資産でフォールバック
     const focusMap = getFocusAssets(activeTag);
 
-    function pickTopDiff(assetMap){
-      // assetMapは { akey: weight } または配列（フォールバック用）
+    // Step 2: 注目資産内で「上振れ差分 >= DIFF_THRESHOLD」の最大スコアを選択
+    // 下振れは採用しない（「VIXが低い」より「金が上がった」の方が直感的）
+    // 注目資産に該当なければ全資産でフォールバック（上振れ条件は維持）
+    function pickTopUpDiff(assetMap){
       const isMap = !Array.isArray(assetMap);
       let top = null, topScore = 0;
       if(!activeS) return null;
@@ -361,39 +363,34 @@
         const avg = globalAvg[akey];
         if(med === null || avg === null) return;
         const diff = med - avg;
-        const score = Math.abs(diff) * weight;
-        if(Math.abs(diff) >= 5 && score > topScore){
-          top = { akey, med, avg, diff };
-          topScore = score;
+        // 上振れかつ閾値以上のみ採用
+        if(diff >= DIFF_THRESHOLD){
+          const score = diff * weight;
+          if(score > topScore){ top = { akey, med, avg, diff }; topScore = score; }
         }
       });
       return top;
     }
 
-    let topDiff = pickTopDiff(focusMap);                   // まず注目資産内で探す
-    if(!topDiff) topDiff = pickTopDiff(ALL_INSIGHT_ASSETS); // なければ全資産でフォールバック
+    let topDiff = pickTopUpDiff(focusMap);
+    if(!topDiff) topDiff = pickTopUpDiff(ALL_INSIGHT_ASSETS); // フォールバック
 
     if(topDiff){
       const lbl = INSIGHT_ASSET_LABELS[topDiff.akey] || topDiff.akey;
-      const absDiff = Math.abs(topDiff.diff).toFixed(0);
+      const absDiff = topDiff.diff.toFixed(0);
       const avgStr = (topDiff.avg >= 0 ? '+' : '') + topDiff.avg.toFixed(1) + '%';
       const medStr = (topDiff.med >= 0 ? '+' : '') + topDiff.med.toFixed(1) + '%';
       const fewNote = groupN < 5 ? '（件数が少なく参考値）' : '';
-      if(topDiff.diff > 0){
-        insights.push(
-          `${lbl}の中央値（${medStr}）が他グループ平均（${avgStr}）より約${absDiff}pt高く、` +
-          `このグループでは${lbl}が上昇しやすい傾向が過去データで観察されています。${fewNote}`
-        );
-      } else {
-        insights.push(
-          `${lbl}の中央値（${medStr}）が他グループ平均（${avgStr}）より約${absDiff}pt低く、` +
-          `このグループでは${lbl}の上昇が抑制される傾向が過去データで観察されています。${fewNote}`
-        );
-      }
+      insights.push(
+        `${lbl}の中央値（${medStr}）が他グループ平均（${avgStr}）より約${absDiff}pt高く、` +
+        `このグループでは${lbl}が上昇しやすい傾向が過去データで観察されています。${fewNote}`
+      );
     }
 
-    // Step 3: 方向一致率（件数5件以上・注目資産内のみ）
-    if(activeS && groupN >= 5 && insights.length < 2){
+    // Step 3: 方向一致率コメント
+    // 差分コメントがない場合は主役として、ある場合は補足として追加（最大2件まで）
+    // 件数2件以上で表示、5件未満は参考値注記
+    if(activeS && insights.length < 2){
       let bestWinrate = null, bestScore = 0;
       Object.keys(focusMap).forEach(akey => {
         const s = activeS[akey];
@@ -408,16 +405,17 @@
       });
       if(bestWinrate){
         const lbl = INSIGHT_ASSET_LABELS[bestWinrate.akey] || bestWinrate.akey;
+        const fewNote = groupN < 5 ? '（件数が少なく参考値）' : '';
         if(bestWinrate.rate >= 0.8){
           insights.push(
             `${lbl}は${bestWinrate.count}件中${bestWinrate.up}件で上昇しており、` +
-            `このグループでは方向が比較的一致しています。`
+            `このグループでは方向が比較的一致しています。${fewNote}`
           );
         } else {
           const down = bestWinrate.count - bestWinrate.up;
           insights.push(
             `${lbl}は${bestWinrate.count}件中${down}件で下落しており、` +
-            `このグループでは上昇が限定的な傾向がありました。`
+            `このグループでは上昇が限定的な傾向がありました。${fewNote}`
           );
         }
       }
