@@ -658,6 +658,145 @@
         }
       ],
       "legacy_tags": []
+    },
+    {
+      "id": "ltcm_crisis_1998",
+      "name": "LTCMショック（ヘッジファンド救済）",
+      "date": "1998-09-02",
+      "category": "financial",
+      "cause_tags": [
+        "bank_crisis",
+        "liquidity_crisis"
+      ],
+      "effect_tags": [],
+      "effect_tag_details": {},
+      "causal_chain": [],
+      "context_snapshot": {
+        "vix_level": 37.0,
+        "oil_price_wti": 14.0,
+        "cpi_yoy": null,
+        "fed_funds_rate": 5.5,
+        "ust10y_yield": 5.1
+      },
+      "description": "ノーベル賞受賞者も参加した超高レバレッジのヘッジファンドLTCMが、ロシアのデフォルト（1998年8月）をきっかけに崩壊寸前となった局面。9月2日にLTCMが投資家宛の書簡で損失（年初来−52%）を開示し、問題が市場に広く認知された。FRBニューヨーク連銀が14の大手金融機関を説得して36億ドルの協調救済を主導し、9月23日に合意が成立。公的資金は使わず民間主導で収束した。",
+      "similarity_reason": "規制対象外のヘッジファンドが引き起こした流動性危機の原型局面。FRBが『調整役』として民間救済を成功させた事例で、リーマン（救済なし）との対比で『介入があれば市場の動揺が短期で収束しやすい』という構造を示す最初の事例として位置づけられる。一方で救済成功がその後の過剰リスクテイクを生んだという評価もあり、LTCM→リーマンという教訓の失敗の系譜として重要。",
+      "why_reaction": "ロシアのデフォルトがLTCMの収束ベット（スプレッド縮小予測）を悉く裏切り、高レバレッジゆえに損失が雪だるま式に拡大した。カウンターパーティの大手金融機関への連鎖リスクが意識され、8月末から9月にかけてS&P500が急落した。9月23日にFRBが調整した民間救済が成立し、市場の不安は比較的速やかに後退した。FRBはその後10月・11月に利下げを実施し、年末にかけて市場は回復した。",
+      "key_insight": "中央銀行が早期に調整役として動き民間主導の救済が成立した局面では、危機が比較的短期間で収束した傾向が過去データで観察された。ただし救済成功が次の大型危機（リーマンショック）における過剰リスクテイクを誘発したという見方も歴史的記録として残っている。",
+      "contrast": [],
+      "propagation": [
+        "ロシアデフォルトがLTCMの収束ベットを裏切る",
+        "超高レバレッジで損失が急拡大",
+        "FRBが民間銀行14行の協調救済を調整",
+        "9月23日 救済合意で市場の不安が後退",
+        "FRBが10月・11月に利下げ"
+      ],
+      "sources": [
+        {
+          "title": "Federal Reserve History: Near Failure of Long-Term Capital Management",
+          "url": "https://www.federalreservehistory.org/essays/ltcm-near-failure"
+        }
+      ],
+      "legacy_tags": []
+    },
+    {
+      "id": "lehman_shock_2008",
+      "name": "リーマンブラザーズ破綻（リーマンショック）",
+      "date": "2008-09-15",
+      "category": "financial",
+      "cause_tags": [
+        "bank_crisis",
+        "liquidity_crisis"
+      ],
+      "effect_tags": [],
+      "effect_tag_details": {},
+      "causal_chain": [],
+      "context_snapshot": {
+        "vix_level": 31.7,
+        "oil_price_wti": 95.7,
+        "cpi_yoy": null,
+        "fed_funds_rate": 2.0,
+        "ust10y_yield": 3.45
+      },
+      "description": "米国第4位の投資銀行リーマンブラザーズが6,390億ドルの負債を抱えて破産申請し、史上最大の破綻となった局面。サブプライムローンを担保にした証券の価格崩壊が引き金となり、信用市場が機能停止に陥った。FRBと財務省は救済に動かず（翌日にAIGは救済という矛盾が不確実性を拡大）、金融恐慌が世界に波及した。",
+      "similarity_reason": "金融システム全体に波及したグローバル規模の銀行危機の最大事例。LTCMと比較すると『FRBが介入したケース（LTCM）』と『介入しなかったケース（リーマン）』という対照例として機能する。SVBと比較すると『政策対応が遅れ不明確だったケース』として、同じ銀行破綻でも対応速度の違いが結果を変えることを示す。",
+      "why_reaction": "破綻申請は『政府は大型金融機関を救わない』というシグナルを市場に送り、翌日のAIG救済との矛盾がさらなる不信感を生んだ。MMF（マネーマーケットファンド）が元本割れを起こし、信用市場が凍結してTEDスプレッドが急拡大した。株式は1日後に約5%下落し、30日後にも下落が続いた。VIXは発生後も上昇し続け、FRBのゼロ金利・量的緩和と財政出動の組み合わせが底打ちをもたらすまで数ヶ月を要した。",
+      "key_insight": "大型金融機関への救済が見送られ、かつその判断が不透明だった局面では、信用市場の機能停止が長引き、株式の回復に数ヶ月以上を要した傾向が過去データで観察された。政策対応の有無と一貫性が危機の深さを左右した事例として記録されている。",
+      "contrast": [
+        {
+          "with": "ltcm_crisis_1998",
+          "axis": "救済・介入の有無と介入の形式",
+          "this_side": "救済なし（市場任せで破綻）",
+          "other_side": "FRB主導で民間銀行の協調救済が成立",
+          "outcome_note": "LTCMはFRBが調整役として動き民間主導の救済が成立したため、危機は比較的短期間で収束した。リーマンは救済が見送られ信用市場が凍結、世界的な金融危機へと発展した。同じ過剰レバレッジによる流動性危機でも、当局の介入有無が市場への波及を決定的に変えたことが過去データから読み取れる。"
+        }
+      ],
+      "propagation": [
+        "破産申請・救済見送り",
+        "翌日AIG救済との矛盾が不確実性を拡大",
+        "MMFが元本割れ・信用市場が凍結",
+        "VIX 継続上昇・株式 長期下落",
+        "FRB ゼロ金利・QE導入で底打ち"
+      ],
+      "sources": [
+        {
+          "title": "HISTORY: Lehman Brothers declares bankruptcy September 15 2008",
+          "url": "https://www.history.com/this-day-in-history/september-15/lehman-brothers-collapses"
+        },
+        {
+          "title": "Federal Reserve History: The 2007-08 Financial Crisis in Review",
+          "url": "https://www.federalreservehistory.org/essays/financial-crisis-in-review"
+        }
+      ],
+      "legacy_tags": []
+    },
+    {
+      "id": "svb_collapse_2023",
+      "name": "シリコンバレー銀行（SVB）破綻",
+      "date": "2023-03-10",
+      "category": "financial",
+      "cause_tags": [
+        "bank_crisis"
+      ],
+      "effect_tags": [],
+      "effect_tag_details": {},
+      "causal_chain": [],
+      "context_snapshot": {
+        "vix_level": 19.1,
+        "oil_price_wti": 76.7,
+        "cpi_yoy": null,
+        "fed_funds_rate": 4.58,
+        "ust10y_yield": 3.69
+      },
+      "description": "テック系スタートアップに特化したシリコンバレー銀行（資産2,090億ドル）がFDICに接収された。FRBの急速な利上げで長期国債ポートフォリオに多額の含み損が発生し、増資失敗の報道がSNSを通じた取り付けを誘発した。1日で420億ドルの預金引き出しが殺到し、翌3月12日には当局が全預金者を保護すると発表。同日、シグネチャー銀行も破綻した。",
+      "similarity_reason": "SNSが加速させた現代型の銀行取り付けの初事例。リーマン（2008年）と比較すると規模は格段に小さく、当局の初動対応が素早かったため全体への波及は限定的だった。同じ『銀行破綻』でも、政策対応の速度と範囲が市場反応をどれだけ変えうるかを示す事例。",
+      "why_reaction": "利上げ環境下で長期債を大量保有するという固有のビジネスモデルの脆弱性が、SNSによる情報拡散で一気に顕在化した。ただし当局が週末中に全預金保護を決定し、月曜朝から通常業務が継続できる措置が取られたことで、信用市場の凍結は起きなかった。VIXは一時上昇したが30日後には落ち着いた。金は逃避先として買われ、利下げ期待の高まりから米国債利回りは低下した。株式は個別銀行株に打撃が集中し、市場全体への波及はリーマン時と比べて限定的だった。",
+      "key_insight": "金融当局が初動で全預金者保護を決定した局面では、銀行危機の伝染が限定的にとどまった傾向が過去データで観察された。SNSによる情報拡散が危機の速度を増幅した一方、政策対応の速度もそれに対応して速くなった構造が読み取れる。同じ銀行危機でも政策初動の速さが結果を分けた事例として記録されている。",
+      "contrast": [
+        {
+          "with": "lehman_shock_2008",
+          "axis": "政策対応の速度と初動の範囲",
+          "this_side": "破綻翌々日（週末中）に全預金者保護を決定",
+          "other_side": "救済せず破綻させ、翌日AIG救済との矛盾が不確実性を拡大",
+          "outcome_note": "SVBは週末中に全預金保護が決まり月曜から通常業務が継続できたため、30日後の株式市場の下落は限定的だった。リーマンは救済見送りと翌日のAIG救済という矛盾が不信感を増幅し、株式は30日後も大幅下落が続いた。同じ金融機関の破綻でも、政策の初動速度と明確さが市場への波及の深さを左右したことが過去データから読み取れる。"
+        }
+      ],
+      "propagation": [
+        "利上げ環境下での長期債含み損",
+        "SNSによる情報拡散・取り付け加速",
+        "当局が週末中に全預金者保護を決定",
+        "信用不安は限定的・逃避需要で金・米国債が上昇"
+      ],
+      "sources": [
+        {
+          "title": "FDIC: Failed Bank Information - Silicon Valley Bank",
+          "url": "https://www.fdic.gov/resources/resolutions/bank-failures/failed-bank-list/silicon-valley.html"
+        },
+        {
+          "title": "CNBC: Silicon Valley Bank is shut down by regulators",
+          "url": "https://www.cnbc.com/2023/03/10/silicon-valley-bank-is-shut-down-by-regulators-fdic-to-protect-insured-deposits.html"
+        }
+      ],
+      "legacy_tags": []
     }
   ]
 }
