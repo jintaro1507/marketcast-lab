@@ -33,16 +33,59 @@
   .page-head h1{font-family:var(--display);font-size:clamp(24px,3.2vw,34px);margin:0 0 14px;}
   .page-head p{max-width:62ch;color:var(--ink-soft);font-size:14px;margin:0;}
 
-  /* tag chooser */
-  .tagbar{padding:20px 5vw 0;display:flex;flex-wrap:wrap;gap:8px;}
-  .tagbar .chip{font-size:12.5px;border:1px solid var(--line-rule);padding:6px 14px;border-radius:2px;color:var(--ink-soft);cursor:pointer;background:var(--paper);}
+  /* ===== タグバー ===== */
+  .tagbar{padding:20px 5vw 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .tagbar .chip{font-size:12.5px;border:1px solid var(--line-rule);padding:6px 14px;border-radius:2px;color:var(--ink-soft);cursor:pointer;background:var(--paper);display:flex;align-items:center;gap:6px;}
   .tagbar .chip:hover{border-color:var(--ink-soft);color:var(--ink);}
   .tagbar .chip.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .tagbar .chip.few{opacity:0.6;}      /* 2-4件：薄く */
+  .tagbar .chip.sparse{opacity:0.4;}   /* 1件以下：かなり薄く */
+  .chip-count{font-family:var(--mono);font-size:9px;opacity:0.7;}
 
-  /* summary panel */
+  /* ===== 横断比較パネル ===== */
+  #cross-panel{padding:20px 5vw 0;display:none;}
+  .cross-card{border:1px solid var(--line-rule);background:var(--paper-deep);padding:16px 20px;max-width:900px;}
+  .cross-card .cross-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:12px;}
+  .cross-card .cross-note{font-size:11px;color:var(--ink-soft);margin-top:10px;line-height:1.6;}
+  table.cross{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.cross th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-soft);padding:6px 10px;text-align:right;border-bottom:1px solid var(--line-rule);}
+  table.cross th:first-child{text-align:left;}
+  table.cross td{padding:9px 10px;border-bottom:1px solid var(--line-rule);text-align:right;font-family:var(--mono);font-size:12.5px;}
+  table.cross td:first-child{text-align:left;font-family:var(--body);font-size:13px;}
+  table.cross tr.cross-active td{background:rgba(28,26,22,0.05);font-weight:600;}
+  table.cross tr.cross-active td:first-child{font-weight:700;}
+  table.cross .cross-n{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-left:5px;}
+
+  /* ===== グループ説明パネル（折りたたみ対応） ===== */
+  #group-panel{padding:24px 5vw 0;}
+  .group-card{border:1px solid var(--line-rule);background:var(--paper-deep);padding:22px 24px;max-width:860px;}
+  .group-card .g-summary{font-size:14.5px;line-height:1.85;margin:0 0 14px;}
+  /* 代表イベント：常時表示 */
+  .rep-events{margin-top:14px;}
+  .rep-events .r-label{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:10px;}
+  .rep-events .r-list{display:flex;gap:8px;flex-wrap:wrap;}
+  .rep-events .r-list a{font-size:12.5px;border:1px solid var(--line-rule);background:var(--paper);padding:7px 13px;border-radius:2px;color:var(--ink);}
+  .rep-events .r-list a:hover{border-color:var(--ink-soft);}
+  .rep-events .r-list a .r-date{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-right:6px;}
+  /* 詳細折りたたみ */
+  .group-details-toggle{background:none;border:none;padding:0;cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--ink-soft);letter-spacing:0.06em;margin-top:14px;display:flex;align-items:center;gap:4px;}
+  .group-details-toggle:hover{color:var(--ink);}
+  .group-details-toggle .toggle-icon{transition:transform 0.2s;}
+  .group-details-toggle.open .toggle-icon{transform:rotate(90deg);}
+  .group-details{display:none;margin-top:16px;border-top:1px solid var(--line-rule);padding-top:16px;}
+  .group-details.open{display:block;}
+  .group-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  .group-col h4{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;color:var(--ink-soft);text-transform:uppercase;margin:0 0 10px;border-bottom:1px solid var(--line-rule);padding-bottom:6px;}
+  .group-col ul{margin:0;padding-left:18px;}
+  .group-col li{font-size:13px;line-height:1.7;margin-bottom:5px;}
+  .group-caveat{margin-top:18px;border-top:1px dashed var(--line-rule);padding-top:14px;font-size:12.5px;line-height:1.8;color:var(--ink);background:rgba(156,122,46,0.06);padding:14px;border-left:3px solid var(--gold);}
+  .group-caveat .c-label{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--ink-soft);display:block;margin-bottom:5px;}
+  @media (max-width:680px){ .group-cols{grid-template-columns:1fr;} }
+
+  /* ===== 統計テーブル ===== */
   .section-label{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);padding:34px 5vw 0;}
   .summary-wrap{padding:14px 5vw 0;overflow-x:auto;}
-  table.summary{width:100%;border-collapse:collapse;font-size:13px;min-width:680px;}
+  table.summary{width:100%;border-collapse:collapse;font-size:13px;min-width:500px;}
   table.summary th{text-align:right;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;color:var(--ink-soft);text-transform:uppercase;border-bottom:1px solid var(--line-rule);padding:9px 12px;}
   table.summary th:first-child{text-align:left;}
   table.summary td{padding:13px 12px;border-bottom:1px solid var(--line-rule);text-align:right;font-family:var(--mono);}
@@ -53,36 +96,24 @@
   .swatch.equity{background:var(--equity);}.swatch.fx{background:var(--fx);}.swatch.bond{background:var(--bond);}
   .pos{color:var(--up);} .neg{color:var(--down);}
   .winrate{font-family:var(--body);font-size:12px;color:var(--ink-soft);}
-  /* 中央値列：最重要指標として目立たせる */
   table.summary td.median-val{font-weight:600;font-size:13.5px;}
   table.summary th.median-hd{color:var(--ink);font-weight:700;}
-  /* 平均列：補助情報として控えめに */
   table.summary td.avg-val{color:var(--ink-soft);font-size:12px;}
   table.summary th.avg-hd{color:var(--ink-soft);}
-
+  /* 最大・最小：初期非表示 */
+  .col-maxmin{display:none;}
+  .col-maxmin.visible{display:table-cell;}
   .summary-note{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);padding:10px 5vw 0;}
   .summary-note .avg-note{display:block;margin-top:4px;font-size:10px;color:var(--ink-soft);opacity:0.8;}
+  .maxmin-toggle{background:none;border:none;padding:0;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--ink-soft);text-decoration:underline;margin-left:6px;}
+  .maxmin-toggle:hover{color:var(--ink);}
 
-  /* group panel */
-  #group-panel{padding:24px 5vw 0;}
-  .group-card{border:1px solid var(--line-rule);background:var(--paper-deep);padding:22px 24px;max-width:860px;}
-  .group-card .g-summary{font-size:14.5px;line-height:1.85;margin:0 0 18px;}
-  .group-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
-  .group-col h4{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;color:var(--ink-soft);text-transform:uppercase;margin:0 0 10px;border-bottom:1px solid var(--line-rule);padding-bottom:6px;}
-  .group-col ul{margin:0;padding-left:18px;}
-  .group-col li{font-size:13px;line-height:1.7;margin-bottom:5px;}
-  .group-caveat{margin-top:18px;border-top:1px dashed var(--line-rule);padding-top:14px;font-size:12.5px;line-height:1.8;color:var(--ink);background:rgba(156,122,46,0.06);padding:14px;border-left:3px solid var(--gold);}
-  .group-caveat .c-label{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--ink-soft);display:block;margin-bottom:5px;}
-  .rep-events{margin-top:18px;}
-  .rep-events .r-label{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:10px;}
-  .rep-events .r-list{display:flex;gap:8px;flex-wrap:wrap;}
-  .rep-events .r-list a{font-size:12.5px;border:1px solid var(--line-rule);background:var(--paper);padding:7px 13px;border-radius:2px;color:var(--ink);}
-  .rep-events .r-list a:hover{border-color:var(--ink-soft);}
-  .rep-events .r-list a .r-date{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-right:6px;}
-  @media (max-width:680px){ .group-cols{grid-template-columns:1fr;} }
+  #conf-warning{display:none;background:var(--paper-deep);border:1px solid var(--line-rule);border-left:3px solid #9C7A2E;padding:12px 16px;margin:10px 5vw 0;font-size:12.5px;color:var(--ink);max-width:64ch;}
 
-  /* event list */
+  /* ===== 個別イベント一覧 ===== */
   .events-list{padding:14px 5vw 0;}
+  /* effect_tags凡例 */
+  .effect-legend{font-family:var(--mono);font-size:10px;color:var(--ink-soft);padding:0 0 14px;border-bottom:1px dashed var(--line-rule);margin-bottom:4px;opacity:0.8;}
   .ev{border-top:1px solid var(--line-rule);padding:22px 0;display:grid;grid-template-columns:140px 1fr 200px;gap:22px;align-items:start;}
   .ev:first-child{border-top:none;}
   .ev .ev-date{font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
@@ -94,7 +125,6 @@
   .ev .ev-tags span.cause{font-family:var(--mono);font-size:10px;color:var(--ink);border:1px solid var(--ink-soft);padding:2px 7px;border-radius:2px;}
   .ev .ev-tags span.effect{font-family:var(--mono);font-size:10px;color:var(--ink-soft);background:var(--paper-deep);border:1px solid var(--line-rule);padding:2px 7px;border-radius:2px;}
   .conf-badge{font-family:var(--mono);font-size:10px;border:1px solid;padding:2px 8px;border-radius:2px;margin-left:8px;}
-  #conf-warning{display:none;background:var(--paper-deep);border:1px solid var(--line-rule);border-left:3px solid #9C7A2E;padding:12px 16px;margin:10px 5vw 0;font-size:12.5px;color:var(--ink);max-width:64ch;}
   .ev .ev-mini{display:flex;flex-direction:column;gap:5px;font-size:12px;}
   .ev .ev-mini .row{display:flex;justify-content:space-between;gap:10px;}
   .ev .ev-mini .row .a{color:var(--ink-soft);display:flex;align-items:center;gap:6px;}
@@ -104,11 +134,11 @@
   footer{margin-top:50px;border-top:1px solid var(--line-rule);padding:28px 5vw 50px;font-size:12px;color:var(--ink-soft);}
   footer .back{display:inline-block;margin-bottom:12px;border-bottom:1px solid var(--line-rule);}
   footer .disclaimer{max-width:64ch;line-height:1.8;}
-
   .empty{padding:40px 5vw;color:var(--ink-soft);font-size:14px;}
 
   @media (max-width:820px){
     .ev{grid-template-columns:1fr;gap:10px;}
+    .group-cols{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -134,6 +164,17 @@
 
 <div class="tagbar" id="tagbar"><!-- タグチップをJSで生成 --></div>
 
+<!-- グループ横断比較パネル（タブ直下） -->
+<div id="cross-panel">
+  <div class="cross-card">
+    <div class="cross-label">他のグループとの比較（30日後・中央値）</div>
+    <div style="overflow-x:auto;">
+      <table class="cross" id="cross-table"><tbody></tbody></table>
+    </div>
+    <div class="cross-note">件数が少ないグループ（2〜4件）は参考値です。数値は各グループのイベント発生後30日の変化率の中央値。</div>
+  </div>
+</div>
+
 <div id="group-panel"><!-- グループ説明をJSで生成 --></div>
 
 <div class="section-label" id="summary-label">過去の同種イベント後の反応（30日後）</div>
@@ -141,7 +182,10 @@
 <div class="summary-wrap">
   <table class="summary" id="summary-table"><tbody></tbody></table>
 </div>
-<div class="summary-note">勝率＝上昇した回数 / 全件数。数値は各イベント発生から30日後のおおよその変化率の集計です。<span class="avg-note">平均値は外れ値の影響を受けるため、中央値も併せて確認してください。</span></div>
+<div class="summary-note">
+  勝率＝上昇した回数 / 全件数。数値は各イベント発生から30日後のおおよその変化率の集計です。
+  <span class="avg-note">平均値は外れ値の影響を受けるため、中央値も併せて確認してください。<button class="maxmin-toggle" id="maxmin-toggle">最大・最小を表示</button></span>
+</div>
 
 <div class="section-label">個別イベントの記録</div>
 <div class="events-list" id="events-list"></div>
@@ -152,33 +196,14 @@
 </footer>
 
 <script>
-(async function(){
-  const params = new URLSearchParams(location.search);
-
-  function pct(v){ if(v===null||v===undefined) return '—'; return (v>0?'+':'')+v.toFixed(1)+'%'; }
-  function cls(v){ if(v===null||v===undefined) return ''; return v>0?'pos':(v<0?'neg':''); }
-
-  let data;
-  try{
-    const res = await fetch('data/event_reactions.json', {cache:'no-store'});
-    data = await res.json();
-  }catch(e){
-    document.getElementById('events-list').innerHTML = '<div class="empty">データを読み込めませんでした。時間をおいて再度お試しください。</div>';
-    return;
-  }
-
+(async()=>{
+  const resp = await fetch('data/event_reactions.json');
+  const data = await resp.json();
   const causeLabels = data.cause_tag_labels || {};
   const effectLabels = data.effect_tag_labels || {};
+  const params = new URLSearchParams(location.search);
 
-  // period情報付きのタグラベル生成（event_detail.htmlと共通の方針）
-  const PERIOD_LABELS = {d1:'1日', d7:'7日', d30:'30日'};
-  function effectChipLabel(tag, details){
-    const base = effectLabels[tag] || tag;
-    const periods = ((details||{})[tag] || []).map(p => PERIOD_LABELS[p] || p);
-    return periods.length ? `${base}（${periods.join('・')}）` : base;
-  }
-
-  // デフォルトタグ：URL指定 → なければ件数が最も多い原因タグ
+  // ===== デフォルトタグ選択 =====
   let activeTag = params.get('tag');
   if(!activeTag || !causeLabels[activeTag]){
     const counts = {};
@@ -186,7 +211,10 @@
     activeTag = Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0] || Object.keys(causeLabels)[0];
   }
 
-  // 信頼性バッジのHTML
+  // ===== ヘルパー =====
+  function pct(v){ return v===null||v===undefined ? '—' : (v>0?'+':'')+v.toFixed(1)+'%'; }
+  function cls(v){ return v===null||v===undefined ? '' : v>0?'pos':v<0?'neg':''; }
+
   function confBadge(conf){
     if(!conf) return '';
     const colorMap = {reference:'var(--ink-soft)', low:'#9C7A2E', medium:'#38456B', high:'#2F5D4E'};
@@ -194,23 +222,131 @@
     return `<span class="conf-badge" style="border-color:${c};color:${c};">${conf.label}</span>`;
   }
 
+  // ===== 最大・最小トグル =====
+  let maxminVisible = false;
+  document.getElementById('maxmin-toggle').addEventListener('click', ()=>{
+    maxminVisible = !maxminVisible;
+    document.querySelectorAll('.col-maxmin').forEach(el=>{
+      el.classList.toggle('visible', maxminVisible);
+    });
+    document.getElementById('maxmin-toggle').textContent = maxminVisible ? '最大・最小を隠す' : '最大・最小を表示';
+  });
+
+  // ===== グループ説明の折りたたみトグル =====
+  function attachGroupToggle(){
+    const btn = document.getElementById('group-details-btn');
+    const det = document.getElementById('group-details');
+    if(!btn || !det) return;
+    btn.addEventListener('click', ()=>{
+      const open = det.classList.toggle('open');
+      btn.classList.toggle('open', open);
+      btn.querySelector('.toggle-text').textContent = open ? '詳細を閉じる' : '共通点・分岐要因を見る';
+    });
+  }
+
+  // ===== effect_tagsラベル（期間付き） =====
+  const PERIOD_LABELS = {d1:'1日', d7:'7日', d30:'30日'};
+  function effectChipLabel(tag, details){
+    const base = effectLabels[tag] || tag;
+    const periods = ((details||{})[tag] || []).map(p => PERIOD_LABELS[p] || p);
+    return periods.length ? `${base}（${periods.join('・')}）` : base;
+  }
+
+  // ===== グループ件数マップ =====
+  function buildTagCounts(){
+    const counts = {};
+    data.events.forEach(e => (e.cause_tags||[]).forEach(t => counts[t]=(counts[t]||0)+1));
+    return counts;
+  }
+
+  // ===== 横断比較パネル =====
+  // 表示対象：件数2件以上かつgroup_metadataあり
+  // 表示資産：WTI, S&P500, VIX, 金(GLD)の4資産
+  const CROSS_ASSETS = ['wti','sp500','vix','gold'];
+  const CROSS_ASSET_LABELS = {wti:'WTI原油', sp500:'S&P500', vix:'VIX', gold:'金(GLD)'};
+
+  function renderCrossPanel(tagCounts){
+    const summary = data.cause_summary || {};
+    const gmeta = data.group_metadata || {};
+
+    // 対象グループを抽出（件数2以上・group_metadata.summaryあり）
+    const targets = Object.keys(causeLabels).filter(t =>{
+      return (tagCounts[t]||0) >= 2 && gmeta[t] && gmeta[t].summary && summary[t];
+    });
+
+    if(targets.length < 2){
+      document.getElementById('cross-panel').style.display = 'none';
+      return;
+    }
+    document.getElementById('cross-panel').style.display = 'block';
+
+    const confLevels = data.confidence_levels || [];
+    function getConf(n){
+      let c = null;
+      confLevels.forEach(lv=>{ if(!c && n<=lv.max_n) c=lv; });
+      return c;
+    }
+
+    // ヘッダー行
+    const assetHeaders = CROSS_ASSETS.map(k=>`<th>${CROSS_ASSET_LABELS[k]||k}</th>`).join('');
+    const headerRow = `<tr><th>グループ</th>${assetHeaders}</tr>`;
+
+    // データ行（現在選択グループを強調）
+    const dataRows = targets.map(t=>{
+      const s = summary[t];
+      const n = tagCounts[t] || 0;
+      const conf = getConf(n);
+      const isActive = t === activeTag;
+      const groupLabel = causeLabels[t] || t;
+      // 件数が少ない場合（2-4件）はグレーで
+      const isFew = n < 5;
+      const nameCls = isFew ? 'style="color:var(--ink-soft)"' : '';
+      const nBadge = `<span class="cross-n">(${n}件${isFew?'・参考値':''})</span>`;
+
+      const cells = CROSS_ASSETS.map(k=>{
+        const med = s && s[k] ? s[k].median : null;
+        const dimStyle = isFew ? 'style="color:var(--ink-soft)"' : '';
+        return `<td class="${cls(med)}" ${dimStyle}>${pct(med)}</td>`;
+      }).join('');
+
+      return `<tr class="${isActive?'cross-active':''}">
+        <td ${nameCls}>${groupLabel}${nBadge}</td>
+        ${cells}
+      </tr>`;
+    }).join('');
+
+    document.getElementById('cross-table').querySelector('tbody').innerHTML = headerRow + dataRows;
+  }
+
+  // ===== メイン描画 =====
   function render(){
+    const tagCounts = buildTagCounts();
     document.getElementById('page-title').textContent = (causeLabels[activeTag] || activeTag) + ' の類似局面';
 
-    // 原因タグチップ（登録イベントがある原因タグのみ）
+    // ----- タブバー（件数バッジ・少件数スタイル） -----
     const usedCauses = {};
     data.events.forEach(e => (e.cause_tags||[]).forEach(t=>usedCauses[t]=true));
     const allTags = Object.keys(causeLabels).filter(t => usedCauses[t]);
-    document.getElementById('tagbar').innerHTML = allTags.map(t =>
-      `<span class="chip ${t===activeTag?'active':''}" data-tag="${t}">${causeLabels[t]||t}</span>`
-    ).join('');
+    document.getElementById('tagbar').innerHTML = allTags.map(t => {
+      const n = tagCounts[t] || 0;
+      let cls2 = t===activeTag ? 'active' : '';
+      if(t !== activeTag){
+        if(n <= 1) cls2 += ' sparse';
+        else if(n <= 4) cls2 += ' few';
+      }
+      const badge = `<span class="chip-count">${n}</span>`;
+      return `<span class="chip ${cls2}" data-tag="${t}">${causeLabels[t]||t}${badge}</span>`;
+    }).join('');
     document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
       activeTag = c.dataset.tag;
       history.replaceState(null,'', '?tag='+activeTag);
       render();
     }));
 
-    // グループ説明パネル（group_metadataに中身があるときのみ表示）
+    // ----- 横断比較パネル -----
+    renderCrossPanel(tagCounts);
+
+    // ----- グループ説明パネル（折りたたみ対応） -----
     const meta = (data.group_metadata && data.group_metadata[activeTag]) || null;
     const eventNames = data.event_names || {};
     const panel = document.getElementById('group-panel');
@@ -219,7 +355,6 @@
       const factors = (meta.divergence_factors||[]).map(t=>`<li>${t}</li>`).join('');
       const caveat = meta.interpretation_caveat
         ? `<div class="group-caveat"><span class="c-label">集計値の読み方・注意点</span>${meta.interpretation_caveat}</div>` : '';
-      // 代表イベント（event_idで紐づけ、詳細へリンク）
       const reps = (meta.representative_events||[]).filter(id=>eventNames[id]);
       const repBlock = reps.length ? `
         <div class="rep-events">
@@ -230,34 +365,43 @@
             return `<a href="event_detail.html?id=${id}"><span class="r-date">${date}</span>${eventNames[id]}</a>`;
           }).join('')}</div>
         </div>` : '';
+
+      // 折りたたみ詳細部分（共通点・分岐要因・注意点）
+      const detailsHtml = (traits || factors || caveat) ? `
+        <button class="group-details-toggle" id="group-details-btn">
+          <span class="toggle-icon">▶</span>
+          <span class="toggle-text">共通点・分岐要因を見る</span>
+        </button>
+        <div class="group-details" id="group-details">
+          ${traits || factors ? `<div class="group-cols">
+            ${traits ? `<div class="group-col"><h4>共通点</h4><ul>${traits}</ul></div>` : ''}
+            ${factors ? `<div class="group-col"><h4>結果が分かれる主な要因</h4><ul>${factors}</ul></div>` : ''}
+          </div>` : ''}
+          ${caveat}
+        </div>` : '';
+
       panel.innerHTML = `
         <div class="group-card">
           <p class="g-summary">${meta.summary}</p>
-          <div class="group-cols">
-            <div class="group-col"><h4>共通点</h4><ul>${traits}</ul></div>
-            <div class="group-col"><h4>結果が分かれる主な要因</h4><ul>${factors}</ul></div>
-          </div>
-          ${caveat}
           ${repBlock}
+          ${detailsHtml}
         </div>`;
       panel.style.display = 'block';
+      attachGroupToggle();
     }else{
       panel.innerHTML = '';
       panel.style.display = 'none';
     }
 
-    // この原因タグに属するイベント数 → 全体の信頼性
+    // ----- 信頼性 -----
     const evs = data.events.filter(e => (e.cause_tags||[]).includes(activeTag));
     const n = evs.length;
     let overallConf = null;
     (data.confidence_levels||[]).forEach(lv=>{ if(!overallConf && n<=lv.max_n) overallConf={level:lv.level,label:lv.label,note:lv.note||''}; });
-
-    // 信頼性の注意書き（参考値のときは強めに）
     const confLine = document.getElementById('summary-label');
     let confNote = `参考件数：${n}件`;
     if(overallConf){ confNote += ` ／ ${overallConf.label}`; }
     confLine.innerHTML = `過去の同種イベント後の反応（30日後） <span style="text-transform:none;letter-spacing:0;">— ${confNote}</span>`;
-
     const warnBox = document.getElementById('conf-warning');
     if(overallConf && overallConf.level === 'reference'){
       warnBox.style.display = 'block';
@@ -266,47 +410,52 @@
       warnBox.style.display = 'none';
     }
 
-    // サマリー表（原因タグ集計）
+    // ----- 統計テーブル（勝率・中央値・平均 ＋ 最大・最小は初期非表示） -----
     const summary = (data.cause_summary && data.cause_summary[activeTag]) || {};
-
-    // グループのpreferred_asset_orderを取得（なければデフォルト順）
     const DEFAULT_ORDER = ['wti','gold','sp500','ust10y','usdjpy','vix'];
     const gmeta = (data.group_metadata && data.group_metadata[activeTag]) || {};
     const order = (gmeta.preferred_asset_order && gmeta.preferred_asset_order.length)
-      ? gmeta.preferred_asset_order
-      : DEFAULT_ORDER;
-
+      ? gmeta.preferred_asset_order : DEFAULT_ORDER;
     const isReference = overallConf && overallConf.level === 'reference';
     const rows = order.filter(k=>summary[k]).map(k=>{
       const s = summary[k];
-      // 参考値のときは中央値・平均を控えめに
       const dimAttr = isReference ? 'style="color:var(--ink-soft)"' : '';
-      // 中央値は常に目立たせる（参考値でも構造は維持）
       const medClass = cls(s.median) + ' median-val';
       const avgClass = cls(s.avg) + ' avg-val';
+      const visClass = maxminVisible ? 'col-maxmin visible' : 'col-maxmin';
       return `<tr>
         <td><span class="asset-name"><span class="swatch ${s.asset}"></span>${s.label}</span></td>
         <td class="winrate">${s.up}/${s.count}件 上昇</td>
         <td class="${medClass}" ${dimAttr}>${pct(s.median)}</td>
         <td class="${avgClass}" ${dimAttr}>${pct(s.avg)}</td>
-        <td class="${cls(s.max)}">${pct(s.max)}</td>
-        <td class="${cls(s.min)}">${pct(s.min)}</td>
+        <td class="${visClass} ${cls(s.max)}">${pct(s.max)}</td>
+        <td class="${visClass} ${cls(s.min)}">${pct(s.min)}</td>
       </tr>`;
     }).join('');
     const tbl = document.getElementById('summary-table');
+    const maxminHdrCls = maxminVisible ? 'col-maxmin visible' : 'col-maxmin';
     if(rows){
       tbl.querySelector('tbody').innerHTML =
-        `<tr><th>資産</th><th>勝率</th><th class="median-hd">中央値</th><th class="avg-hd">平均</th><th>最大</th><th>最小</th></tr>` + rows;
+        `<tr><th>資産</th><th>勝率</th><th class="median-hd">中央値</th><th class="avg-hd">平均</th><th class="${maxminHdrCls}">最大</th><th class="${maxminHdrCls}">最小</th></tr>` + rows;
     }else{
-      tbl.querySelector('tbody').innerHTML = `<tr><td colspan="6" style="color:var(--ink-soft)">この原因タグの集計データはまだありません。</td></tr>`;
+      tbl.querySelector('tbody').innerHTML = `<tr><td colspan="4" style="color:var(--ink-soft)">この原因タグの集計データはまだありません。</td></tr>`;
     }
 
-    // 個別イベント一覧
+    // ----- 個別イベント一覧 -----
     const list = document.getElementById('events-list');
     if(!evs.length){ list.innerHTML = '<div class="empty">該当するイベントがまだ登録されていません。</div>'; return; }
-    list.innerHTML = evs.map(e=>{
+
+    // effect_tags期間凡例（個別イベント一覧の先頭に1回だけ表示）
+    const hasEffectTags = evs.some(e => (e.effect_tags||[]).length > 0);
+    const legend = hasEffectTags
+      ? `<div class="effect-legend">結果タグの括弧内（例：7日）は、1日後・7日後・30日後のうち判定閾値を超えた期間を示します。</div>`
+      : '';
+
+    list.innerHTML = legend + evs.map(e=>{
       const r = e.reactions || {};
-      const mini = ['wti','gold','sp500'].filter(k=>r[k]&&r[k].status==='ok').map(k=>{
+      // 表示資産はpreferred_asset_orderの先頭3つを優先
+      const miniKeys = (gmeta.preferred_asset_order || ['wti','gold','sp500']).slice(0,3);
+      const mini = miniKeys.filter(k=>r[k]&&r[k].status==='ok').map(k=>{
         const c = r[k].changes.d30;
         return `<div class="row"><span class="a"><span class="swatch ${r[k].asset}"></span>${r[k].label}</span><span class="v ${cls(c)}">${c!==null?(c>0?'▲':'▼')+' '+pct(c):'—'}</span></div>`;
       }).join('');
