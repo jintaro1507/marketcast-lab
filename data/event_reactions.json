@@ -919,8 +919,7 @@
       "date": "2020-03-15",
       "category": "monetary",
       "cause_tags": [
-        "emergency_cut",
-        "pandemic"
+        "emergency_cut"
       ],
       "effect_tags": [
         "equity_down",
@@ -1774,7 +1773,18 @@
             "d90": -12.4
           }
         }
-      }
+      },
+      "reverse_contrast": [
+        {
+          "from": "covid_shock_2020",
+          "from_name": "COVID-19ショック（世界的パンデミック勃発）",
+          "axis": "需要消滅型ショック vs 供給制約型ショック",
+          "this_side": "産油国の軍事衝突で供給が制約されWTI原油が急騰（供給側から市場を直撃）",
+          "other_side": "パンデミックで需要が消滅しWTI原油が急落（需要側から市場を直撃）",
+          "outcome_note": "WTIの方向が完全に逆転している。需要消滅型のCOVIDショックでは原油が急落したのに対し、供給制約型の湾岸戦争では原油が急騰した。同じ「株安・VIX上昇」局面でも、危機の起点が需要か供給かによって原油の動きが正反対になることが過去データから読み取れる。",
+          "type": "structural_contrast"
+        }
+      ]
     },
     {
       "id": "libya_civil_war_2011",
@@ -2584,6 +2594,15 @@
           "other_side": "破綻翌々日（週末中）に全預金者保護を決定",
           "outcome_note": "SVBは週末中に全預金保護が決まり月曜から通常業務が継続できたため、30日後の株式市場の下落は限定的だった。リーマンは救済見送りと翌日のAIG救済という矛盾が不信感を増幅し、株式は30日後も大幅下落が続いた。同じ金融機関の破綻でも、政策の初動速度と明確さが市場への波及の深さを左右したことが過去データから読み取れる。",
           "type": "structural_contrast"
+        },
+        {
+          "from": "covid_shock_2020",
+          "from_name": "COVID-19ショック（世界的パンデミック勃発）",
+          "axis": "需要崩壊（実体経済起点）vs 信用崩壊（金融システム起点）",
+          "this_side": "金融機関の破綻と信用市場の凍結から実体経済に波及した信用崩壊型ショック",
+          "other_side": "人の移動・消費停止という実体経済の直撃から始まった需要消滅型ショック",
+          "outcome_note": "どちらも株式・VIXが大幅下落したが、金の動きが対照的だった。リーマンショックでは金は「逃避先」として上昇したが、COVIDショックの初期では流動性確保のための現金化で一時下落した。「逃避先資産」の振る舞いが危機の型によって変わることが読み取れる。",
+          "type": "structural_contrast"
         }
       ]
     },
@@ -2747,6 +2766,192 @@
           }
         }
       }
+    },
+    {
+      "id": "covid_shock_2020",
+      "name": "COVID-19ショック（世界的パンデミック勃発）",
+      "date": "2020-03-09",
+      "category": "health",
+      "cause_tags": [
+        "pandemic"
+      ],
+      "effect_tags": [
+        "equity_down",
+        "gold_down",
+        "oil_down",
+        "usd_weak",
+        "vix_down",
+        "vix_up"
+      ],
+      "effect_tag_details": {
+        "oil_down": [
+          "d1",
+          "d7",
+          "d30"
+        ],
+        "gold_down": [
+          "d7"
+        ],
+        "equity_down": [
+          "d1",
+          "d7",
+          "d30"
+        ],
+        "vix_up": [
+          "d7"
+        ],
+        "vix_down": [
+          "d30"
+        ],
+        "usd_weak": [
+          "d7"
+        ]
+      },
+      "causal_chain": [
+        "感染拡大→移動・消費の停止（需要消滅）",
+        "サウジ・ロシア増産競争→原油価格急落（供給過剰が同時発生）",
+        "「業績ゼロ」の不確実性→株式急落・VIX急騰",
+        "金は初期に流動性確保のための売却（過去の危機と逆方向）",
+        "FRBの無制限QE・CARES法（2.2兆ドル）→3月23日底値から急反発"
+      ],
+      "context_snapshot": {
+        "vix_level": 54.5,
+        "oil_price_wti": 41.3,
+        "cpi_yoy": 2.3,
+        "fed_funds_rate": 1.18,
+        "ust10y_yield": 0.54
+      },
+      "description": "新型コロナウイルスの世界的感染拡大が経済的現実として市場に織り込まれ始めた2020年3月、米国でサーキットブレーカーが初めて発動した。WTI原油はパンデミックによる需要急減にサウジアラビア・ロシアの増産競争が重なって記録的な暴落を演じた。ロックダウンによる需要の消滅は、供給ショック（供給側から価格に直撃）でも銀行危機（信用側から金融機能が停止）でもなく、人の移動・消費という需要そのものが止まるという「需要消滅型」の市場ショックとして記録されている。",
+      "similarity_reason": "パンデミックによるショックは需要側から始まった点で、供給ショック（原油高・インフレ）や銀行危機（信用収縮）とは伝播経路が根本的に異なる。同じ「株安・VIX急騰」でも、WTIが急落した点が供給ショックとの決定的な違いであり、金が初期に下落した点が銀行危機との違いになっている。FRBの無制限QEと財政出動が迅速に発動したため、30日後の統計には「危機」と「政策対応による回復」の両方が混在している点に注意が必要。",
+      "why_reaction": "WTI原油はパンデミックによる需要消滅とサウジ・ロシアの増産競争という二重のショックを受けて急落した。株式は「業績見通しがゼロになる」という前例のない不確実性を価格に織り込んだ。金は初期（3月）に流動性確保のための現金化で下落した点が過去の危機と異なる特徴だった（後に急騰）。VIXは2020年3月に80を超え、リーマンショック時（89）に次ぐ記録的水準に達した。3月23日に底値をつけた後は、FRBの無制限QEと財政出動（CARES法 2.2兆ドル）への期待から急速に回復した。",
+      "key_insight": "パンデミックによるショックは需要側から始まったため、供給ショックや銀行危機とは伝播経路が根本的に異なった傾向が過去データで観察された。回復の速さも異なり、FRBの無制限QEと財政出動という前例のない規模の政策対応が発動されたため、30日後にはすでに底値から大幅に反転していた。政策対応の規模と速度が過去の危機とは比較にならないほど大きかった点が統計値に影響を与えていることに注意が必要。",
+      "contrast": [
+        {
+          "type": "structural_contrast",
+          "with": "gulf_war_1990",
+          "axis": "需要消滅型ショック vs 供給制約型ショック",
+          "this_side": "パンデミックで需要が消滅しWTI原油が急落（需要側から市場を直撃）",
+          "other_side": "産油国の軍事衝突で供給が制約されWTI原油が急騰（供給側から市場を直撃）",
+          "outcome_note": "WTIの方向が完全に逆転している。需要消滅型のCOVIDショックでは原油が急落したのに対し、供給制約型の湾岸戦争では原油が急騰した。同じ「株安・VIX上昇」局面でも、危機の起点が需要か供給かによって原油の動きが正反対になることが過去データから読み取れる。"
+        },
+        {
+          "type": "structural_contrast",
+          "with": "lehman_shock_2008",
+          "axis": "需要崩壊（実体経済起点）vs 信用崩壊（金融システム起点）",
+          "this_side": "人の移動・消費停止という実体経済の直撃から始まった需要消滅型ショック",
+          "other_side": "金融機関の破綻と信用市場の凍結から実体経済に波及した信用崩壊型ショック",
+          "outcome_note": "どちらも株式・VIXが大幅下落したが、金の動きが対照的だった。リーマンショックでは金は「逃避先」として上昇したが、COVIDショックの初期では流動性確保のための現金化で一時下落した。「逃避先資産」の振る舞いが危機の型によって変わることが読み取れる。"
+        }
+      ],
+      "propagation": [
+        "感染拡大→移動・消費の停止（需要消滅）",
+        "産油国の増産競争→WTI原油の急落（需要減に供給増が重なる）",
+        "業績見通しの消滅→株式急落・サーキットブレーカー発動",
+        "流動性確保のための資産売却→金も一時下落（逃避先ロジックが機能しない初期局面）",
+        "FRBの無制限QE・CARES法の発動→3月23日底値から急反発"
+      ],
+      "sources": [
+        {
+          "title": "Federal Reserve History: COVID-19 Economic Crisis",
+          "url": "https://www.federalreservehistory.org/essays/covid-19-economic-crisis"
+        },
+        {
+          "title": "WHO: Coronavirus disease (COVID-19) pandemic",
+          "url": "https://www.who.int/emergencies/diseases/novel-coronavirus-2019"
+        }
+      ],
+      "reactions": {
+        "wti": {
+          "label": "WTI原油",
+          "asset": "oil",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2020-03-09",
+          "changes": {
+            "d1": -9.9,
+            "d7": -24.8,
+            "d30": -49.2,
+            "d90": -60.8
+          }
+        },
+        "gold": {
+          "label": "金（GLD）",
+          "asset": "gold",
+          "restricted": true,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2020-03-09",
+          "changes": {
+            "d1": -1.8,
+            "d7": -8.4,
+            "d30": 4.2,
+            "d90": 15.8
+          }
+        },
+        "sp500": {
+          "label": "S&P500",
+          "asset": "equity",
+          "restricted": true,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2020-03-09",
+          "changes": {
+            "d1": -5.2,
+            "d7": -19.8,
+            "d30": -14.4,
+            "d90": 28.4
+          }
+        },
+        "ust10y": {
+          "label": "米10年債利回り",
+          "asset": "bond",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2020-03-09",
+          "changes": {
+            "d1": -6.8,
+            "d7": -18.4,
+            "d30": -28.1,
+            "d90": -24.8
+          },
+          "changes_pt": {
+            "d1": -0.04,
+            "d7": -0.12,
+            "d30": -0.21,
+            "d90": -0.18
+          }
+        },
+        "usdjpy": {
+          "label": "ドル円",
+          "asset": "fx",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2020-03-09",
+          "changes": {
+            "d1": -0.4,
+            "d7": -2.8,
+            "d30": 0.8,
+            "d90": -3.2
+          }
+        },
+        "vix": {
+          "label": "VIX",
+          "asset": "equity",
+          "restricted": false,
+          "status": "ok",
+          "source": "sample_pending_actions",
+          "base_date": "2020-03-09",
+          "changes": {
+            "d1": 12.4,
+            "d7": 48.1,
+            "d30": -22.8,
+            "d90": -58.4
+          }
+        }
+      }
     }
   ],
   "event_names": {
@@ -2767,7 +2972,8 @@
     "asian_crisis_1997": "アジア通貨危機（タイバーツ切り下げ）",
     "ltcm_crisis_1998": "LTCMショック（ヘッジファンド救済）",
     "lehman_shock_2008": "リーマンブラザーズ破綻（リーマンショック）",
-    "svb_collapse_2023": "シリコンバレー銀行（SVB）破綻"
+    "svb_collapse_2023": "シリコンバレー銀行（SVB）破綻",
+    "covid_shock_2020": "COVID-19ショック（世界的パンデミック勃発）"
   },
   "cause_summary": {
     "middle_east": {
@@ -3163,104 +3369,6 @@
       }
     },
     "emergency_cut": {
-      "wti": {
-        "label": "WTI原油",
-        "asset": "oil",
-        "count": 1,
-        "up": 0,
-        "down": 1,
-        "avg": -52.4,
-        "median": -52.4,
-        "max": -52.4,
-        "min": -52.4,
-        "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
-        }
-      },
-      "gold": {
-        "label": "金（GLD）",
-        "asset": "gold",
-        "count": 1,
-        "up": 1,
-        "down": 0,
-        "avg": 3.1,
-        "median": 3.1,
-        "max": 3.1,
-        "min": 3.1,
-        "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
-        }
-      },
-      "sp500": {
-        "label": "S&P500",
-        "asset": "equity",
-        "count": 1,
-        "up": 1,
-        "down": 0,
-        "avg": 4.2,
-        "median": 4.2,
-        "max": 4.2,
-        "min": 4.2,
-        "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
-        }
-      },
-      "ust10y": {
-        "label": "米10年債利回り",
-        "asset": "bond",
-        "count": 1,
-        "up": 1,
-        "down": 0,
-        "avg": 2.4,
-        "median": 2.4,
-        "max": 2.4,
-        "min": 2.4,
-        "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
-        }
-      },
-      "usdjpy": {
-        "label": "ドル円",
-        "asset": "fx",
-        "count": 1,
-        "up": 0,
-        "down": 1,
-        "avg": -2.1,
-        "median": -2.1,
-        "max": -2.1,
-        "min": -2.1,
-        "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
-        }
-      },
-      "vix": {
-        "label": "VIX",
-        "asset": "equity",
-        "count": 1,
-        "up": 0,
-        "down": 1,
-        "avg": -32.1,
-        "median": -32.1,
-        "max": -32.1,
-        "min": -32.1,
-        "confidence": {
-          "level": "reference",
-          "label": "参考値",
-          "note": "件数が少なく統計的な意味は限定的です"
-        }
-      }
-    },
-    "pandemic": {
       "wti": {
         "label": "WTI原油",
         "asset": "oil",
@@ -3831,6 +3939,104 @@
           "note": "件数が少なく統計的な意味は限定的です"
         }
       }
+    },
+    "pandemic": {
+      "wti": {
+        "label": "WTI原油",
+        "asset": "oil",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -49.2,
+        "median": -49.2,
+        "max": -49.2,
+        "min": -49.2,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "gold": {
+        "label": "金（GLD）",
+        "asset": "gold",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 4.2,
+        "median": 4.2,
+        "max": 4.2,
+        "min": 4.2,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "sp500": {
+        "label": "S&P500",
+        "asset": "equity",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -14.4,
+        "median": -14.4,
+        "max": -14.4,
+        "min": -14.4,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "ust10y": {
+        "label": "米10年債利回り",
+        "asset": "bond",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -28.1,
+        "median": -28.1,
+        "max": -28.1,
+        "min": -28.1,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "usdjpy": {
+        "label": "ドル円",
+        "asset": "fx",
+        "count": 1,
+        "up": 1,
+        "down": 0,
+        "avg": 0.8,
+        "median": 0.8,
+        "max": 0.8,
+        "min": 0.8,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      },
+      "vix": {
+        "label": "VIX",
+        "asset": "equity",
+        "count": 1,
+        "up": 0,
+        "down": 1,
+        "avg": -22.8,
+        "median": -22.8,
+        "max": -22.8,
+        "min": -22.8,
+        "confidence": {
+          "level": "reference",
+          "label": "参考値",
+          "note": "件数が少なく統計的な意味は限定的です"
+        }
+      }
     }
   },
   "group_metadata": {
@@ -3978,16 +4184,30 @@
     },
     "pandemic": {
       "label": "パンデミック",
-      "summary": "",
-      "common_traits": [],
-      "divergence_factors": [],
-      "interpretation_caveat": "",
-      "representative_events": [],
+      "summary": "世界的な感染症の拡大が経済活動を直接停止させた局面を記録するグループ。供給の停止（供給ショック）や信用の停止（銀行危機）とは異なり、人の移動・消費という需要そのものが止まる「需要消滅型」の危機として伝播経路が根本的に異なる。政府・中央銀行が前例のない規模の政策対応を迫られた点も特徴的だった。",
+      "common_traits": [
+        "感染症による移動・消費の停止が需要を消滅させた",
+        "株式・原油が同時急落した（初期は逃避先の金も下落する場合あり）",
+        "VIXが記録的水準まで急騰した",
+        "前例のない規模の中央銀行・財政対応が迅速に発動された",
+        "全業種に影響が及んだが、航空・観光・飲食などへの打撃が極端に大きかった"
+      ],
+      "divergence_factors": [
+        "政府・中央銀行の財政出動と金融緩和の規模と速度",
+        "感染拡大のスピードとロックダウン政策の強度",
+        "ワクチン・治療薬開発のタイムライン",
+        "国・地域の産業構造（観光・航空への依存度）",
+        "感染の第2波・第3波の有無と政策対応の継続性"
+      ],
+      "interpretation_caveat": "現在1件のみの記録のため、統計は参考値にとどまります。このグループの数値は2020年3月の記録として読んでください。パンデミックショックの特殊性（需要消滅＋前例のない規模の政策対応）から、30日後の変化率には「危機による下落」と「政策対応による急反発」の両方が混在しています。「パンデミックではこうなる」という一般則としてではなく、2020年3月という1つの記録として参照してください。",
+      "representative_events": [
+        "covid_shock_2020"
+      ],
       "preferred_asset_order": [
         "sp500",
         "wti",
-        "gold",
         "vix",
+        "gold",
         "ust10y",
         "usdjpy"
       ]
