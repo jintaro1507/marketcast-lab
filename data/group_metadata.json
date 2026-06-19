@@ -246,6 +246,26 @@
       "divergence_factors": [],
       "interpretation_caveat": "",
       "representative_events": []
+    },
+    "liquidity_crisis": {
+      "label": "流動性危機",
+      "summary": "金融市場で急激な流動性枯渇が生じ、信用収縮と資産の投げ売りが連鎖したグループ。LTCM破綻（1998年）とリーマン・ショック（2008年）が該当する。どちらも金融機関の過剰レバレッジが引き金となり、株式・信用市場が同時に崩壊した。",
+      "common_traits": [
+        "金融機関のバランスシートが毀損し、インターバンク市場が麻痺",
+        "株式・クレジットが同時かつ急激に売られる",
+        "中央銀行・政府の緊急介入が転換点になりやすい"
+      ],
+      "divergence_factors": [
+        "問題の震源が単一機関（LTCM）か、システム全体（リーマン）か",
+        "政府・中央銀行の介入規模と速度",
+        "実体経済への波及の深さ"
+      ],
+      "interpretation_caveat": "2件のみのため統計的信頼性は低い。個別イベントの詳細を参照することを推奨する。",
+      "representative_events": [
+        "ltcm_crisis_1998",
+        "lehman_shock_2008"
+      ],
+      "preferred_asset_order": ["sp500", "vix", "gold", "ust10y", "usdjpy", "wti"]
     }
   }
 }
