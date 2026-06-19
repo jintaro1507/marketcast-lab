@@ -113,43 +113,42 @@ def check_event_reactions(er, ev_count):
 
 
 def check_market(mkt):
-    """market.json の必須系列検査。(fails, warnings) を返す。"""
+    """market.json の検査。(fails, warnings) を返す。"""
     fails, warns = [], []
-    series_list = mkt.get("series", [])
 
-    # series が list か dict かを吸収（label または id でマッチ）
-    def find_series(sid):
-        for s in series_list:
-            if isinstance(s, dict):
-                if s.get("id") == sid or s.get("label","").startswith(sid[:4]):
-                    return s
-        return None
+    # generated_at 必須
+    if not mkt.get("generated_at"):
+        fails.append("market.json: generated_at が欠落")
 
-    # series が dict のキー形式の場合も対応
-    if isinstance(series_list, dict):
-        bad_n = sum(
-            1 for sid in MARKET_REQUIRED
-            if series_list.get(sid, {}).get("status") == "error"
-            and series_list.get(sid, {}).get("latest_value") is None
-            and series_list.get(sid, {}).get("pct_change") is None
-        )
-    else:
-        bad = []
-        for s in series_list:
-            sid = s.get("id", s.get("label",""))
-            is_required = any(req in sid for req in MARKET_REQUIRED)
-            if is_required and s.get("status") == "error":
-                if s.get("latest_value") is None and s.get("pct_change") is None:
-                    bad.append(sid)
-        bad_n = len(bad)
+    # series が配列であること
+    series_list = mkt.get("series")
+    if not isinstance(series_list, list):
+        fails.append("market.json: series が配列でない")
+        return fails, warns
 
-    if bad_n >= MARKET_FAIL_MIN:
+    # id をキーとして系列を検索（fetch_and_build.py が id を出力するようになったため）
+    series_by_id = {s.get("id"): s for s in series_list if isinstance(s, dict)}
+
+    for sid in MARKET_REQUIRED:
+        s = series_by_id.get(sid)
+        if s is None:
+            fails.append(f"market.json: 必須系列 {sid} が見つからない")
+            continue
+        if s.get("status") == "error" and s.get("latest_value") is None and s.get("pct_change") is None:
+            warns.append(f"market.json: {sid} が error かつ value 欠落")
+
+    # 必須3系列のうち2件以上が error かつ value 欠落 → Fail
+    bad = [sid for sid in MARKET_REQUIRED
+           if series_by_id.get(sid, {}).get("status") == "error"
+           and series_by_id.get(sid, {}).get("latest_value") is None
+           and series_by_id.get(sid, {}).get("pct_change") is None]
+    if len(bad) >= 2:
+        # warns に追加済みのものを fails に昇格
+        warns = [w for w in warns if not any(b in w for b in bad)]
         fails.append(
-            f"market.json: 必須系列 {bad_n}件がerrorかつvalue欠落 "
-            f"(閾値={MARKET_FAIL_MIN}件)"
+            f"market.json: 必須系列 {len(bad)}件が error かつ value 欠落 "
+            f"({', '.join(bad)})"
         )
-    elif bad_n == 1:
-        warns.append(f"market.json: 必須系列 1件がerrorかつvalue欠落")
 
     return fails, warns
 
