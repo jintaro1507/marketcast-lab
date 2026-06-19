@@ -48,6 +48,11 @@ jobs:
         run: |
           python3 scripts/calculate_event_reactions.py
 
+      - name: 品質ゲート（異常時はデプロイ停止）
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python3 scripts/quality_gate.py
+
       - name: Pages 用に成果物をまとめる
         uses: actions/upload-pages-artifact@v3
         with:
