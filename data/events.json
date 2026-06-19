@@ -14,7 +14,8 @@
     "debt_crisis": "債務危機",
     "currency_crisis": "通貨危機",
     "natural_disaster": "自然災害",
-    "middle_east": "中東地政学"
+    "middle_east": "中東地政学",
+    "liquidity_crisis": "流動性危機"
   },
   "effect_tag_labels": {
     "oil_up": "原油上昇",
