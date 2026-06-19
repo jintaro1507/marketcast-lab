@@ -30,6 +30,18 @@ from urllib.error import URLError, HTTPError
 FRED_API_KEY = os.environ.get("FRED_API_KEY", "")
 FRED_BASE = "https://api.stlouisfed.org/fred/series/observations"
 
+
+def _safe_error_message(error):
+    """例外メッセージから FRED_API_KEY を除去して返す。
+    HTTPError 等の例外文字列にAPIキーを含むURLが混入することを防ぐ。
+    ログ出力・JSON保存の両方で使用すること。
+    """
+    message = str(error)
+    api_key = os.environ.get("FRED_API_KEY", "")
+    if api_key:
+        message = message.replace(api_key, "***")
+    return message[:300]
+
 HERE = os.path.dirname(__file__)
 EVENTS_PATH = os.path.join(HERE, "..", "data", "events.json")
 GROUP_META_PATH = os.path.join(HERE, "..", "data", "group_metadata.json")
@@ -41,7 +53,7 @@ OUT_PATH = os.path.join(HERE, "..", "data", "event_reactions.json")
 ASSETS = [
     {"key": "wti",    "label": "WTI原油",      "source": "fred",  "series": "DCOILWTICO", "asset": "oil",    "restricted": False},
     {"key": "gold",   "label": "金（GLD）",     "source": "stooq", "series": "gld.us",     "yahoo_symbol": "GLD", "asset": "gold",   "restricted": True},
-    {"key": "sp500",  "label": "S&P500",        "source": "fred",  "series": "SP500",      "asset": "equity", "restricted": True},
+    {"key": "sp500",  "label": "S&P500",        "source": "fred",  "series": "SP500",      "yahoo_symbol": "^GSPC", "yahoo_auto_adjust": False, "asset": "equity", "restricted": True},
     {"key": "ust10y", "label": "米10年債利回り","source": "fred",  "series": "DGS10",      "asset": "bond",   "restricted": False},
     {"key": "usdjpy", "label": "ドル円",        "source": "fred",  "series": "DEXJPUS",    "asset": "fx",     "restricted": False},
     {"key": "vix",    "label": "VIX",           "source": "fred",  "series": "VIXCLS",     "asset": "equity", "restricted": False},
@@ -135,18 +147,20 @@ def fetch_stooq_range(symbol, start, end):
                 print(f"  [Stooq] {symbol} ブロック確認、リトライ中止")
                 raise
             last_err = e
-            print(f"  [Stooq] {symbol} 取得失敗 (試行{attempt}/3): {e}")
+            print(f"  [Stooq] {symbol} 取得失敗 (試行{attempt}/3): {type(e).__name__}: {_safe_error_message(e)}")
             time.sleep(2 * attempt)
         except (URLError, HTTPError) as e:
             # 接続エラーはリトライする価値あり
             last_err = e
-            print(f"  [Stooq] {symbol} 接続エラー (試行{attempt}/3): {e}")
+            print(f"  [Stooq] {symbol} 接続エラー (試行{attempt}/3): {type(e).__name__}: {_safe_error_message(e)}")
             time.sleep(2 * attempt)
     raise RuntimeError(f"Stooq取得に3回失敗: {symbol} / 最終エラー: {last_err}")
 
 
-def fetch_yahoo_range(symbol, start, end):
+def fetch_yahoo_range(symbol, start, end, auto_adjust=True):
     """Yahoo Financeから日次終値を {date: value} で返す（Stooq失敗時のフォールバック）。
+    auto_adjust=True（デフォルト）は金GLD用の既存挙動を維持する。
+    S&P500フォールバック時は auto_adjust=False を明示して呼び出すこと。
     yfinanceがあれば使い、無ければYahooのchart APIを直接叩く。"""
     # まず yfinance を試す（0.2系以降のAPI対応）
     try:
@@ -154,7 +168,7 @@ def fetch_yahoo_range(symbol, start, end):
         ticker = yf.Ticker(symbol)
         df = ticker.history(start=start.isoformat(),
                             end=(end + dt.timedelta(days=1)).isoformat(),
-                            interval="1d", auto_adjust=True)
+                            interval="1d", auto_adjust=auto_adjust)
         out = {}
         if df is not None and len(df) > 0:
             for idx, row in df.iterrows():
@@ -174,7 +188,7 @@ def fetch_yahoo_range(symbol, start, end):
     except ImportError:
         pass  # yfinance未導入ならchart APIへ
     except Exception as e:
-        print(f"  [Yahoo/yfinance] {symbol} 取得失敗: {e} → chart APIを試行")
+        print(f"  [Yahoo/yfinance] {symbol} 取得失敗: {type(e).__name__} → chart APIを試行")
 
     # フォールバックのフォールバック: Yahoo chart APIを直接叩く（v8は廃止、v8/financeに修正）
     period1 = int(dt.datetime(start.year, start.month, start.day,
@@ -215,7 +229,7 @@ def fetch_range(asset, start, end):
         try:
             return fetch_stooq_range(asset["series"], start, end), "stooq"
         except (URLError, HTTPError, RuntimeError) as e:
-            print(f"  [フォールバック] {asset['key']}: Stooq失敗のためYahooへ切替 ({e})")
+            print(f"  [フォールバック] {asset['key']}: Stooq失敗のためYahooへ切替 ({type(e).__name__})")
             ysym = asset.get("yahoo_symbol", asset["series"].replace(".us", "").upper())
             return fetch_yahoo_range(ysym, start, end), "yahoo"
     return fetch_series_range(asset["series"], start, end), "fred"
@@ -230,8 +244,40 @@ def value_on_or_before(series_map, target_date, max_lookback=7):
     return None, None
 
 
+def _fill_changes(entry, series_map, base_val, used_base_date, base_date, is_yield):
+    """変化率計算を entry に書き込む共通ヘルパー（FRED / Yahoo 共用）。"""
+    entry["base_date"] = used_base_date
+    for name, days in HORIZONS:
+        fut_val, _ = value_on_or_before(series_map, base_date + dt.timedelta(days=days))
+        if fut_val is None:
+            entry["changes"][name] = None
+            if is_yield:
+                entry["changes_pt"][name] = None
+        else:
+            # 相対変化率(%)はすべての資産で保存（表示の統一用）
+            entry["changes"][name] = round((fut_val - base_val) / abs(base_val) * 100.0, 1)
+            # 利回りは絶対変化幅(pt)も保存（タグ判定はこちらを使う）
+            if is_yield:
+                entry["changes_pt"][name] = round(fut_val - base_val, 2)
+
+
+def _fetch_sp500_yahoo_fallback(asset, start, end, base_date):
+    """SP500 専用 Yahoo ^GSPC フォールバック取得ヘルパー。
+    取得・基準値解決のみ行い、(series_map, base_val, used_base_date) を返す。
+    status / source / error の書き込みは呼び出し元 compute_reactions_for_event で行う。
+    auto_adjust は ASSETS の yahoo_auto_adjust 設定に従う（probe 検証済み: False で FRED と一致）。
+    """
+    auto_adj = asset.get("yahoo_auto_adjust", False)
+    yahoo_map = fetch_yahoo_range(asset["yahoo_symbol"], start, end, auto_adjust=auto_adj)
+    base_val, used_base_date = value_on_or_before(yahoo_map, base_date)
+    return yahoo_map, base_val, used_base_date
+
+
 def compute_reactions_for_event(event):
-    """1イベントについて、各資産の各期間の変化率を計算。"""
+    """1イベントについて、各資産の各期間の変化率を計算。
+    SP500 は FRED を一次ソースとし、FRED で基準値が得られない場合（範囲外・空・例外）に
+    Yahoo Finance ^GSPC を二次ソースとして使用する（probe 検証: 2026-06-19 Run#1）。
+    """
     base_date = dt.date.fromisoformat(event["date"])
     # 余裕をもって前後の期間を取得（基準日が休場の場合の遡り＋90日後＋バッファ）
     start = base_date - dt.timedelta(days=10)
@@ -248,24 +294,49 @@ def compute_reactions_for_event(event):
             entry["source"] = used_source
             base_val, used_base_date = value_on_or_before(series_map, base_date)
             if base_val is None or base_val == 0:
-                entry["status"] = "no_data"
+                # FRED 取得成功でも基準値が得られない場合（範囲外・空）
+                # → SP500 のみ Yahoo ^GSPC フォールバック（gold の Stooq→Yahoo とは別経路）
+                if a["key"] == "sp500" and a.get("yahoo_symbol"):
+                    print(f"  [sp500] FRED基準値なし → Yahoo {a['yahoo_symbol']} でフォールバック")
+                    try:
+                        yahoo_map, yahoo_bv, yahoo_bd = _fetch_sp500_yahoo_fallback(
+                            a, start, end, base_date)
+                        entry["source"] = "yahoo"
+                        entry["fallback_from"] = "fred"
+                        if yahoo_bv is None or yahoo_bv == 0:
+                            entry["status"] = "no_data"
+                        else:
+                            _fill_changes(entry, yahoo_map, yahoo_bv, yahoo_bd, base_date, is_yield)
+                    except (URLError, HTTPError, RuntimeError) as ye:
+                        entry["source"] = "yahoo"
+                        entry["fallback_from"] = "fred"
+                        entry["status"] = "error"
+                        entry["error"] = _safe_error_message(ye)
+                else:
+                    entry["status"] = "no_data"
             else:
-                entry["base_date"] = used_base_date
-                for name, days in HORIZONS:
-                    fut_val, _ = value_on_or_before(series_map, base_date + dt.timedelta(days=days))
-                    if fut_val is None:
-                        entry["changes"][name] = None
-                        if is_yield:
-                            entry["changes_pt"][name] = None
-                    else:
-                        # 相対変化率(%)はすべての資産で保存（表示の統一用）
-                        entry["changes"][name] = round((fut_val - base_val) / abs(base_val) * 100.0, 1)
-                        # 利回りは絶対変化幅(pt)も保存（タグ判定はこちらを使う）
-                        if is_yield:
-                            entry["changes_pt"][name] = round(fut_val - base_val, 2)
+                _fill_changes(entry, series_map, base_val, used_base_date, base_date, is_yield)
         except (URLError, HTTPError, RuntimeError) as e:
-            entry["status"] = "error"
-            entry["error"] = str(e)
+            # FRED 自体が例外 → SP500 のみ Yahoo フォールバック
+            if a["key"] == "sp500" and a.get("yahoo_symbol"):
+                print(f"  [sp500] FRED例外 ({type(e).__name__}) → Yahoo {a['yahoo_symbol']} でフォールバック")
+                try:
+                    yahoo_map, yahoo_bv, yahoo_bd = _fetch_sp500_yahoo_fallback(
+                        a, start, end, base_date)
+                    entry["source"] = "yahoo"
+                    entry["fallback_from"] = "fred"
+                    if yahoo_bv is None or yahoo_bv == 0:
+                        entry["status"] = "no_data"
+                    else:
+                        _fill_changes(entry, yahoo_map, yahoo_bv, yahoo_bd, base_date, is_yield)
+                except (URLError, HTTPError, RuntimeError) as ye:
+                    entry["source"] = "yahoo"
+                    entry["fallback_from"] = "fred"
+                    entry["status"] = "error"
+                    entry["error"] = _safe_error_message(ye)
+            else:
+                entry["status"] = "error"
+                entry["error"] = _safe_error_message(e)
         assets_out[a["key"]] = entry
     return assets_out
 
@@ -385,7 +456,7 @@ def build():
             try:
                 _cs_cache[cache_key] = fetch_series_range(series_id, start, end)
             except Exception as e:
-                print(f"  [context_snapshot] {series_id} 取得失敗: {e}")
+                print(f"  [context_snapshot] {series_id} 取得失敗: {type(e).__name__}: {_safe_error_message(e)}")
                 _cs_cache[cache_key] = {}
         series_map = _cs_cache[cache_key]
         val, _ = value_on_or_before(series_map, base_date)
