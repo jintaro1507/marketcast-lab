@@ -348,11 +348,14 @@
     </div>
     <div class="react-note">基準日: ${ev.date} 時点（休場の場合は直前の取引日）。数値は基準日からのおおよその変化率。一部系列は再配布制限のため派生値のみ。出典: FRED 等。</div>
     ${(()=>{
-      const nodata = Object.values(ev.reactions||{}).filter(a=>a.status==='no_data'||a.status==='error').length;
       const total = Object.keys(ev.reactions||{}).length;
-      return nodata >= 2
-        ? `<div class="react-note" style="color:var(--ink-soft);border-top:1px dashed var(--line-rule);margin-top:6px;padding-top:8px;">⚠ このイベントは古い時代のため、一部資産（${nodata}/${total}系列）はデータを取得できません。取得可能な系列のみ表示しています。</div>`
-        : '';
+      const errorCount  = Object.values(ev.reactions||{}).filter(a=>a.status==='error').length;
+      const nodataCount = Object.values(ev.reactions||{}).filter(a=>a.status==='no_data').length;
+      if(errorCount >= 1)
+        return `<div class="react-note" style="color:var(--ink-soft);border-top:1px dashed var(--line-rule);margin-top:6px;padding-top:8px;">⚠ 一部資産のデータを一時的に取得できませんでした（${errorCount}/${total}系列）。</div>`;
+      if(nodataCount >= 2)
+        return `<div class="react-note" style="color:var(--ink-soft);border-top:1px dashed var(--line-rule);margin-top:6px;padding-top:8px;">⚠ 一部資産は、当時の系列提供範囲外または商品設定前のため、データを表示できません（${nodataCount}/${total}系列）。</div>`;
+      return '';
     })()}
 
     ${whyHtml}
