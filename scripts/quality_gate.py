@@ -64,7 +64,7 @@ def check_event_reactions(er, ev_count):
     if not events:
         return fails, warns  # 以降の検査不能
 
-    # 資産別 error 率
+    # 資産別 error 率（全イベント横断）
     total = len(events)
     for asset in ASSETS:
         error_n = sum(
@@ -83,6 +83,20 @@ def check_event_reactions(er, ev_count):
             warns.append(
                 f"資産 {asset}: {error_n}件のerror "
                 f"({rate:.0%}) ― 部分的なAPI障害の可能性"
+            )
+
+    # 1イベント内の error 集中チェック（3資産以上 error → Fail）
+    # no_data は含めない（系列提供範囲外は正常な欠損）
+    EVENT_ERROR_FAIL_N = 3
+    for ev in events:
+        error_n = sum(
+            1 for a in ev.get("reactions", {}).values()
+            if a.get("status") == "error"
+        )
+        if error_n >= EVENT_ERROR_FAIL_N:
+            fails.append(
+                f"イベント {ev.get('id','?')}: {error_n}資産が error "
+                f"（閾値={EVENT_ERROR_FAIL_N}資産）― 429等のAPI障害の可能性"
             )
 
     # 機密情報混入
