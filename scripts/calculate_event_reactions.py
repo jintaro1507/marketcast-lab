@@ -67,8 +67,22 @@ HORIZONS = [
 ]
 
 
+# モジュールレベルの系列キャッシュ（1回のActions実行中に全関数で共有）
+# series_id をキーとして全期間データを保持し、重複取得を防ぐ。
+# 異なる series_id のデータが混在しないよう、キーは series_id のみとする。
+_SERIES_CACHE: dict = {}
+
+# キャッシュで取得する全期間（全イベントをカバーする最大窓）
+_CACHE_START = dt.date(1950, 1, 1)
+_CACHE_END   = dt.date.today() + dt.timedelta(days=120)
+
+
 def fetch_series_range(series_id, start, end):
-    """指定期間の観測値を {date: value} で返す。"""
+    """FRED から指定期間の観測値を {date: value} で返す。
+    HTTP 429 は指数バックオフ（2/4/8秒）で最大3回リトライする。
+    3回失敗した場合は例外として上位へ返し、status=error にする（no_data には変換しない）。
+    APIキー・完全URL・クエリ文字列はログに出さない。
+    """
     if not FRED_API_KEY:
         raise RuntimeError("FRED_API_KEY が設定されていません")
     params = {
@@ -81,17 +95,46 @@ def fetch_series_range(series_id, start, end):
     }
     url = f"{FRED_BASE}?{urlencode(params)}"
     req = Request(url, headers={"User-Agent": "MarketcastLab/0.1"})
-    with urlopen(req, timeout=30) as resp:
-        payload = json.loads(resp.read().decode("utf-8"))
-    out = {}
-    for obs in payload.get("observations", []):
-        v = obs.get("value", ".")
-        if v not in (".", "", None):
-            try:
-                out[obs["date"]] = float(v)
-            except ValueError:
-                pass
-    return out
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            with urlopen(req, timeout=30) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            out = {}
+            for obs in payload.get("observations", []):
+                v = obs.get("value", ".")
+                if v not in (".", "", None):
+                    try:
+                        out[obs["date"]] = float(v)
+                    except ValueError:
+                        pass
+            return out
+        except HTTPError as e:
+            if e.code == 429:
+                wait = 2 ** attempt  # 2, 4, 8秒
+                print(f"  [FRED] {series_id} 429 Rate Limited — {wait}秒待機 (試行{attempt}/3)")
+                time.sleep(wait)
+                last_err = e
+            else:
+                raise
+    raise RuntimeError(f"FRED 429 リトライ上限超過: {series_id} / {type(last_err).__name__}")
+
+
+def fetch_series_range_cached(series_id, start, end):
+    """系列単位で全期間データをキャッシュし、窓を切り出して返す。
+    1回のActions実行中に同一series_idの呼び出しは原則1回のFRED取得で済む。
+    キャッシュは _SERIES_CACHE に series_id をキーとして格納し、
+    異なる series_id 間でデータが混在しない。
+    """
+    if series_id not in _SERIES_CACHE:
+        print(f"  [FRED cache] {series_id} 全期間取得 ({_CACHE_START} 〜 {_CACHE_END})")
+        _SERIES_CACHE[series_id] = fetch_series_range(series_id, _CACHE_START, _CACHE_END)
+        print(f"  [FRED cache] {series_id} {len(_SERIES_CACHE[series_id])}件 キャッシュ完了")
+    else:
+        print(f"  [FRED cache] {series_id} キャッシュ再利用")
+    full = _SERIES_CACHE[series_id]
+    s, e = start.isoformat(), end.isoformat()
+    return {d: v for d, v in full.items() if s <= d <= e}
 
 
 def fetch_stooq_range(symbol, start, end):
@@ -232,7 +275,7 @@ def fetch_range(asset, start, end):
             print(f"  [フォールバック] {asset['key']}: Stooq失敗のためYahooへ切替 ({type(e).__name__})")
             ysym = asset.get("yahoo_symbol", asset["series"].replace(".us", "").upper())
             return fetch_yahoo_range(ysym, start, end), "yahoo"
-    return fetch_series_range(asset["series"], start, end), "fred"
+    return fetch_series_range_cached(asset["series"], start, end), "fred"
 
 
 def value_on_or_before(series_map, target_date, max_lookback=7):
@@ -444,21 +487,17 @@ def build():
         "fed_funds_rate": "DFF",
         "ust10y_yield":  "DGS10",
     }
-    # 系列キャッシュ（同一系列を複数イベントで再利用）
-    _cs_cache = {}
 
     def fetch_cs_value(series_id, base_date):
-        """イベント日時点のFRED値を取得（キャッシュあり、休日は前営業日を使用）"""
-        cache_key = series_id
-        if cache_key not in _cs_cache:
-            start = base_date - dt.timedelta(days=15)
-            end   = base_date + dt.timedelta(days=3)
-            try:
-                _cs_cache[cache_key] = fetch_series_range(series_id, start, end)
-            except Exception as e:
-                print(f"  [context_snapshot] {series_id} 取得失敗: {type(e).__name__}: {_safe_error_message(e)}")
-                _cs_cache[cache_key] = {}
-        series_map = _cs_cache[cache_key]
+        """イベント日時点のFRED値を取得（モジュールレベルの_SERIES_CACHEを共有）。
+        _cs_cache.clear() は廃止し、全イベントで同一キャッシュを再利用する。"""
+        try:
+            series_map = fetch_series_range_cached(series_id,
+                                                    base_date - dt.timedelta(days=15),
+                                                    base_date + dt.timedelta(days=3))
+        except Exception as e:
+            print(f"  [context_snapshot] {series_id} 取得失敗: {type(e).__name__}: {_safe_error_message(e)}")
+            return None
         val, _ = value_on_or_before(series_map, base_date)
         return round(val, 4) if val is not None else None
 
@@ -473,11 +512,9 @@ def build():
             cs.setdefault(f, None)
 
         base_date = dt.date.fromisoformat(ev["date"])
-        # nullの項目だけ取得
+        # nullの項目だけ取得（キャッシュはイベントをまたいで共有される）
         for field, series_id in CS_SERIES.items():
             if cs.get(field) is None:
-                # キャッシュはイベントごとにリセット（期間が異なるため）
-                _cs_cache.clear()
                 cs[field] = fetch_cs_value(series_id, base_date)
                 if cs[field] is not None:
                     print(f"  [context_snapshot] {ev['id']} {field}={cs[field]} (自動取得)")
