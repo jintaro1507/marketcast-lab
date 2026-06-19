@@ -52,9 +52,21 @@ SERIES = [
 LOOKBACK_DAYS = 30
 
 
+# ---------- セキュリティ ----------
+def _safe_error_msg(e):
+    """例外メッセージから FRED_API_KEY を除去する。ログ・JSON 出力に使用。"""
+    msg = str(e)
+    if FRED_API_KEY:
+        msg = msg.replace(FRED_API_KEY, "***")
+    return msg[:200]
+
+
 # ---------- FRED 取得 ----------
 def fetch_fred_series(series_id, days=120):
-    """FREDから直近観測値を取得して [(date, value), ...] を返す。"""
+    """FREDから直近観測値を取得して [(date, value), ...] を返す。
+    HTTP 429 は指数バックオフ（2/4/8秒）で最大3回リトライする。
+    APIキー・完全URL・クエリ文字列はログに出さない。
+    """
     if not FRED_API_KEY:
         raise RuntimeError("FRED_API_KEY が設定されていません")
     start = (dt.date.today() - dt.timedelta(days=days)).isoformat()
@@ -62,17 +74,29 @@ def fetch_fred_series(series_id, days=120):
               "file_type": "json", "observation_start": start, "sort_order": "asc"}
     url = f"{FRED_BASE}?{urlencode(params)}"
     req = Request(url, headers={"User-Agent": "MarketcastLab/0.1"})
-    with urlopen(req, timeout=20) as resp:
-        payload = json.loads(resp.read().decode("utf-8"))
-    out = []
-    for obs in payload.get("observations", []):
-        v = obs.get("value", ".")
-        if v not in (".", "", None):
-            try:
-                out.append((obs["date"], float(v)))
-            except ValueError:
-                pass
-    return out
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            with urlopen(req, timeout=20) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            out = []
+            for obs in payload.get("observations", []):
+                v = obs.get("value", ".")
+                if v not in (".", "", None):
+                    try:
+                        out.append((obs["date"], float(v)))
+                    except ValueError:
+                        pass
+            return out
+        except HTTPError as e:
+            if e.code == 429:
+                wait = 2 ** attempt  # 2, 4, 8秒
+                print(f"  [FRED] {series_id} 429 Rate Limited — {wait}秒待機 (試行{attempt}/3)")
+                time.sleep(wait)
+                last_err = e
+            else:
+                raise
+    raise RuntimeError(f"FRED 429 リトライ上限超過: {series_id} / {_safe_error_msg(last_err)}")
 
 
 # ---------- Stooq 取得 ----------
@@ -196,7 +220,7 @@ def build_payload():
     """全系列を処理して market.json 用の最終JSON構造を組み立てる。"""
     results = []
     for s in SERIES:
-        entry = {"label": s["label"], "asset": s["asset"], "status": "ok"}
+        entry = {"id": s["id"], "label": s["label"], "asset": s["asset"], "status": "ok"}
         try:
             obs = fetch_series(s)
             trend = compute_trend(obs)
@@ -209,8 +233,8 @@ def build_payload():
                 entry["restricted"] = s["restricted"]
         except (URLError, HTTPError, RuntimeError) as e:
             entry["status"] = "error"
-            entry["error"] = str(e)
-            print(f"  [エラー] {s['label']}: {e}")
+            entry["error"] = _safe_error_msg(e)
+            print(f"  [エラー] {s['label']}: {type(e).__name__}")
         results.append(entry)
 
     return {
@@ -224,8 +248,15 @@ def build_payload():
 if __name__ == "__main__":
     payload = build_payload()
     out_path = os.path.join(os.path.dirname(__file__), "..", "data", "market.json")
-    with open(out_path, "w", encoding="utf-8") as f:
+    tmp_path = out_path + ".tmp"
+    # 原子的書き込み: 一時ファイルへ書き込み → JSON 検証 → os.replace で置換
+    # 書き込み中の失敗で既存の正常な market.json を壊さない
+    with open(tmp_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
+    # 書き込んだ一時ファイルを再読込して構文確認
+    with open(tmp_path, encoding="utf-8") as f:
+        json.load(f)  # 構文エラーなら例外を投げ、os.replace を実行しない
+    os.replace(tmp_path, out_path)
     print(f"書き出し完了: {out_path}")
     print(json.dumps(payload, ensure_ascii=False, indent=2)[:800])
 
