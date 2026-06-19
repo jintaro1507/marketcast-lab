@@ -242,7 +242,7 @@
 
   function confBadge(conf){
     if(!conf) return '';
-    const colorMap = {reference:'var(--ink-soft)', low:'#9C7A2E', medium:'#38456B', high:'#2F5D4E'};
+    const colorMap = {reference:'var(--ink-soft)', low:'#9C7A2E', mid:'#38456B', high:'#2F5D4E'};
     const c = colorMap[conf.level] || 'var(--ink-soft)';
     return `<span class="conf-badge" style="border-color:${c};color:${c};">${conf.label}</span>`;
   }
