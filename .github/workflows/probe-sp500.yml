@@ -1,0 +1,62 @@
+# 【検証専用】S&P500 ソース調査ワークフロー
+# 安全設計チェックリスト（コードで確認可能な項目）:
+#   [✓] workflow_dispatch のみ（schedule・push トリガーなし）
+#   [✓] permissions: contents: read のみ（pages: write なし）
+#   [✓] deploy-pages ステップなし
+#   [✓] upload-pages-artifact ステップなし
+#   [✓] update.yml を変更しない（このファイルは別ファイル）
+#   [✓] market.json / event_reactions.json への書き込みなし
+#   [✓] FRED_API_KEY は secrets から環境変数として渡す
+#   [✓] artifact に JSON と CSV を含める（probe_out/*.json, *.csv）
+#   [✓] artifact 保持期間: 14 日
+#   [✓] 取得失敗時でも artifact をアップロードする（if: always()）
+#   [✓] 本番 "pages" concurrency グループと別グループ
+
+name: "[PROBE] S&P500 source check (manual only)"
+
+on:
+  workflow_dispatch:   # 手動実行のみ。schedule・push トリガーは持たせない
+
+permissions:
+  contents: read       # pages: write を意図的に付与しない（デプロイ不可能）
+
+concurrency:
+  group: "probe-sp500"   # 本番 "pages" グループとは別
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: Python をセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 依存パッケージをインストール（本番 update.yml と同じ構成）
+        run: pip install yfinance --quiet
+
+      - name: probe_out/ ディレクトリを確保
+        run: mkdir -p probe_out
+
+      - name: S&P500 ソース調査を実行
+        # FRED_API_KEY: Secrets から環境変数として注入。値をログに出力しない。
+        # exit 0: 全候補の検証と artifact 生成が完了（一部候補が失敗でも OK）
+        # exit 1: JSON / CSV 生成など検証基盤の障害（ワークフロー失敗）
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python3 scripts/probe_sp500_sources.py
+
+      - name: 調査レポートを artifact として保存
+        # if: always() により、前ステップが失敗してもアップロードを試みる
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sp500-probe-report
+          path: probe_out/          # JSON と CSV の両方が含まれる
+          if-no-files-found: warn
+          retention-days: 14        # 保持期間明記
