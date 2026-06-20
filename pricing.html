@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>正式版について ｜ Marketcast Lab</title>
+<style>
+  :root{
+    --paper:#F2EFE8; --paper-deep:#E8E3D7; --ink:#1C1A16; --ink-soft:#5B564B;
+    --line-rule:#cfc7b6;
+    --oil:#B5703A; --gold:#9C7A2E; --equity:#38456B; --crypto:#6B4A8A;
+    --fx:#4A6B5A; --bond:#7A6A55;
+    --up:#8A3B2E; --down:#2F5D4E;
+    --display:"Shippori Mincho","Noto Serif JP",serif;
+    --body:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;
+    --mono:"JetBrains Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.7;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ===== strip / header / nav ===== */
+  .strip{background:var(--ink);color:var(--paper);font-size:12px;padding:8px 5vw;letter-spacing:0.02em;}
+  .strip b{font-weight:600;}
+  header{border-bottom:1px solid var(--line-rule);padding:18px 5vw 16px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .brand{font-family:var(--display);font-size:20px;letter-spacing:0.04em;display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{font-family:var(--mono);font-size:11px;color:var(--ink-soft);border:1px solid var(--line-rule);padding:2px 6px;border-radius:2px;letter-spacing:0.08em;}
+  nav{display:flex;gap:24px;font-size:13px;color:var(--ink-soft);}
+  nav a:hover{color:var(--ink);}
+
+  /* ===== breadcrumb ===== */
+  .breadcrumb{padding:20px 5vw 0;font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
+  .breadcrumb a{border-bottom:1px solid var(--line-rule);}
+
+  /* ===== page head ===== */
+  .page-head{padding:28px 5vw 32px;border-bottom:1px solid var(--line-rule);max-width:860px;}
+  .page-head .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px;}
+  .page-head h1{font-family:var(--display);font-size:clamp(24px,3.5vw,34px);margin:0 0 14px;line-height:1.3;}
+  .page-head .lead{max-width:58ch;color:var(--ink-soft);font-size:14px;margin:0 0 10px;line-height:1.8;}
+  .page-head .non-predict{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);border-left:2px solid var(--line-rule);padding-left:10px;margin-top:14px;line-height:1.7;opacity:0.85;}
+
+  /* ===== section-label ===== */
+  .section-label{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);padding:36px 5vw 0;}
+
+  /* ===== price block ===== */
+  .price-block{padding:20px 5vw 0;max-width:560px;}
+  .price-card{border:1px solid var(--line-rule);background:var(--paper-deep);padding:24px 28px;}
+  .price-label{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:16px;}
+  .price-main{display:flex;align-items:baseline;gap:6px;margin-bottom:6px;}
+  .price-amount{font-family:var(--display);font-size:clamp(32px,5vw,42px);letter-spacing:0.02em;}
+  .price-unit{font-family:var(--mono);font-size:13px;color:var(--ink-soft);}
+  .price-note{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);line-height:1.9;margin-top:12px;border-top:1px solid var(--line-rule);padding-top:12px;}
+  .price-note li{list-style:none;padding:0;}
+  .price-note li::before{content:"—　";opacity:0.5;}
+
+  /* ===== free features ===== */
+  .free-block{padding:20px 5vw 0;max-width:720px;}
+  .free-card{border:1px solid var(--line-rule);background:var(--paper-deep);padding:22px 26px;}
+  .free-card-label{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px;}
+  .free-items{display:flex;flex-direction:column;gap:0;}
+  .free-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--line-rule);}
+  .free-item:last-child{border-bottom:none;}
+  .free-check{font-family:var(--mono);font-size:11px;color:var(--ink-soft);width:16px;flex-shrink:0;padding-top:2px;opacity:0.7;}
+  .free-item-body{flex:1;}
+  .free-item-name{font-size:13.5px;font-weight:500;line-height:1.5;}
+  .free-item-note{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-top:3px;line-height:1.6;}
+
+  /* ===== paid features ===== */
+  .paid-block{padding:20px 5vw 0;max-width:720px;}
+  .paid-intro{font-size:13.5px;color:var(--ink-soft);line-height:1.8;margin-bottom:20px;}
+  .paid-items{display:flex;flex-direction:column;gap:16px;}
+  .paid-item{border:1px solid var(--line-rule);padding:18px 22px;position:relative;}
+  .paid-item-num{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--ink-soft);opacity:0.6;margin-bottom:8px;}
+  .paid-item-name{font-family:var(--display);font-size:16px;margin:0 0 8px;line-height:1.4;}
+  .paid-item-desc{font-size:13px;color:var(--ink-soft);margin:0;line-height:1.75;}
+  .paid-badge{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:0.08em;border:1px solid var(--line-rule);padding:2px 8px;border-radius:2px;color:var(--ink-soft);margin-bottom:10px;}
+
+  /* ===== comparison table ===== */
+  .compare-block{padding:20px 5vw 0;max-width:720px;}
+
+  /* PC table */
+  .compare-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .compare-table th{font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-soft);border-bottom:2px solid var(--ink-soft);padding:10px 14px;text-align:center;}
+  .compare-table th.col-feat{text-align:left;}
+  .compare-table td{padding:11px 14px;border-bottom:1px solid var(--line-rule);vertical-align:middle;}
+  .compare-table td.col-feat{font-size:13px;color:var(--ink);}
+  .compare-table td.col-free,
+  .compare-table td.col-paid{text-align:center;font-family:var(--mono);font-size:12px;}
+  .avail{color:var(--ink);font-size:13px;}
+  .unavail{color:var(--line-rule);}
+  .add-plan{color:var(--ink-soft);font-size:11.5px;letter-spacing:0.02em;}
+  .compare-table tr:last-child td{border-bottom:none;}
+  .compare-table .row-divider td{border-top:2px solid var(--line-rule);padding-top:14px;}
+
+  /* SP cards（680px以下） */
+  .compare-cards{display:none;flex-direction:column;gap:0;}
+  .cc-item{border-bottom:1px solid var(--line-rule);padding:13px 0;}
+  .cc-item:last-child{border-bottom:none;}
+  .cc-feat{font-size:13px;color:var(--ink);margin-bottom:7px;}
+  .cc-cols{display:flex;gap:0;}
+  .cc-col{flex:1;text-align:center;}
+  .cc-col-head{font-family:var(--mono);font-size:9.5px;letter-spacing:0.08em;color:var(--ink-soft);margin-bottom:4px;}
+  .cc-col-val{font-family:var(--mono);font-size:12px;}
+
+  /* ===== CTA block ===== */
+  .cta-block{padding:20px 5vw 0;max-width:560px;}
+  .cta-card{border:1px solid var(--line-rule);background:var(--paper-deep);padding:24px 28px;}
+  .cta-price-line{font-family:var(--mono);font-size:13px;color:var(--ink-soft);margin-bottom:16px;}
+  .cta-disabled{display:inline-block;font-family:var(--mono);font-size:12px;border:1px solid var(--line-rule);padding:10px 20px;border-radius:2px;color:var(--ink-soft);opacity:0.55;cursor:default;letter-spacing:0.04em;pointer-events:none;user-select:none;}
+  .cta-note{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);margin-top:10px;opacity:0.75;line-height:1.7;}
+
+  /* ===== disclaimer block ===== */
+  .disclaimer-block{margin:36px 5vw 0;padding:16px 18px;border:1px solid var(--line-rule);background:var(--paper-deep);max-width:720px;}
+  .disclaimer-block .disc-label{font-family:var(--mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;}
+  .disclaimer-block p{margin:0;font-size:12px;color:var(--ink-soft);line-height:1.85;}
+  .disclaimer-block p + p{margin-top:6px;}
+
+  /* ===== footer ===== */
+  footer{margin-top:56px;border-top:1px solid var(--line-rule);padding:28px 5vw 50px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;font-size:12px;color:var(--ink-soft);}
+  footer .back{display:inline-block;border-bottom:1px solid var(--line-rule);}
+  footer .foot-disclaimer{max-width:60ch;line-height:1.8;}
+
+  /* ===== responsive ===== */
+  @media(max-width:680px){
+    .compare-table{display:none;}
+    .compare-cards{display:flex;}
+    .price-card{padding:18px 20px;}
+    .page-head{padding:22px 5vw 24px;}
+    .paid-item{padding:16px 18px;}
+    .free-card{padding:18px 20px;}
+    .cta-card{padding:18px 20px;}
+  }
+  @media(max-width:400px){
+    nav{gap:14px;font-size:12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 免責ストリップ ===== -->
+<div class="strip"><b>本サイトは情報提供・教育目的です。</b>個別の投資助言ではありません。最終判断はご自身の責任で行ってください。</div>
+
+<!-- ===== ヘッダー ===== -->
+<header>
+  <div class="brand"><a href="index.html">Marketcast Lab</a> <span class="mark">観測所</span></div>
+  <nav>
+    <a href="index.html#events">イベント観測</a>
+    <a href="index.html#assets">資産別反応史</a>
+    <a href="glossary.html">用語解説</a>
+    <a href="disclaimer.html">免責事項</a>
+  </nav>
+</header>
+
+<!-- ===== パンくず ===== -->
+<div class="breadcrumb"><a href="index.html">トップ</a> ／ 正式版について</div>
+
+<!-- ===== ページ見出し ===== -->
+<div class="page-head">
+  <div class="eyebrow">Marketcast Lab 正式版</div>
+  <h1>現在の市場環境と<br>複数の過去局面を比較する</h1>
+  <p class="lead">現在の市場環境に近い過去局面を順位付きで確認し、一致点と違いを整理できる機能を提供予定です。</p>
+  <p class="non-predict">将来の値動きを予測したり、売買を推奨したりするサービスではありません。</p>
+</div>
+
+<!-- ===== 予定価格 ===== -->
+<div class="section-label">正式版公開時の予定価格</div>
+<div class="price-block">
+  <div class="price-card">
+    <div class="price-label">月額料金（予定）</div>
+    <div class="price-main">
+      <span class="price-amount">980</span>
+      <span class="price-unit">円／月（税込予定）</span>
+    </div>
+    <ul class="price-note">
+      <li>正式版公開時の予定価格です。確定価格ではありません</li>
+      <li>自動更新となる予定です</li>
+      <li>いつでも解約可能となる予定です</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== 現在の無料版で利用できる内容 ===== -->
+<div class="section-label">現在の無料版で利用できる内容</div>
+<div class="free-block">
+  <div class="free-card">
+    <div class="free-card-label">無料版　— 現在公開中</div>
+    <div class="free-items">
+      <div class="free-item">
+        <span class="free-check">✓</span>
+        <div class="free-item-body">
+          <div class="free-item-name">現在の市場環境</div>
+          <div class="free-item-note">VIX・WTI原油・FF金利・米10年債利回りの4指標について、取得可能な最新値と基準日を確認できます</div>
+        </div>
+      </div>
+      <div class="free-item">
+        <span class="free-check">✓</span>
+        <div class="free-item-body">
+          <div class="free-item-name">選択した事象タイプの過去局面 top1</div>
+          <div class="free-item-note">8つの事象タイプから選択し、現在の市場環境に最も近い過去局面を1件確認できます</div>
+        </div>
+      </div>
+      <div class="free-item">
+        <span class="free-check">✓</span>
+        <div class="free-item-body">
+          <div class="free-item-name">6資産の期間別反応（d1・d7・d30・d90）</div>
+          <div class="free-item-note">WTI原油・金・S&P500・米10年債利回り・ドル円・VIX について、発生後1日・7日・30日・90日後の変化率を確認できます</div>
+        </div>
+      </div>
+      <div class="free-item">
+        <span class="free-check">✓</span>
+        <div class="free-item-body">
+          <div class="free-item-name">グループ統計</div>
+          <div class="free-item-note">同じ原因タグに分類された過去局面の平均・中央値・最大・最小・上昇件数を確認できます</div>
+        </div>
+      </div>
+      <div class="free-item">
+        <span class="free-check">✓</span>
+        <div class="free-item-body">
+          <div class="free-item-name">過去イベントの解説と伝播パターン</div>
+          <div class="free-item-note">各局面で何が起きたか、なぜその反応になったか、どう波及したかを文章で確認できます</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 正式版で追加予定の内容 ===== -->
+<div class="section-label">正式版で追加予定の内容</div>
+<div class="paid-block">
+  <p class="paid-intro">現在の無料版は「top1の確認」までです。正式版では、現在の市場環境を起点に、過去局面を複数件まとめて比較・整理できる機能が加わります。</p>
+  <div class="paid-items">
+
+    <div class="paid-item">
+      <div class="paid-badge">追加予定</div>
+      <div class="paid-item-num">01</div>
+      <h2 class="paid-item-name">類似候補の順位付き比較</h2>
+      <p class="paid-item-desc">現在の市場環境に近い過去局面を、上位2〜5件まで順位付きで確認できます。top1だけでなく、次の候補との違いも横並びで把握できます。</p>
+    </div>
+
+    <div class="paid-item">
+      <div class="paid-badge">追加予定</div>
+      <div class="paid-item-num">02</div>
+      <h2 class="paid-item-name">一致点と違いの分解</h2>
+      <p class="paid-item-desc">VIX・原油・金利環境について、現在の市場環境と各候補の間で「一致した軸」「一致しなかった軸」「比較できなかった軸」を候補ごとに整理します。どの条件が重なり、どこが異なるかを把握できます。</p>
+    </div>
+
+    <div class="paid-item">
+      <div class="paid-badge">追加予定</div>
+      <div class="paid-item-num">03</div>
+      <h2 class="paid-item-name">複数候補の横断比較</h2>
+      <p class="paid-item-desc">複数の過去局面を同じ画面に並べ、共通点と違いをまとめて確認できます。個別に見るだけでは気づきにくい、局面間の構造的な差異を整理できます。</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== 無料版 / 正式版 比較表 ===== -->
+<div class="section-label">機能比較</div>
+<div class="compare-block">
+
+  <!-- PC 表示 -->
+  <table class="compare-table" aria-label="無料版と正式版の機能比較">
+    <thead>
+      <tr>
+        <th class="col-feat">機能</th>
+        <th class="col-free">無料版</th>
+        <th class="col-paid">正式版</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-feat">現在の市場環境（VIX・原油・FF金利・米10年債）</td>
+        <td class="col-free"><span class="avail">利用可能</span></td>
+        <td class="col-paid"><span class="avail">利用可能</span></td>
+      </tr>
+      <tr>
+        <td class="col-feat">過去局面 top1</td>
+        <td class="col-free"><span class="avail">利用可能</span></td>
+        <td class="col-paid"><span class="avail">利用可能</span></td>
+      </tr>
+      <tr>
+        <td class="col-feat">6資産の期間別反応（d1・d7・d30・d90）</td>
+        <td class="col-free"><span class="avail">利用可能</span></td>
+        <td class="col-paid"><span class="avail">利用可能</span></td>
+      </tr>
+      <tr>
+        <td class="col-feat">グループ統計（平均・中央値・上昇件数 等）</td>
+        <td class="col-free"><span class="avail">利用可能</span></td>
+        <td class="col-paid"><span class="avail">利用可能</span></td>
+      </tr>
+      <tr>
+        <td class="col-feat">過去イベントの解説・伝播パターン</td>
+        <td class="col-free"><span class="avail">利用可能</span></td>
+        <td class="col-paid"><span class="avail">利用可能</span></td>
+      </tr>
+      <tr class="row-divider">
+        <td class="col-feat">類似候補 2〜5件（順位付き）</td>
+        <td class="col-free"><span class="unavail">—</span></td>
+        <td class="col-paid"><span class="add-plan">追加予定</span></td>
+      </tr>
+      <tr>
+        <td class="col-feat">一致軸・不一致軸・比較不能軸の分解</td>
+        <td class="col-free"><span class="unavail">—</span></td>
+        <td class="col-paid"><span class="add-plan">追加予定</span></td>
+      </tr>
+      <tr>
+        <td class="col-feat">複数候補の横断比較</td>
+        <td class="col-free"><span class="unavail">—</span></td>
+        <td class="col-paid"><span class="add-plan">追加予定</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- スマートフォン カード表示（680px以下） -->
+  <div class="compare-cards" aria-label="無料版と正式版の機能比較">
+
+    <div class="cc-item">
+      <div class="cc-feat">現在の市場環境（VIX・原油・FF金利・米10年債）</div>
+      <div class="cc-cols">
+        <div class="cc-col"><div class="cc-col-head">無料版</div><div class="cc-col-val avail">利用可能</div></div>
+        <div class="cc-col"><div class="cc-col-head">正式版</div><div class="cc-col-val avail">利用可能</div></div>
+      </div>
+    </div>
+
+    <div class="cc-item">
+      <div class="cc-feat">過去局面 top1</div>
+      <div class="cc-cols">
+        <div class="cc-col"><div class="cc-col-head">無料版</div><div class="cc-col-val avail">利用可能</div></div>
+        <div class="cc-col"><div class="cc-col-head">正式版</div><div class="cc-col-val avail">利用可能</div></div>
+      </div>
+    </div>
+
+    <div class="cc-item">
+      <div class="cc-feat">6資産の期間別反応（d1・d7・d30・d90）</div>
+      <div class="cc-cols">
+        <div class="cc-col"><div class="cc-col-head">無料版</div><div class="cc-col-val avail">利用可能</div></div>
+        <div class="cc-col"><div class="cc-col-head">正式版</div><div class="cc-col-val avail">利用可能</div></div>
+      </div>
+    </div>
+
+    <div class="cc-item">
+      <div class="cc-feat">グループ統計（平均・中央値・上昇件数 等）</div>
+      <div class="cc-cols">
+        <div class="cc-col"><div class="cc-col-head">無料版</div><div class="cc-col-val avail">利用可能</div></div>
+        <div class="cc-col"><div class="cc-col-head">正式版</div><div class="cc-col-val avail">利用可能</div></div>
+      </div>
+    </div>
+
+    <div class="cc-item">
+      <div class="cc-feat">過去イベントの解説・伝播パターン</div>
+      <div class="cc-cols">
+        <div class="cc-col"><div class="cc-col-head">無料版</div><div class="cc-col-val avail">利用可能</div></div>
+        <div class="cc-col"><div class="cc-col-head">正式版</div><div class="cc-col-val avail">利用可能</div></div>
+      </div>
+    </div>
+
+    <div class="cc-item">
+      <div class="cc-feat">類似候補 2〜5件（順位付き）</div>
+      <div class="cc-cols">
+        <div class="cc-col"><div class="cc-col-head">無料版</div><div class="cc-col-val unavail">—</div></div>
+        <div class="cc-col"><div class="cc-col-head">正式版</div><div class="cc-col-val add-plan">追加予定</div></div>
+      </div>
+    </div>
+
+    <div class="cc-item">
+      <div class="cc-feat">一致軸・不一致軸・比較不能軸の分解</div>
+      <div class="cc-cols">
+        <div class="cc-col"><div class="cc-col-head">無料版</div><div class="cc-col-val unavail">—</div></div>
+        <div class="cc-col"><div class="cc-col-head">正式版</div><div class="cc-col-val add-plan">追加予定</div></div>
+      </div>
+    </div>
+
+    <div class="cc-item">
+      <div class="cc-feat">複数候補の横断比較</div>
+      <div class="cc-cols">
+        <div class="cc-col"><div class="cc-col-head">無料版</div><div class="cc-col-val unavail">—</div></div>
+        <div class="cc-col"><div class="cc-col-head">正式版</div><div class="cc-col-val add-plan">追加予定</div></div>
+      </div>
+    </div>
+
+  </div><!-- /compare-cards -->
+</div><!-- /compare-block -->
+
+<!-- ===== CTA ===== -->
+<div class="section-label">正式版の公開について</div>
+<div class="cta-block">
+  <div class="cta-card">
+    <div class="cta-price-line">予定価格　月額 980円（税込予定）</div>
+    <span class="cta-disabled" aria-disabled="true">月額980円で提供予定</span>
+    <div class="cta-note">現在、正式版の公開準備中です。<br>公開時期が決まりましたら本サイト上でお知らせします。</div>
+  </div>
+</div>
+
+<!-- ===== 免責 ===== -->
+<div class="disclaimer-block">
+  <div class="disc-label">免責事項</div>
+  <p>本サービスは、過去の市場データを整理・表示するものです。将来の値動きを示すものではありません。</p>
+  <p>特定の取引・銘柄・商品を推奨するものではありません。本サイトの情報にもとづく判断はすべて利用者ご自身の責任で行ってください。</p>
+</div>
+
+<!-- ===== フッター ===== -->
+<footer>
+  <a class="back" href="index.html">← トップへ戻る</a>
+  <div class="foot-disclaimer">本ページの数値は過去の事実の記録であり、将来の値動きを示すものでも、特定の取引・銘柄・商品を推奨するものでもありません。</div>
+</footer>
+
+</body>
+</html>
