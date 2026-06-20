@@ -1,0 +1,552 @@
+  <!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>現在の市場環境 ｜ Marketcast Lab</title>
+<style>
+  :root{
+    --paper:#F2EFE8; --paper-deep:#E8E3D7; --ink:#1C1A16; --ink-soft:#5B564B;
+    --line-rule:#cfc7b6;
+    --oil:#B5703A; --gold:#9C7A2E; --equity:#38456B; --crypto:#6B4A8A;
+    --fx:#4A6B5A; --bond:#7A6A55;
+    --up:#8A3B2E; --down:#2F5D4E;
+    --display:"Shippori Mincho","Noto Serif JP",serif;
+    --body:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;
+    --mono:"JetBrains Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.7;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ===== strip / header / nav ===== */
+  .strip{background:var(--ink);color:var(--paper);font-size:12px;padding:8px 5vw;letter-spacing:0.02em;}
+  .strip b{font-weight:600;}
+  header{border-bottom:1px solid var(--line-rule);padding:18px 5vw 16px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .brand{font-family:var(--display);font-size:20px;letter-spacing:0.04em;display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{font-family:var(--mono);font-size:11px;color:var(--ink-soft);border:1px solid var(--line-rule);padding:2px 6px;border-radius:2px;letter-spacing:0.08em;}
+  nav{display:flex;gap:24px;font-size:13px;color:var(--ink-soft);}
+  nav a:hover{color:var(--ink);}
+
+  /* ===== breadcrumb ===== */
+  .breadcrumb{padding:20px 5vw 0;font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
+  .breadcrumb a{border-bottom:1px solid var(--line-rule);}
+
+  /* ===== page head ===== */
+  .page-head{padding:24px 5vw 28px;border-bottom:1px solid var(--line-rule);}
+  .page-head h1{font-family:var(--display);font-size:clamp(22px,3vw,30px);margin:0 0 10px;line-height:1.35;}
+  .page-head .lead{max-width:60ch;color:var(--ink-soft);font-size:13.5px;margin:0;line-height:1.75;}
+
+  /* ===== section-label ===== */
+  .section-label{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);padding:32px 5vw 0;}
+
+  /* ===== ctx-grid（event_detail.htmlと同一） ===== */
+  .ctx{padding:14px 5vw 0;}
+  .ctx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;border:1px solid var(--line-rule);background:var(--line-rule);}
+  .ctx-cell{background:var(--paper);padding:14px 16px;}
+  .ctx-cell .ctx-label{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--ink-soft);margin-bottom:6px;}
+  .ctx-cell .ctx-val{font-family:var(--mono);font-size:18px;font-weight:500;line-height:1.2;}
+  .ctx-cell .ctx-unit{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-left:3px;}
+  .ctx-cell .ctx-na{font-family:var(--mono);font-size:18px;color:var(--ink-soft);}
+  .ctx-cell .ctx-note{font-family:var(--mono);font-size:9.5px;color:var(--ink-soft);margin-top:4px;opacity:0.8;}
+  .ctx-caption{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);padding:8px 0 0;max-width:64ch;}
+
+  /* ===== env-block（環境タグ） ===== */
+  .env{padding:14px 5vw 0;}
+  .env-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .env-chip{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;border:1px solid var(--line-rule);padding:4px 10px;border-radius:2px;color:var(--ink-soft);}
+  .env-chip .chip-key{color:var(--ink-soft);margin-right:6px;}
+  .env-chip .chip-val{color:var(--ink);font-weight:500;}
+  .rate-detail{margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--ink-soft);line-height:1.85;}
+  .rate-detail .rate-row{display:flex;flex-wrap:wrap;gap:4px 24px;}
+  .rate-note{font-family:var(--mono);font-size:9.5px;color:var(--ink-soft);margin-top:8px;opacity:0.75;max-width:64ch;}
+
+  /* ===== selected cause ===== */
+  .cause-block{padding:14px 5vw 0;}
+  .cause-block .cause-label{font-family:var(--display);font-size:17px;line-height:1.5;margin:0;}
+
+  /* ===== match-card（event_id あり） ===== */
+  .match{padding:14px 5vw 0;}
+  .match-card{border:1px solid var(--line-rule);background:var(--paper-deep);max-width:720px;overflow:hidden;}
+  .match-card-head{padding:14px 18px 12px;border-bottom:1px solid var(--line-rule);}
+  .overlap-badge{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;border:1px solid var(--line-rule);padding:3px 9px;border-radius:2px;margin-bottom:10px;}
+  .overlap-badge.high{border-color:var(--up);color:var(--up);}
+  .overlap-badge.mid{color:var(--ink-soft);}
+  .match-name{font-family:var(--display);font-size:17px;margin:0 0 4px;line-height:1.45;}
+  .match-date{font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
+  .match-card-body{padding:14px 18px 16px;}
+  .match-summary{font-size:13.5px;color:var(--ink-soft);margin:0 0 16px;line-height:1.75;}
+  .detail-link{display:inline-block;font-family:var(--mono);font-size:12px;border:1px solid var(--line-rule);padding:7px 14px;border-radius:2px;color:var(--ink-soft);margin-bottom:14px;}
+  .detail-link:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .cta-block{border-top:1px dashed var(--line-rule);padding-top:14px;margin-top:4px;}
+  .cta-disabled{display:inline-block;font-family:var(--mono);font-size:11.5px;border:1px solid var(--line-rule);padding:8px 16px;border-radius:2px;color:var(--ink-soft);opacity:0.6;cursor:default;letter-spacing:0.02em;}
+  .cta-note{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-top:6px;opacity:0.7;}
+
+  /* ===== no-match-box（event_id=null） ===== */
+  .no-match-box{border:1px solid var(--line-rule);background:var(--paper-deep);border-left:3px solid var(--line-rule);padding:18px 20px;max-width:720px;}
+  .no-match-title{font-family:var(--display);font-size:16px;margin:0 0 8px;}
+  .no-match-summary{font-size:13.5px;color:var(--ink-soft);margin:0 0 10px;line-height:1.75;}
+  .no-match-note{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);line-height:1.7;opacity:0.85;}
+
+  /* ===== completeness warning ===== */
+  .completeness-warn{margin:14px 5vw 0;padding:12px 16px;border:1px solid var(--line-rule);border-left:3px solid var(--ink-soft);background:var(--paper-deep);font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);max-width:720px;}
+
+  /* ===== meta / disclaimer ===== */
+  .meta-block{padding:28px 5vw 0;font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);line-height:1.8;}
+  .meta-block .generated{margin-bottom:4px;}
+  .meta-block .data-note{margin-top:6px;opacity:0.8;}
+  .disclaimer-block{margin:14px 5vw 0;padding:14px 16px;border:1px solid var(--line-rule);background:var(--paper-deep);max-width:720px;}
+  .disclaimer-block p{margin:0;font-size:12px;color:var(--ink-soft);line-height:1.8;}
+
+  /* ===== error / empty ===== */
+  .error-box{padding:40px 5vw;max-width:600px;}
+  .error-box p{font-size:14px;color:var(--ink-soft);margin:0 0 16px;}
+  .error-box a{font-family:var(--mono);font-size:12px;border-bottom:1px solid var(--line-rule);}
+
+  /* ===== footer ===== */
+  footer{margin-top:56px;border-top:1px solid var(--line-rule);padding:28px 5vw 50px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;font-size:12px;color:var(--ink-soft);}
+  footer .back{display:inline-block;border-bottom:1px solid var(--line-rule);}
+  footer .foot-disclaimer{max-width:60ch;line-height:1.8;}
+
+  /* ===== responsive ===== */
+  @media(max-width:680px){
+    .ctx-grid{grid-template-columns:repeat(2,1fr);}
+    .env-row{gap:6px;}
+    .rate-detail .rate-row{gap:4px 16px;}
+  }
+  @media(max-width:320px){
+    .ctx-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="strip"><b>本サイトは情報提供・教育目的です。</b>個別の投資助言ではありません。最終判断はご自身の責任で行ってください。</div>
+
+<header>
+  <div class="brand"><a href="index.html">Marketcast Lab</a> <span class="mark">観測所</span></div>
+  <nav>
+    <a href="index.html#events">イベント観測</a>
+    <a href="index.html#assets">資産別反応史</a>
+    <a href="glossary.html">用語解説</a>
+    <a href="disclaimer.html">免責事項</a>
+  </nav>
+</header>
+
+<div id="app"></div>
+
+<script>
+(async function(){
+  'use strict';
+
+  /* ------------------------------------------------------------------ */
+  /* 定数                                                                 */
+  /* ------------------------------------------------------------------ */
+
+  const VALID_CAUSES = new Set([
+    'supply_shock','bank_crisis','war','middle_east',
+    'monetary_tightening','monetary_easing','emergency_cut','pandemic'
+  ]);
+
+  const CAUSE_LABELS = {
+    supply_shock:        '原油・エネルギーが急騰している',
+    bank_crisis:         '銀行・金融機関に不安がある',
+    war:                 '地政学的緊張・軍事衝突が起きている',
+    middle_east:         '中東情勢が不安定になっている',
+    monetary_tightening: '中央銀行が利上げ・引き締めをしている',
+    monetary_easing:     '中央銀行が利下げ・緩和をしている',
+    emergency_cut:       '中央銀行が緊急の大幅利下げをした',
+    pandemic:            '感染症・パンデミックが経済を直撃している',
+  };
+
+  const VIX_LABELS    = {calm:'平穏', elev:'警戒', stress:'ストレス', panic:'パニック'};
+  const OIL_LABELS    = {lo:'低水準', mid:'中水準', hi:'高水準'};
+  const RATE_LABELS   = {low:'低金利', mid:'中金利', high:'高金利'};
+  const CURVE_LABELS  = {normal:'順イールド', flat:'フラット', inverted:'逆イールド'};
+
+  const INDICATOR_META = {
+    vix:   {label:'VIX',         unit:''},
+    oil:   {label:'WTI原油',     unit:'USD/bbl'},
+    ff:    {label:'FF金利',       unit:'%'},
+    ust10y:{label:'米10年債利回り', unit:'%'},
+  };
+
+  const app = document.getElementById('app');
+
+  /* ------------------------------------------------------------------ */
+  /* ユーティリティ                                                        */
+  /* ------------------------------------------------------------------ */
+
+  /* 安全に要素を作ってテキストをセットする */
+  function el(tag, cls, text){
+    const e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  /* number を toFixed(2) で整形。数値でなければ null を返す */
+  function fmt2(v){
+    if(typeof v !== 'number' || !isFinite(v)) return null;
+    return v.toFixed(2);
+  }
+
+  /* generated_at を JST「2026年6月20日 19:21」形式に変換
+     閲覧者の端末タイムゾーンに依存しないよう timeZone:'Asia/Tokyo' を明示する */
+  function fmtDatetime(iso){
+    try{
+      const d = new Date(iso);
+      if(isNaN(d.getTime())) return null;
+      const fmt = new Intl.DateTimeFormat('ja-JP', {
+        timeZone: 'Asia/Tokyo',
+        year:   'numeric',
+        month:  'numeric',
+        day:    'numeric',
+        hour:   '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      // 例: "2026年6月20日 19:21" — ブラウザの Intl 実装によって
+      // "2026/6/20 19:21" 形式になる場合があるため統一フォーマットを使う
+      const parts = fmt.formatToParts(d);
+      const p = {};
+      parts.forEach(({type, value}) => { p[type] = value; });
+      return p.year + '年' + p.month + '月' + p.day + '日 ' + p.hour + ':' + p.minute;
+    }catch(e){ return null; }
+  }
+
+  /* overlap_label → badge クラス */
+  function overlapClass(label){
+    if(label === '高い重なり') return 'high';
+    if(label === '中程度の重なり') return 'mid';
+    return 'mid'; /* 部分的な重なり等も壊れないよう mid に */
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* cause 検証                                                           */
+  /* ------------------------------------------------------------------ */
+
+  const params = new URLSearchParams(location.search);
+  const cause = params.get('cause');
+
+  if(!cause || !VALID_CAUSES.has(cause)){
+    renderCauseError();
+    return;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* JSON fetch                                                           */
+  /* ------------------------------------------------------------------ */
+
+  let data;
+  try{
+    const res = await fetch('data/current_context_public.json', {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    data = await res.json();
+  }catch(err){
+    console.error('[current_context] fetch error:', err);
+    renderFetchError();
+    return;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 描画                                                                 */
+  /* ------------------------------------------------------------------ */
+
+  render(data, cause);
+
+  /* ================================================================== */
+  /* render 関数群                                                        */
+  /* ================================================================== */
+
+  function render(d, cause){
+    const frag = document.createDocumentFragment();
+
+    /* パンくず */
+    const bc = el('div','breadcrumb');
+    const bcA = el('a','','トップ');
+    bcA.href = 'index.html';
+    bc.appendChild(bcA);
+    bc.appendChild(document.createTextNode(' ／ 現在の市場環境'));
+    frag.appendChild(bc);
+
+    /* ページ見出し */
+    const ph = el('div','page-head');
+    const h1 = el('h1','','現在の市場環境');
+    const lead = el('p','lead','現在の市場環境を、過去の重大イベント発生時の市場環境と比較します。将来の値動きの予測や売買の推奨を行うものではありません。');
+    ph.appendChild(h1);
+    ph.appendChild(lead);
+    frag.appendChild(ph);
+
+    /* data_completeness 警告 */
+    const completeness = (typeof d.data_completeness === 'number') ? d.data_completeness : 3;
+    if(completeness <= 1){
+      const warn = el('div','completeness-warn','現在の市場環境データが十分に揃っていないため、過去局面との比較を限定的に表示しています。');
+      frag.appendChild(warn);
+    }
+
+    /* B: 現在の指標 */
+    frag.appendChild(el('div','section-label','現在の指標'));
+    frag.appendChild(buildIndicators(d.indicators));
+
+    /* C: 市場環境タグ */
+    frag.appendChild(el('div','section-label','現在の市場環境'));
+    frag.appendChild(buildEnvTags(d.market_state_tags, d.rate_display));
+
+    /* D: 選択した事象タイプ */
+    frag.appendChild(el('div','section-label','選択した事象タイプ'));
+    const cb = el('div','cause-block');
+    cb.appendChild(el('p','cause-label', CAUSE_LABELS[cause] || cause));
+    frag.appendChild(cb);
+
+    /* E: free_top_match */
+    frag.appendChild(el('div','section-label','現在の市場環境と過去局面の重なり'));
+    frag.appendChild(buildTopMatch(d.free_top_match, cause));
+
+    /* meta / 生成日時 */
+    const mb = el('div','meta-block');
+    const dt = fmtDatetime(d.generated_at);
+    if(dt){
+      mb.appendChild(el('div','generated','データ生成日時：' + dt));
+    }
+    if(d.data_note){
+      const dn = el('div','data-note');
+      dn.textContent = d.data_note;
+      mb.appendChild(dn);
+    }
+    frag.appendChild(mb);
+
+    /* disclaimer */
+    if(d.disclaimer){
+      const db = el('div','disclaimer-block');
+      const dp = el('p','');
+      dp.textContent = d.disclaimer;
+      db.appendChild(dp);
+      frag.appendChild(db);
+    }
+
+    /* footer */
+    const ft = el('footer','');
+    const back = el('a','back','← トップへ戻る');
+    back.href = 'index.html';
+    ft.appendChild(back);
+    ft.appendChild(el('div','foot-disclaimer','本ページの数値は過去の事実の記録であり、将来の値動きを示すものでも、特定の取引・銘柄・商品を推奨するものでもありません。'));
+    frag.appendChild(ft);
+
+    app.appendChild(frag);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* B: 指標グリッド                                                      */
+  /* ------------------------------------------------------------------ */
+
+  function buildIndicators(indicators){
+    const wrap = el('div','ctx');
+    const grid = el('div','ctx-grid');
+
+    const order = ['vix','oil','ff','ust10y'];
+    order.forEach(key => {
+      const meta = INDICATOR_META[key];
+      const ind  = (indicators && indicators[key]) ? indicators[key] : null;
+      const status = ind ? ind.status : 'unavailable';
+      const value  = ind ? ind.value  : null;
+      const asOf   = ind ? ind.as_of  : null;
+
+      const cell = el('div','ctx-cell');
+      cell.appendChild(el('div','ctx-label', meta.label));
+
+      if(status === 'unavailable'){
+        cell.appendChild(el('span','ctx-na','—'));
+        cell.appendChild(el('div','ctx-note','— / —'));
+      } else {
+        /* stale / ok: 値を表示 */
+        const formatted = fmt2(value);
+        if(formatted !== null){
+          const valWrap = el('span','ctx-val','');
+          valWrap.appendChild(document.createTextNode(formatted));
+          if(meta.unit){
+            const unitSpan = el('span','ctx-unit', '\u2009' + meta.unit);
+            valWrap.appendChild(unitSpan);
+          }
+          cell.appendChild(valWrap);
+        } else {
+          cell.appendChild(el('span','ctx-na','—'));
+        }
+        /* 基準日 */
+        cell.appendChild(el('div','ctx-note', asOf ? asOf : '—'));
+        /* stale 注記 */
+        if(status === 'stale'){
+          cell.appendChild(el('div','ctx-note','更新が古い可能性があります'));
+        }
+      }
+      grid.appendChild(cell);
+    });
+
+    wrap.appendChild(grid);
+    const cap = el('div','ctx-caption','各値はデータ提供元の最終更新時点のものです。基準日は指標ごとに異なります。');
+    wrap.appendChild(cap);
+    return wrap;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* C: 環境タグ                                                          */
+  /* ------------------------------------------------------------------ */
+
+  function buildEnvTags(tags, rateDisplay){
+    const wrap = el('div','env');
+    const row  = el('div','env-row');
+
+    const mst = tags || {};
+
+    /* VIX タグ */
+    const vixChip = el('span','env-chip');
+    vixChip.appendChild(el('span','chip-key','VIX'));
+    vixChip.appendChild(el('span','chip-val', VIX_LABELS[mst.vix] || '—'));
+    row.appendChild(vixChip);
+
+    /* 原油タグ */
+    const oilChip = el('span','env-chip');
+    oilChip.appendChild(el('span','chip-key','原油'));
+    oilChip.appendChild(el('span','chip-val', OIL_LABELS[mst.oil] || '—'));
+    row.appendChild(oilChip);
+
+    /* 金利タグ */
+    const rateChip = el('span','env-chip');
+    rateChip.appendChild(el('span','chip-key','金利環境'));
+    rateChip.appendChild(el('span','chip-val', RATE_LABELS[mst.rate] || '—'));
+    row.appendChild(rateChip);
+
+    wrap.appendChild(row);
+
+    /* rate_display */
+    const rd = rateDisplay || {};
+    const rateDetail = el('div','rate-detail');
+    const rateRow = el('div','rate-row');
+
+    const envLabel = (rd.rate_env_label !== null && rd.rate_env_label !== undefined)
+      ? rd.rate_env_label + '金利' : '—';
+    rateRow.appendChild(el('span','','金利環境：' + envLabel));
+
+    const spreadVal = fmt2(rd.spread);
+    const spreadStr = (spreadVal !== null) ? spreadVal + 'pt' : '—';
+    const curveStr  = CURVE_LABELS[rd.curve_note] || '—';
+    rateRow.appendChild(el('span','','FF-10年スプレッド：' + spreadStr + '（' + curveStr + '）'));
+
+    rateDetail.appendChild(rateRow);
+    wrap.appendChild(rateDetail);
+
+    wrap.appendChild(el('div','rate-note','FF金利と米10年債利回りのスプレッドは参考情報であり、類似局面のマッチング軸には使用していません。'));
+
+    return wrap;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* E: top1 表示                                                         */
+  /* ------------------------------------------------------------------ */
+
+  function buildTopMatch(freeTopMatch, cause){
+    const wrap = el('div','match');
+
+    if(!freeTopMatch || !freeTopMatch[cause]){
+      wrap.appendChild(el('p','','現在この事象タイプの比較対象を表示できません。'));
+      return wrap;
+    }
+
+    const m = freeTopMatch[cause];
+
+    if(m.event_id){
+      /* event_id あり */
+      const card = el('div','match-card');
+
+      /* head */
+      const head = el('div','match-card-head');
+      const badge = el('span', 'overlap-badge ' + overlapClass(m.overlap_label));
+      badge.textContent = m.overlap_label || '';
+      head.appendChild(badge);
+
+      const nameEl = el('p','match-name');
+      nameEl.textContent = m.name || '';
+      head.appendChild(nameEl);
+
+      const dateEl = el('div','match-date');
+      dateEl.textContent = m.date ? '発生日：' + m.date : '';
+      head.appendChild(dateEl);
+
+      card.appendChild(head);
+
+      /* body */
+      const body = el('div','match-card-body');
+
+      const sumEl = el('p','match-summary');
+      sumEl.textContent = m.matched_summary || '';
+      body.appendChild(sumEl);
+
+      const detailLink = el('a','detail-link','詳細を見る →');
+      detailLink.href = 'event_detail.html?id=' + encodeURIComponent(m.event_id);
+      body.appendChild(detailLink);
+
+      /* CTA */
+      const ctaBlock = el('div','cta-block');
+      const ctaText = m.cta || '有料版で類似局面の詳細比較を見る';
+      ctaBlock.appendChild(el('span','cta-disabled', ctaText));
+      ctaBlock.appendChild(el('div','cta-note','正式版で提供予定'));
+      body.appendChild(ctaBlock);
+
+      card.appendChild(body);
+      wrap.appendChild(card);
+
+    } else {
+      /* event_id = null */
+      const box = el('div','no-match-box');
+      box.appendChild(el('p','no-match-title','明確な類似局面はありません'));
+      const sumEl = el('p','no-match-summary');
+      sumEl.textContent = m.matched_summary || '';
+      box.appendChild(sumEl);
+      box.appendChild(el('p','no-match-note','これはエラーではなく、現在の市場環境が収録済みの過去局面と中程度以上には重ならない結果です。'));
+      wrap.appendChild(box);
+    }
+
+    return wrap;
+  }
+
+  /* ================================================================== */
+  /* エラー画面                                                           */
+  /* ================================================================== */
+
+  function renderCauseError(){
+    const box = el('div','error-box');
+    box.appendChild(el('p','','事象タイプが正しく選択されていません。'));
+    const lnk = el('a','','← トップへ戻り、事象タイプを選び直す');
+    lnk.href = 'index.html';
+    box.appendChild(lnk);
+    box.appendChild(renderErrorNav());
+    app.appendChild(box);
+  }
+
+  function renderFetchError(){
+    const box = el('div','error-box');
+    box.appendChild(el('p','','市場環境データを読み込めませんでした。時間をおいて再度お試しください。'));
+    const lnk = el('a','','← トップへ戻る');
+    lnk.href = 'index.html';
+    box.appendChild(lnk);
+    box.appendChild(renderErrorNav());
+    app.appendChild(box);
+  }
+
+  /* エラー画面共通の最小導線（トップ・免責） */
+  function renderErrorNav(){
+    const nav = el('div','error-nav');
+    nav.style.cssText = 'margin-top:20px;font-family:var(--mono);font-size:11px;color:var(--ink-soft);display:flex;gap:16px;';
+    const d = el('a','','免責事項');
+    d.href = 'disclaimer.html';
+    d.style.cssText = 'border-bottom:1px solid var(--line-rule);color:var(--ink-soft);';
+    nav.appendChild(d);
+    return nav;
+  }
+
+})();
+</script>
+
+</body>
+</html>
