@@ -46,6 +46,8 @@ HERE = os.path.dirname(__file__)
 EVENTS_PATH = os.path.join(HERE, "..", "data", "events.json")
 GROUP_META_PATH = os.path.join(HERE, "..", "data", "group_metadata.json")
 OUT_PATH = os.path.join(HERE, "..", "data", "event_reactions.json")
+MARKET_PATH = os.path.join(HERE, "..", "data", "market.json")
+CURRENT_CONTEXT_PATH = os.path.join(HERE, "..", "data", "current_context_public.json")
 
 # 対象資産。source=fred は FRED API、source=stooq は Stooq から取得。
 # restricted=Trueは再配布制限があるため生値を出さず変化率/派生値のみ表示。
@@ -65,6 +67,67 @@ HORIZONS = [
     ("d30", 30),
     ("d90", 90),
 ]
+
+# ===== market_state_tags 共通分類関数 =====
+# 現在側・過去イベント側の両方が必ずこれらを使う。閾値は仕様として固定。
+
+# CSN Step1 に実在する8分類（index.html から確認済み）
+CSN_CAUSE_TAGS = [
+    "supply_shock", "bank_crisis", "war", "middle_east",
+    "monetary_tightening", "monetary_easing", "emergency_cut", "pandemic",
+]
+
+def classify_vix(value):
+    """VIX水準を帯タグ化。None → None。"""
+    if value is None:
+        return None
+    if value < 15:
+        return "calm"
+    if value < 25:
+        return "elev"
+    if value < 40:
+        return "stress"
+    return "panic"
+
+
+def classify_oil(value):
+    """WTI原油水準を帯タグ化。None → None。"""
+    if value is None:
+        return None
+    if value < 40:
+        return "lo"
+    if value < 80:
+        return "mid"
+    return "hi"
+
+
+def classify_rate(ff, ust10y):
+    """FF金利と10年債利回りの単純平均で金利環境を帯タグ化。
+    片方欠損時は存在する値のみ利用。両方欠損時は None。"""
+    vals = [v for v in [ff, ust10y] if v is not None]
+    if not vals:
+        return None
+    avg = sum(vals) / len(vals)
+    if avg < 2:
+        return "low"
+    if avg < 4:
+        return "mid"
+    return "high"
+
+
+def build_market_state_tags(vix, oil, ff, ust10y):
+    """4指標値から market_state_tags dict を生成。タグなし軸は含めない。"""
+    tags = {}
+    v = classify_vix(vix)
+    if v is not None:
+        tags["vix"] = v
+    o = classify_oil(oil)
+    if o is not None:
+        tags["oil"] = o
+    r = classify_rate(ff, ust10y)
+    if r is not None:
+        tags["rate"] = r
+    return tags
 
 
 # モジュールレベルの系列キャッシュ（1回のActions実行中に全関数で共有）
@@ -471,6 +534,287 @@ def summarize_by_cause(events_with_reactions, horizon="d30", conf_levels=None):
     return summary
 
 
+def build_current_context(er_payload):
+    """
+    current_context_public.json を生成する。
+    market.json（VIX/油/10年債）と _SERIES_CACHE["DFF"]（FF金利）を統合し、
+    現在の market_state_tags と cause別無料top1を出力する。
+
+    設計原則:
+    - 有料加工結果（候補2-5件・全一致/不一致・6資産反応）は含めない
+    - DFF取得失敗時も既存のevent_reactions.json生成は継続済みのため、
+      ここでは失敗を捕捉してフォールバックするだけでよい
+    - 現在・過去で必ず同じ build_market_state_tags を使用
+    - 日時はすべてJST基準（UTC+9）で統一
+    """
+    # JST 基準の「今日」: GitHub Actions は UTC 動作のため date.today() は UTC 日付になる。
+    # UTC+9 で統一することで日付境界付近の1日ズレを防ぐ。
+    _JST = dt.timezone(dt.timedelta(hours=9))
+    today_jst = dt.datetime.now(_JST).date()
+
+    # ---------- 1. market.json からVIX・油・10年債を取得 ----------
+    # market.json の各系列を取得するための明示的マッピング。
+    # Git版(idなし)では asset + label完全一致で取得。曖昧な部分一致は使わない。
+    # asset="equity" は VIX と S&P500 の2件存在するため label も必ず照合する。
+    # 安全に特定できない場合は unavailable とする。
+    _MARKET_SERIES_MAP = {
+        # series_id: (asset値, label完全一致文字列)
+        "VIXCLS":     ("equity", "VIX(恐怖指数)"),
+        "DCOILWTICO": ("oil",    "WTI原油先物"),
+        "DGS10":      ("bond",   "米10年債利回り"),
+    }
+
+    def _load_market():
+        try:
+            with open(MARKET_PATH, encoding="utf-8") as f:
+                mkt = json.load(f)
+        except Exception as e:
+            print(f"  [current_context] market.json 読み込み失敗: {e}")
+            return {}, []
+        series_list = mkt.get("series", [])
+        by_id = {}
+        for s in series_list:
+            if isinstance(s, dict) and s.get("id"):
+                by_id[s["id"]] = s
+        return by_id, series_list
+
+    by_id, series_list = _load_market()
+
+    def _get_series(series_id):
+        """id → フォールバック(asset完全一致+label完全一致) の順で market series を取得。
+        曖昧な部分一致は使わない。安全に特定できなければ None を返す。"""
+        s = by_id.get(series_id)
+        if s:
+            return s
+        # Git版フォールバック: _MARKET_SERIES_MAP に定義された asset + label 完全一致のみ
+        mapping = _MARKET_SERIES_MAP.get(series_id)
+        if mapping is None:
+            return None
+        expected_asset, expected_label = mapping
+        for item in series_list:
+            if not isinstance(item, dict):
+                continue
+            if item.get("asset") == expected_asset and item.get("label") == expected_label:
+                return item
+        return None
+
+    def _indicator(s):
+        """market.json の series エントリ → indicators エントリ。stale判定はJST基準。
+        - value なし / as_of なし / as_of 解析不能 → status="unavailable"
+        - 有効な as_of で 8暦日以上前                → status="stale"
+        - 有効な as_of で 7暦日以内                  → status="ok"
+        """
+        if s is None or s.get("latest_value") is None:
+            return {"value": None, "as_of": None, "status": "unavailable"}
+        val = s["latest_value"]
+        as_of_str = s.get("as_of")
+        if not as_of_str:
+            return {"value": None, "as_of": None, "status": "unavailable"}
+        try:
+            delta = (today_jst - dt.date.fromisoformat(as_of_str)).days
+            status = "ok" if delta <= 7 else "stale"
+        except ValueError:
+            # as_of が ISO 日付として解析不能 → unavailable
+            return {"value": None, "as_of": None, "status": "unavailable"}
+        return {"value": val, "as_of": as_of_str, "status": status}
+
+    ind_vix    = _indicator(_get_series("VIXCLS"))
+    ind_oil    = _indicator(_get_series("DCOILWTICO"))
+    ind_ust10y = _indicator(_get_series("DGS10"))
+
+    # ---------- 2. _SERIES_CACHE["DFF"] から FF 現在値を取得 ----------
+    # DFF は build() 内の先行ロードで _SERIES_CACHE に登録済み（失敗時は空dict）。
+    # 空dictの場合も dff_cache が falsy なので unavailable に落ちる。
+    ff_val = None
+    ff_as_of = None
+    ff_status = "unavailable"
+    try:
+        dff_cache = _SERIES_CACHE.get("DFF", {})
+        if dff_cache:
+            # JST基準の今日以前の最新値を取得（最大7日遡及）
+            ff_val, ff_date_str = value_on_or_before(dff_cache, today_jst, max_lookback=7)
+            if ff_val is not None:
+                ff_val = round(ff_val, 4)
+                ff_as_of = ff_date_str
+                delta = (today_jst - dt.date.fromisoformat(ff_date_str)).days
+                ff_status = "ok" if delta <= 7 else "stale"
+            else:
+                print("  [current_context] DFF: キャッシュあるが今日前後7日の値なし → unavailable")
+        else:
+            print("  [current_context] DFF: キャッシュ未取得 → unavailable (金利環境は10年債のみでフォールバック)")
+    except Exception as e:
+        print(f"  [current_context] DFF 現在値取得中に例外: {e}")
+
+    ind_ff = {"value": ff_val, "as_of": ff_as_of, "status": ff_status}
+
+    # ---------- 3. market_state_tags 生成 ----------
+    vix_val    = ind_vix["value"]
+    oil_val    = ind_oil["value"]
+    ust10y_val = ind_ust10y["value"]
+
+    state_tags = build_market_state_tags(vix_val, oil_val, ff_val, ust10y_val)
+    data_completeness = len(state_tags)  # 0〜3
+
+    # ---------- 4. rate_display 生成 ----------
+    rate_labels = {"low": "低", "mid": "中", "high": "高"}
+    rate_env_label = rate_labels.get(state_tags.get("rate"))  # rate タグなし → None（画面側で "--" に変換）
+
+    spread = None
+    curve_note = None
+    if ff_val is not None and ust10y_val is not None:
+        spread = round(ust10y_val - ff_val, 3)
+        if spread < -0.3:
+            curve_note = "inverted"
+        elif spread < 0.3:
+            curve_note = "flat"
+        else:
+            curve_note = "normal"
+
+    rate_display = {
+        "rate_env_label": rate_env_label,
+        "spread": spread,
+        "curve_note": curve_note,
+    }
+
+    # ---------- 5. free_top_match 生成 ----------
+    # er_payload["events"] の context_snapshot を使い、
+    # cause別にグループ内での state_tags 一致数でtop1を選ぶ。
+    # 現在と過去で必ず同じ classify_*/build_market_state_tags を使用する。
+    # oil_shock_1973 は比較可能軸2未満のためランキング対象外（通常除外）。
+    # data_completeness < 2 のとき全グループで「明確な類似局面なし」とする。
+
+    RANK_EXCLUDED = {"oil_shock_1973"}  # ランキング対象外（参考イベント）
+
+    def _make_matched_summary(matched_axes):
+        """一致した軸のリストから人間が読めるサマリー文字列を生成。"""
+        labels = {"vix": "VIX水準", "oil": "原油水準", "rate": "金利環境"}
+        parts = [labels.get(a, a) for a in matched_axes]
+        if not parts:
+            return "一致する市場環境なし"
+        return "・".join(parts) + "が一致"
+
+    events_for_match = er_payload.get("events", [])
+
+    def _top1_for_cause(cause_tag):
+        """cause_tag グループ内のtop1候補を返す。なければNoneを返す。"""
+        group = [
+            e for e in events_for_match
+            if cause_tag in (e.get("cause_tags") or [])
+            and e["id"] not in RANK_EXCLUDED
+        ]
+        if not group:
+            return None
+
+        scored = []
+        for ev in group:
+            cs = ev.get("context_snapshot") or {}
+            ev_tags = build_market_state_tags(
+                cs.get("vix_level"),
+                cs.get("oil_price_wti"),
+                cs.get("fed_funds_rate"),
+                cs.get("ust10y_yield"),
+            )
+            # 両者に共通して存在する軸のみ比較
+            common_axes = set(state_tags) & set(ev_tags)
+            if len(common_axes) < 2:
+                continue  # 比較可能軸2未満は除外
+            matched = [ax for ax in common_axes if state_tags[ax] == ev_tags[ax]]
+            n_match = len(matched)
+            n_comp  = len(common_axes)
+            # 発生日（新しい順で同点解消）: ISO文字列の降順
+            scored.append((n_match, n_comp, ev["date"], matched, ev))
+
+        if not scored:
+            return None
+
+        # ソート: 一致数↓ → 比較可能数↓ → 発生日↓（新しい順）
+        # ISO日付文字列(YYYY-MM-DD)を整数に変換して負値にすることで降順化
+        def _date_key(d):
+            try:
+                return -int(d.replace("-", ""))
+            except Exception:
+                return 0
+
+        scored.sort(key=lambda x: (-x[0], -x[1], _date_key(x[2])))
+        best = scored[0]
+        n_match, n_comp, _, matched_axes, best_ev = best
+
+        # 重なりラベル判定
+        if n_match == 3:
+            overlap_label = "高い重なり"
+        elif n_match >= 1 and n_match > n_comp / 2:
+            overlap_label = "中程度の重なり"
+        elif n_match == 1:
+            overlap_label = "部分的な重なり"
+        else:
+            overlap_label = "明確な類似局面なし"
+
+        # 無料top1の表示条件:
+        # 「高い重なり」「中程度の重なり」のみ event_id を返す。
+        # 「部分的な重なり」以下は候補はあるが重なり不足 → event_id=null で返す。
+        if overlap_label in ("高い重なり", "中程度の重なり"):
+            return {
+                "event_id":        best_ev["id"],
+                "name":            best_ev["name"],
+                "date":            best_ev["date"],
+                "overlap_label":   overlap_label,
+                "matched_summary": _make_matched_summary(matched_axes),
+                "cta":             "有料版で類似局面の詳細比較を見る",
+            }
+        else:
+            # 候補はあるが中程度以上の重なりなし
+            return {
+                "event_id":        None,
+                "overlap_label":   "明確な類似局面なし",
+                "matched_summary": "現在の市場環境と中程度以上に重なる過去局面はありません",
+            }
+
+    free_top_match = {}
+    for cause_tag in CSN_CAUSE_TAGS:
+        if data_completeness < 2:
+            free_top_match[cause_tag] = {
+                "event_id": None,
+                "overlap_label": "明確な類似局面なし",
+                "matched_summary": "現在の市場環境データが不足しているため比較できません",
+            }
+        else:
+            result = _top1_for_cause(cause_tag)
+            if result is None:
+                free_top_match[cause_tag] = {
+                    "event_id": None,
+                    "overlap_label": "明確な類似局面なし",
+                    "matched_summary": "該当する比較対象がありません",
+                }
+            else:
+                free_top_match[cause_tag] = result
+
+    # ---------- 6. 出力 ----------
+    now_jst = dt.datetime.now(_JST)
+
+    context_payload = {
+        "generated_at": now_jst.strftime("%Y-%m-%dT%H:%M:%S+09:00"),
+        "indicators": {
+            "vix":    ind_vix,
+            "oil":    ind_oil,
+            "ff":     ind_ff,
+            "ust10y": ind_ust10y,
+        },
+        "market_state_tags": state_tags,
+        "rate_display": rate_display,
+        "data_completeness": data_completeness,
+        "free_top_match": free_top_match,
+        "disclaimer": "本データは過去の市場状況の記録であり、将来の値動きを示すものでも、売買を推奨するものでもありません。",
+        "data_note": "各指標の基準日はデータ提供元の更新タイミングにより異なります。CPI等の月次データはこのファイルに含まれません。",
+    }
+
+    try:
+        with open(CURRENT_CONTEXT_PATH, "w", encoding="utf-8") as f:
+            json.dump(context_payload, f, ensure_ascii=False, indent=2)
+        print(f"[current_context] 書き出し完了: {CURRENT_CONTEXT_PATH}")
+    except Exception as e:
+        print(f"  [current_context] 書き出し失敗: {e}")
+
+
 def build():
     with open(EVENTS_PATH, encoding="utf-8") as f:
         events_master = json.load(f)
@@ -487,6 +831,20 @@ def build():
         "fed_funds_rate": "DFF",
         "ust10y_yield":  "DGS10",
     }
+
+    # DFF 無条件先行ロード:
+    # auto_fill は cs.get("fed_funds_rate") が非 None のとき DFF 取得をスキップするため、
+    # 全19件のFF金利が充填済みの本番では DFF が _SERIES_CACHE に登録されない。
+    # current_context 生成で DFF 現在値が必要なため、ここで最大1回だけ確実に登録する。
+    # キャッシュ済みなら fetch_series_range_cached が再取得せずキャッシュを再利用する。
+    # 【失敗時も空dictをキャッシュ】: 失敗後に auto_fill が fed_funds_rate=None の
+    # イベントに対してDFFを再試行しないよう、失敗結果も _SERIES_CACHE["DFF"]={} で確定する。
+    if "DFF" not in _SERIES_CACHE:
+        try:
+            fetch_series_range_cached("DFF", _CACHE_START, _CACHE_END)
+        except Exception as e:
+            print(f"  [build] DFF 先行ロード失敗: {_safe_error_message(e)} → 空キャッシュを登録し再試行を防止")
+            _SERIES_CACHE["DFF"] = {}  # 失敗結果をキャッシュ: 以後 auto_fill も再試行しない
 
     def fetch_cs_value(series_id, base_date):
         """イベント日時点のFRED値を取得（モジュールレベルの_SERIES_CACHEを共有）。
@@ -610,3 +968,6 @@ if __name__ == "__main__":
         json.dump(payload, f, ensure_ascii=False, indent=2)
     print(f"書き出し完了: {OUT_PATH}")
     print(json.dumps(payload, ensure_ascii=False, indent=2)[:1200])
+
+    # ===== S2: current_context_public.json 生成 =====
+    build_current_context(payload)
