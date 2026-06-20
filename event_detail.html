@@ -126,9 +126,21 @@
   .insight-box p{margin:0 0 10px;font-size:14px;line-height:1.9;}
   .insight-box .insight-note{font-size:11px;color:var(--ink-soft);margin:0;padding-top:8px;border-top:1px dashed var(--line-rule);}
 
+  /* context_snapshot */
+  .ctx{padding:14px 5vw 0;}
+  .ctx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;border:1px solid var(--line-rule);background:var(--line-rule);}
+  .ctx-cell{background:var(--paper);padding:14px 16px;}
+  .ctx-cell .ctx-label{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--ink-soft);margin-bottom:6px;}
+  .ctx-cell .ctx-val{font-family:var(--mono);font-size:18px;font-weight:500;line-height:1.2;}
+  .ctx-cell .ctx-unit{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-left:3px;}
+  .ctx-cell .ctx-na{font-family:var(--mono);font-size:18px;color:var(--ink-soft);}
+  .ctx-cell .ctx-note{font-family:var(--mono);font-size:9.5px;color:var(--ink-soft);margin-top:4px;opacity:0.8;}
+  .ctx-caption{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);padding:8px 0 0;max-width:64ch;}
+
   @media (max-width:680px){
     .contrast-sides{grid-template-columns:1fr;}
     .contrast-mid{padding:8px 0;transform:rotate(90deg);}
+    .ctx-grid{grid-template-columns:repeat(2,1fr);}
   }
 </style>
 </head>
@@ -157,6 +169,55 @@
   const horizonLabels = {d1:'1日後', d7:'7日後', d30:'30日後', d90:'90日後'};
   function pct(v){ if(v===null||v===undefined) return '—'; return (v>0?'+':'')+v.toFixed(1)+'%'; }
   function cls(v){ if(v===null||v===undefined) return ''; return v>0?'pos':(v<0?'neg':''); }
+
+  // context_snapshot 表示ヘルパー
+  function renderContextSnapshot(ev){
+    const cs = ev.context_snapshot;
+    if(!cs) return '';
+    const baseDate = ev.date;
+
+    // 値フォーマット: null/undefined → null、0 は 0 として表示
+    function fmtVal(v){ return (v === null || v === undefined) ? null : v; }
+
+    // VIX・原油の欠損注記: oil_shock_1973 のみ対象時期の理由を出し分け、それ以外は汎用文言
+    const noSeriesNote = ev.id === 'oil_shock_1973'
+      ? '対象時期に利用できる系列データがありません'
+      : 'この指標のデータは収録されていません';
+
+    const items = [
+      { key:'vix_level',      label:'VIX',          unit:'',        decimals:2,
+        naNote: noSeriesNote },
+      { key:'oil_price_wti',  label:'WTI原油',       unit:'USD/bbl', decimals:1,
+        naNote: noSeriesNote },
+      { key:'fed_funds_rate', label:'FF金利',         unit:'%',       decimals:2,
+        naNote:'この指標のデータは収録されていません' },
+      { key:'ust10y_yield',   label:'米10年債利回り',  unit:'%',       decimals:2,
+        naNote:'この指標のデータは収録されていません' },
+      { key:'cpi_yoy',        label:'CPI前年比',      unit:'%',       decimals:1,
+        naNote:'このイベントのCPIデータは収録されていません', presentNote:'月次データ' },
+    ];
+
+    const cells = items.map(item => {
+      const raw = fmtVal(cs[item.key]);
+      let valHtml, noteHtml;
+      if(raw !== null){
+        valHtml = `<span class="ctx-val">${raw.toFixed(item.decimals)}<span class="ctx-unit">${item.unit ? '\u2009' + item.unit : ''}</span></span>`;
+        noteHtml = item.presentNote ? `<div class="ctx-note">${item.presentNote}</div>` : '';
+      } else {
+        valHtml = `<span class="ctx-na">—</span>`;
+        noteHtml = item.naNote ? `<div class="ctx-note">${item.naNote}</div>` : '';
+      }
+      return `<div class="ctx-cell"><div class="ctx-label">${item.label}</div>${valHtml}${noteHtml}</div>`;
+    }).join('');
+
+    const dateNote = baseDate ? `基準日: ${baseDate} 時点（休場日の場合は直前の取引日）` : '';
+
+    return `<div class="section-label">イベント発生時の市場環境</div>
+      <div class="ctx">
+        <div class="ctx-grid">${cells}</div>
+        <div class="ctx-caption">各値はイベント基準日時点またはその直前に取得可能だったデータです。${dateNote ? dateNote + '。' : ''}現在の市場状況ではありません。</div>
+      </div>`;
+  }
 
   let data;
   try{
@@ -338,6 +399,8 @@
     <div class="prop"><div class="prop-flow">${flowHtml || '<span style="color:var(--ink-soft)">記録なし</span>'}</div></div>
 
     ${reasonHtml}
+
+    ${renderContextSnapshot(ev)}
 
     <div class="section-label">発生後の各資産の変化（実データ）</div>
     <div class="horizon-switch" id="horizon-switch">
