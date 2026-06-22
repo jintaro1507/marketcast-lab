@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>アカウント ｜ Marketcast Lab</title>
+<style>
+  :root{
+    --paper:#F2EFE8; --paper-deep:#E8E3D7; --ink:#1C1A16; --ink-soft:#5B564B;
+    --line-rule:#cfc7b6;
+    --display:"Shippori Mincho","Noto Serif JP",serif;
+    --body:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;
+    --mono:"JetBrains Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.7;-webkit-font-smoothing:antialiased;}
+  a{color:var(--ink);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  header{
+    border-bottom:1px solid var(--line-rule);
+    padding:18px 5vw 16px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .brand{font-family:var(--display);font-size:22px;letter-spacing:0.04em;display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{font-family:var(--mono);font-size:11px;color:var(--ink-soft);border:1px solid var(--line-rule);padding:2px 6px;border-radius:2px;letter-spacing:0.08em;}
+  nav{display:flex;gap:28px;font-size:13px;letter-spacing:0.03em;color:var(--ink-soft);}
+  nav a{color:var(--ink-soft);}
+  nav a:hover{color:var(--ink);}
+
+  .page-wrap{max-width:480px;margin:64px auto 80px;padding:0 5vw;}
+  h1{font-family:var(--display);font-size:22px;font-weight:400;letter-spacing:0.04em;margin:0 0 32px;}
+
+  .account-section{
+    border:1px solid var(--line-rule);
+    background:var(--paper-deep);
+    border-radius:2px;
+    padding:24px 28px;
+    margin-bottom:24px;
+  }
+  .account-section h2{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    margin:0 0 16px;
+    border-bottom:1px solid var(--line-rule);
+    padding-bottom:10px;
+  }
+  .account-row{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    font-size:14px;
+  }
+  .account-label{font-size:12px;color:var(--ink-soft);min-width:80px;}
+  #account-email{font-family:var(--mono);font-size:13px;word-break:break-all;}
+
+  .auth-msg{font-size:13px;padding:10px 12px;border-radius:2px;margin-bottom:16px;}
+  .auth-msg--ok{background:#e8f0eb;color:#1a4a2e;border:1px solid #b0d4bc;}
+  .auth-msg--error{background:#f5eae8;color:#5a1a14;border:1px solid #d4b0ac;}
+
+  .logout-btn{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1px solid var(--line-rule);
+    border-radius:2px;
+    padding:10px 20px;
+    font-family:var(--body);
+    font-size:13px;
+    letter-spacing:0.04em;
+    cursor:pointer;
+  }
+  .logout-btn:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .logout-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+  footer{border-top:1px solid var(--line-rule);padding:20px 5vw;font-size:12px;color:var(--ink-soft);margin-top:auto;}
+</style>
+</head>
+<body data-auth-page="account">
+
+<header>
+  <div class="brand"><a href="index.html">Marketcast Lab</a> <span class="mark">観測所</span></div>
+  <nav>
+    <a href="index.html#events">イベント観測</a>
+    <a href="index.html#assets">資産別反応史</a>
+    <a href="glossary.html">用語解説</a>
+    <a href="disclaimer.html">免責事項</a>
+    <a href="account.html" data-auth-link>アカウント</a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+  <h1>アカウント</h1>
+
+  <p id="auth-message" class="auth-msg" hidden></p>
+
+  <div class="account-section">
+    <h2>登録情報</h2>
+    <div class="account-row">
+      <span class="account-label">メール</span>
+      <span id="account-email">読み込み中…</span>
+    </div>
+  </div>
+
+  <button type="button" id="logout-btn" class="logout-btn">ログアウト</button>
+</div>
+
+<footer>Marketcast Lab — β版</footer>
+
+<script type="module" src="assets/js/auth-pages.js"></script>
+<script type="module" src="assets/js/auth-common.js"></script>
+</body>
+</html>
