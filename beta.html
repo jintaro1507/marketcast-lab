@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>β版事前登録 ｜ Marketcast Lab</title>
+<meta name="description" content="世界の重大イベント後に、株・金・原油・為替など主要資産がどう動いたかを比較できるMarketcast Lab。β版公開時の案内を受け取れます。">
+
+<!-- OGP (title・description・typeは設定済み) -->
+<meta property="og:title" content="β版事前登録 ｜ Marketcast Lab">
+<meta property="og:description" content="世界の重大イベント後に、株・金・原油・為替など主要資産がどう動いたかを比較できるMarketcast Lab。β版公開時の案内を受け取れます。">
+<meta property="og:type" content="website">
+<!--
+  ★ 公開前に追加が必要な OGP タグ ★
+  以下の2項目は確認・準備が完了してから追加してください。
+  公開URLはリポジトリ Settings > Pages で確認してください。
+  OGP画像(推奨 1200×630px)を assets/img/ogp.png として配置してから追加してください。
+
+  <meta property="og:url" content="https://【公開URL】/beta.html">
+  <meta property="og:image" content="https://【公開URL】/assets/img/ogp.png">
+-->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="β版事前登録 ｜ Marketcast Lab">
+<meta name="twitter:description" content="世界の重大イベント後に、株・金・原油・為替など主要資産がどう動いたかを比較できるMarketcast Lab。β版公開時の案内を受け取れます。">
+<!--
+  <meta name="twitter:image" content="https://【公開URL】/assets/img/ogp.png">
+-->
+
+<style>
+  /* ===== デザイントークン（既存サイト準拠） ===== */
+  :root{
+    --paper: #F2EFE8;
+    --paper-deep: #E8E3D7;
+    --ink: #1C1A16;
+    --ink-soft: #5B564B;
+    --line-rule: #cfc7b6;
+    --equity: #38456B;
+    --accent-up: #8A3B2E;
+    --accent-down: #2F5D4E;
+    --display: "Shippori Mincho", "Noto Serif JP", serif;
+    --body: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+    --mono: "JetBrains Mono", "Courier New", monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ===== Disclaimer strip ===== */
+  .strip{background:var(--ink);color:var(--paper);font-size:12px;letter-spacing:0.02em;padding:8px 5vw;display:flex;gap:8px;align-items:center;}
+  .strip b{font-weight:600;}
+
+  /* ===== Header ===== */
+  header{border-bottom:1px solid var(--line-rule);padding:18px 5vw 16px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .brand{font-family:var(--display);font-size:22px;letter-spacing:0.04em;display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{font-family:var(--mono);font-size:11px;color:var(--ink-soft);border:1px solid var(--line-rule);padding:2px 6px;border-radius:2px;letter-spacing:0.08em;}
+  nav{display:flex;gap:28px;font-size:13px;letter-spacing:0.03em;color:var(--ink-soft);}
+  nav a:hover{color:var(--ink);}
+
+  /* ===== Hero ===== */
+  .page-head{padding:52px 5vw 36px;border-bottom:1px solid var(--line-rule);}
+  .page-head .eyebrow{font-family:var(--mono);font-size:12px;color:var(--ink-soft);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:16px;}
+  .page-head .status-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--accent-down);border:1px solid var(--accent-down);border-radius:2px;padding:3px 8px;margin-bottom:18px;letter-spacing:0.06em;}
+  .page-head .status-badge::before{content:'';display:inline-block;width:6px;height:6px;background:var(--accent-down);border-radius:50%;}
+  .page-head h1{font-family:var(--display);font-size:clamp(26px,3.8vw,46px);line-height:1.4;margin:0 0 18px;max-width:22ch;}
+  .page-head p.lead{max-width:52ch;color:var(--ink-soft);font-size:14.5px;margin:0 0 28px;}
+  .cta-btn{display:inline-block;background:var(--equity);color:#fff;font-family:var(--body);font-size:14px;font-weight:600;padding:11px 28px;border:none;border-radius:2px;cursor:pointer;letter-spacing:0.03em;transition:opacity .15s;}
+  .cta-btn:hover,.cta-btn:focus-visible{opacity:.85;}
+  .cta-btn:focus-visible{outline:2px solid var(--equity);outline-offset:3px;}
+
+  /* ===== Section ===== */
+  .section{padding:44px 5vw;border-bottom:1px solid var(--line-rule);}
+  .section-eyebrow{font-family:var(--mono);font-size:11px;color:var(--ink-soft);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:18px;}
+  .section-title{font-family:var(--display);font-size:clamp(19px,2.2vw,26px);margin:0 0 24px;line-height:1.45;}
+
+  /* ===== Feature cards ===== */
+  .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;border:1px solid var(--line-rule);background:var(--line-rule);}
+  .feature-card{background:var(--paper);padding:24px 22px;}
+  .feature-card .card-tag{font-family:var(--mono);font-size:10px;color:var(--equity);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;display:block;}
+  .feature-card h3{font-family:var(--display);font-size:16px;margin:0 0 8px;line-height:1.45;}
+  .feature-card p{font-size:13px;color:var(--ink-soft);margin:0;line-height:1.7;}
+
+  /* ===== Audience ===== */
+  .audience-list{list-style:none;padding:0;margin:0;display:grid;gap:1px;border:1px solid var(--line-rule);background:var(--line-rule);}
+  .audience-list li{background:var(--paper);padding:14px 22px;font-size:14px;color:var(--ink-soft);display:flex;align-items:baseline;gap:12px;}
+  .audience-list li::before{content:'→';font-family:var(--mono);font-size:11px;color:var(--equity);flex-shrink:0;}
+
+  /* ===== Screenshot ===== */
+  .screenshot-wrap{margin-top:0;}
+  .screenshot-placeholder{width:100%;aspect-ratio:16/9;background:var(--paper-deep);border:1px solid var(--line-rule);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--ink-soft);font-family:var(--mono);font-size:11px;letter-spacing:0.06em;}
+  .screenshot-caption{margin-top:10px;font-size:13px;color:var(--ink-soft);}
+
+  /* ===== Form section ===== */
+  .form-section{padding:44px 5vw;background:var(--paper-deep);border-top:2px solid var(--equity);}
+  .form-inner{max-width:540px;}
+  .form-section h2{font-family:var(--display);font-size:clamp(19px,2.2vw,26px);margin:0 0 8px;}
+  .form-desc{font-size:14px;color:var(--ink-soft);margin:0 0 28px;line-height:1.7;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12px;font-weight:600;letter-spacing:0.03em;margin-bottom:5px;}
+  .field .req{font-family:var(--mono);font-size:10px;color:var(--accent-up);margin-left:4px;}
+  .field .opt{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-left:4px;}
+  .field input,.field select{width:100%;padding:9px 11px;font-family:var(--body);font-size:14px;color:var(--ink);background:var(--paper);border:1px solid var(--line-rule);border-radius:2px;appearance:none;transition:border-color .15s;}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--equity);box-shadow:0 0 0 2px rgba(56,69,107,.15);}
+  .field input::placeholder{color:var(--ink-soft);}
+  .field input.is-error,.field select.is-error{border-color:var(--accent-up);}
+  .field-error{display:none;font-size:11px;font-family:var(--mono);color:var(--accent-up);margin-top:4px;}
+  .field input.is-error~.field-error,.field select.is-error~.field-error{display:block;}
+
+  .consent-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:20px;}
+  .consent-row input[type=checkbox]{width:14px;height:14px;flex-shrink:0;margin-top:3px;accent-color:var(--equity);cursor:pointer;}
+  .consent-row label{font-size:13px;color:var(--ink-soft);line-height:1.6;cursor:pointer;}
+  .consent-row label a{color:var(--equity);text-decoration:underline;text-underline-offset:2px;}
+  .consent-row label a:hover{opacity:.8;}
+  .consent-error{display:none;font-size:11px;font-family:var(--mono);color:var(--accent-up);margin:-14px 0 16px;}
+
+  .submit-btn{width:100%;background:var(--equity);color:#fff;font-family:var(--body);font-size:14px;font-weight:600;padding:12px 20px;border:none;border-radius:2px;cursor:pointer;letter-spacing:0.03em;transition:opacity .15s;}
+  .submit-btn:hover:not(:disabled){opacity:.85;}
+  .submit-btn:focus-visible{outline:2px solid var(--equity);outline-offset:3px;}
+  .submit-btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  .form-message{display:none;padding:12px 16px;border-radius:2px;font-size:13px;line-height:1.6;margin-top:14px;}
+  .form-message.success{display:block;background:rgba(47,93,78,.08);border:1px solid var(--accent-down);color:var(--accent-down);}
+  .form-message.error{display:block;background:rgba(138,59,46,.08);border:1px solid var(--accent-up);color:var(--accent-up);}
+  .form-message.duplicate{display:block;background:rgba(56,69,107,.07);border:1px solid var(--equity);color:var(--equity);}
+
+  .disclaimer-note{margin-top:24px;padding-top:18px;border-top:1px solid var(--line-rule);font-size:12px;color:var(--ink-soft);line-height:1.7;}
+
+  /* ===== Footer ===== */
+  footer{margin-top:0;border-top:1px solid var(--line-rule);padding:24px 5vw 40px;font-size:12px;color:var(--ink-soft);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-family:var(--mono);}
+  .footer-links{display:flex;gap:24px;list-style:none;padding:0;margin:0;}
+  .footer-links a:hover{color:var(--ink);}
+
+  /* ===== Focus & Motion ===== */
+  :focus-visible{outline:2px solid var(--equity);outline-offset:2px;}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}*,*::before,*::after{transition:none!important;}}
+
+  /* ===== Responsive ===== */
+  @media(max-width:600px){
+    .page-head{padding:36px 5vw 28px;}
+    .section{padding:36px 5vw;}
+    .form-section{padding:36px 5vw;}
+    .feature-grid{grid-template-columns:1fr;}
+    footer{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<div class="strip"><b>本サイトは情報提供・教育目的です。</b>個別の投資助言ではありません。最終判断はご自身の責任で行ってください。</div>
+
+<header>
+  <div class="brand"><a href="index.html">Marketcast Lab</a> <span class="mark">観測所</span></div>
+  <nav>
+    <a href="index.html#events">イベント観測</a>
+    <a href="index.html#assets">資産別反応史</a>
+    <a href="glossary.html">用語解説</a>
+    <a href="disclaimer.html">免責事項</a>
+    <a href="login.html" data-auth-link>ログイン</a>
+  </nav>
+</header>
+
+<!-- Hero -->
+<div class="page-head">
+  <div class="eyebrow">Beta Registration</div>
+  <div class="status-badge">β版開発中</div>
+  <h1>世界で何かが起きたとき、市場はどう動いたか。</h1>
+  <p class="lead">Marketcast Labは、過去の重大イベント後に、株・金・原油・為替など主要6資産がどう動いたかを、翌日・7日後・30日後・90日後の時間軸で比較できる市場分析サービスです。</p>
+  <a href="#register" class="cta-btn">β版の案内を受け取る</a>
+</div>
+
+<!-- Features -->
+<div class="section" id="features">
+  <div class="section-eyebrow">できること</div>
+  <h2 class="section-title">Marketcast Labでできること</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <span class="card-tag">Event</span>
+      <h3>過去の重大イベントを比較</h3>
+      <p>戦争、金融危機、政策変更、選挙、感染症など、世界の重大イベント後の市場反応を確認できます。</p>
+    </div>
+    <div class="feature-card">
+      <span class="card-tag">Asset</span>
+      <h3>主要資産を横断して確認</h3>
+      <p>株式、金、原油、為替など、主要6資産の動きを同じ基準で比較できます。</p>
+    </div>
+    <div class="feature-card">
+      <span class="card-tag">Time</span>
+      <h3>複数の時間軸で確認</h3>
+      <p>翌日、7日後、30日後、90日後に分け、短期反応と中期的な変化を確認できます。</p>
+    </div>
+  </div>
+</div>
+
+<!-- Audience -->
+<div class="section">
+  <div class="section-eyebrow">対象</div>
+  <h2 class="section-title">こんな方に向いています</h2>
+  <ul class="audience-list">
+    <li>世界情勢と市場の関係を理解したい</li>
+    <li>投資や資産運用の判断材料を増やしたい</li>
+    <li>世界経済を学びたい学生・社会人</li>
+    <li>調査、企画、教育で過去の市場データを使いたい</li>
+  </ul>
+</div>
+
+<!-- Screenshot section: 実画面画像が用意できたら以下のコメントを外して有効化してください。
+     assets/img/screenshot-beta.png (推奨: 16:9) を配置してから公開してください。
+<div class="section">
+  <div class="section-eyebrow">画面</div>
+  <h2 class="section-title">実際の画面</h2>
+  <div class="screenshot-wrap">
+    <img src="assets/img/screenshot-beta.png"
+         alt="重大イベントと主要資産の値動きを、同じ画面上で比較できます"
+         style="width:100%;border:1px solid var(--line-rule);">
+    <p class="screenshot-caption">重大イベントと主要資産の値動きを、同じ画面上で比較できます。</p>
+  </div>
+</div>
+-->
+
+<!-- Registration Form -->
+<div class="form-section" id="register">
+  <div class="form-inner">
+    <h2>β版公開時にご案内します</h2>
+    <p class="form-desc">メールアドレスをご登録いただいた方に、β版の公開時期や利用開始方法をご案内します。</p>
+
+    <div id="form-area">
+      <div class="field">
+        <label for="email">メールアドレス<span class="req" aria-hidden="true">*</span></label>
+        <input type="email" id="email" name="email" placeholder="example@email.com"
+               autocomplete="email" required aria-required="true" aria-describedby="email-err">
+        <span id="email-err" class="field-error" role="alert">有効なメールアドレスを入力してください。</span>
+      </div>
+
+      <div class="field">
+        <label for="purpose">ご利用目的<span class="opt">任意</span></label>
+        <select id="purpose" name="purpose">
+          <option value="">選択してください（任意）</option>
+          <option value="investment">投資・資産運用</option>
+          <option value="learning">世界情勢・経済の学習</option>
+          <option value="work_research">仕事・調査</option>
+          <option value="education">教育</option>
+          <option value="other">その他</option>
+        </select>
+      </div>
+
+      <div class="consent-row">
+        <input type="checkbox" id="consent" name="consent" required aria-required="true" aria-describedby="consent-err">
+        <label for="consent"><a href="privacy.html">プライバシーポリシー</a>に同意して登録する</label>
+      </div>
+      <span id="consent-err" class="consent-error" role="alert">プライバシーポリシーへの同意が必要です。</span>
+
+      <button type="button" id="submit-btn" class="submit-btn">β版の案内を受け取る</button>
+
+      <div id="form-message" class="form-message" role="status" aria-live="polite"></div>
+    </div>
+
+    <p class="disclaimer-note">
+      Marketcast Labは、過去の市場データを整理・比較する情報提供サービスです。特定の金融商品について、売買、保有その他の投資判断を推奨するものではありません。
+    </p>
+  </div>
+</div>
+
+<footer>
+  <span>Marketcast Lab — β版　運営：ONE SHORE合同会社</span>
+  <ul class="footer-links">
+    <li><a href="privacy.html">プライバシーポリシー</a></li>
+    <li><a href="disclaimer.html">免責事項</a></li>
+    <li><a href="index.html">トップに戻る</a></li>
+  </ul>
+</footer>
+
+<script type="module" src="assets/js/auth-common.js"></script>
+
+<script type="module">
+/* ─── Supabase クライアントを既存ファイルから import ─────────────────
+ * 接続情報（URL・Publishable key）は assets/js/supabase-client.js で一元管理。
+ * このファイルには Secret key / service_role key を書かない。
+ * ──────────────────────────────────────────────────────────────────── */
+import { supabase } from './assets/js/supabase-client.js';
+
+/* ─── URLパラメータから source を取得 ─── */
+function getSource() {
+  try {
+    const raw = (new URLSearchParams(window.location.search).get('source') || '').trim();
+    const ALLOWED = ['x', 'twitter', 'note', 'direct', 'other'];
+    return ALLOWED.includes(raw) ? raw : (raw.length > 0 ? 'other' : null);
+  } catch (e) { return null; }
+}
+
+/* ─── バリデーション ─── */
+function isValidEmail(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+}
+
+/* ─── XSS防止 ─── */
+function setText(el, t) { el.textContent = t; }
+
+/* ─── 要素 ─── */
+const emailEl    = document.getElementById('email');
+const emailErr   = document.getElementById('email-err');
+const purposeEl  = document.getElementById('purpose');
+const consentEl  = document.getElementById('consent');
+const consentErr = document.getElementById('consent-err');
+const submitBtn  = document.getElementById('submit-btn');
+const msgEl      = document.getElementById('form-message');
+
+function showMsg(type, text) {
+  msgEl.className = 'form-message ' + type;
+  setText(msgEl, text);
+  msgEl.style.display = 'block';
+  msgEl.focus();
+}
+function hideMsg() { msgEl.style.display = 'none'; msgEl.className = 'form-message'; }
+
+function validate() {
+  let ok = true;
+  if (!isValidEmail(emailEl.value)) {
+    emailEl.classList.add('is-error');
+    emailErr.style.display = 'block';
+    ok = false;
+  } else {
+    emailEl.classList.remove('is-error');
+    emailErr.style.display = 'none';
+  }
+  if (!consentEl.checked) {
+    consentErr.style.display = 'block';
+    ok = false;
+  } else {
+    consentErr.style.display = 'none';
+  }
+  return ok;
+}
+
+/* ─── 送信 ─── */
+submitBtn.addEventListener('click', async () => {
+  hideMsg();
+  if (!validate()) return;
+
+  submitBtn.disabled = true;
+  setText(submitBtn, '送信中…');
+
+  const { error } = await supabase
+    .from('beta_waitlist')
+    .insert({
+      email:   emailEl.value.trim(),
+      purpose: purposeEl.value || null,
+      consent: true,
+      source:  getSource(),
+    });
+
+  if (!error) {
+    showMsg('success', 'ご登録ありがとうございます。β版公開時にご案内します。');
+    submitBtn.style.display = 'none';
+  } else if (error.code === '23505') {
+    /* UNIQUE制約違反 = 重複登録 */
+    showMsg('duplicate', 'このメールアドレスは登録済みです。β版公開時にご案内します。');
+    submitBtn.disabled = false;
+    setText(submitBtn, 'β版の案内を受け取る');
+  } else {
+    showMsg('error', '登録できませんでした。時間をおいて、もう一度お試しください。');
+    submitBtn.disabled = false;
+    setText(submitBtn, 'β版の案内を受け取る');
+  }
+});
+
+/* ─── blur時バリデーション ─── */
+emailEl.addEventListener('blur', () => {
+  if (emailEl.value && !isValidEmail(emailEl.value)) {
+    emailEl.classList.add('is-error'); emailErr.style.display = 'block';
+  } else if (isValidEmail(emailEl.value)) {
+    emailEl.classList.remove('is-error'); emailErr.style.display = 'none';
+  }
+});
+</script>
+
+</body>
+</html>
