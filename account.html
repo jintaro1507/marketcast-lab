@@ -62,6 +62,11 @@
   .account-label{font-size:12px;color:var(--ink-soft);min-width:80px;}
   #account-email{font-family:var(--mono);font-size:13px;word-break:break-all;}
 
+  #plan-loading{font-size:13px;color:var(--ink-soft);}
+  #plan-name{font-size:14px;}
+  #plan-period{font-size:12px;color:var(--ink-soft);margin-top:8px;}
+  #plan-error{font-size:13px;color:#5a1a14;}
+
   .auth-msg{font-size:13px;padding:10px 12px;border-radius:2px;margin-bottom:16px;}
   .auth-msg--ok{background:#e8f0eb;color:#1a4a2e;border:1px solid #b0d4bc;}
   .auth-msg--error{background:#f5eae8;color:#5a1a14;border:1px solid #d4b0ac;}
@@ -107,6 +112,14 @@
       <span class="account-label">メール</span>
       <span id="account-email">読み込み中…</span>
     </div>
+  </div>
+
+  <div class="account-section">
+    <h2>ご利用プラン</h2>
+    <p id="plan-loading">読み込み中…</p>
+    <div id="plan-name" hidden></div>
+    <div id="plan-period" hidden></div>
+    <p id="plan-error" hidden></p>
   </div>
 
   <button type="button" id="logout-btn" class="logout-btn">ログアウト</button>

@@ -417,23 +417,120 @@ function initResetPassword() {
 // ======================================================
 // ページ: account
 // ======================================================
+
+// status → 表示ラベルのマッピング
+const PLAN_LABEL_MAP = {
+  trialing:           'トライアル中',
+  active:             '有料プラン',
+  past_due:           'お支払い確認中',
+  canceled:           '解約済み',
+  unpaid:             'お支払い未完了',
+  paused:             '一時停止中',
+  incomplete:         'お申し込み手続き中',
+  incomplete_expired: 'お申し込み手続き期限切れ',
+};
+
+// current_period_end を「〇〇年〇〇月〇〇日」形式に変換
+// 変換失敗時は null を返す
+function formatPeriodEnd(value) {
+  if (value == null) return null;
+  try {
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleDateString('ja-JP', {
+      year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Tokyo',
+    });
+  } catch (_) {
+    return null;
+  }
+}
+
+// プラン表示要素の排他制御
+// state: 'loading' | 'ok' | 'error'
+function setPlanState(state, planLabel, periodLabel) {
+  const loadingEl = document.getElementById('plan-loading');
+  const nameEl    = document.getElementById('plan-name');
+  const periodEl  = document.getElementById('plan-period');
+  const errorEl   = document.getElementById('plan-error');
+
+  if (loadingEl) loadingEl.hidden = (state !== 'loading');
+  if (nameEl)    nameEl.hidden    = (state !== 'ok');
+  if (periodEl)  periodEl.hidden  = (state !== 'ok') || !periodLabel;
+  if (errorEl)   errorEl.hidden   = (state !== 'error');
+
+  if (state === 'ok') {
+    if (nameEl)   nameEl.textContent   = planLabel  || '';
+    if (periodEl && periodLabel) periodEl.textContent = '現在の契約期間：' + periodLabel + 'まで';
+  }
+  if (state === 'error' && errorEl) {
+    errorEl.textContent = 'プラン情報を取得できませんでした。時間をおいて再度お試しください。';
+  }
+}
+
 function initAccount() {
   const emailEl   = document.getElementById('account-email');
   const logoutBtn = document.getElementById('logout-btn');
 
   (async () => {
+    // 1. セッション取得
+    let session;
     try {
       const { data } = await supabase.auth.getSession();
-      if (!data.session) {
-        window.location.href = 'login.html';
-        return;
-      }
-      if (emailEl) emailEl.textContent = data.session.user.email;
+      session = data.session;
     } catch (_) {
       window.location.href = 'login.html';
+      return;
+    }
+
+    // 2. 未ログインなら login.html へ固定遷移
+    if (!session) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    // 3. メールアドレス表示
+    if (emailEl) emailEl.textContent = session.user.email;
+
+    // 4. user_id 取得
+    const userId = session.user.id;
+
+    // 5. subscriptions SELECT
+    try {
+      const { data: sub, error } = await supabase
+        .from('subscriptions')
+        .select('user_id,status,current_period_end')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error) {
+        // SELECTエラー → 一般的な文言のみ表示
+        setPlanState('error');
+        return;
+      }
+
+      // 6. 行なし／行あり を表示
+      if (sub === null) {
+        // 行なし = 無料プラン
+        setPlanState('ok', '無料プラン（β版）', null);
+        return;
+      }
+
+      const label = PLAN_LABEL_MAP[sub.status];
+
+      if (!label) {
+        setPlanState('error');
+        return;
+      }
+
+      const period = formatPeriodEnd(sub.current_period_end);
+      setPlanState('ok', label, period);
+
+    } catch (_) {
+      setPlanState('error');
     }
   })();
 
+  // 7. ログアウト処理（既存機能を維持）
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
       setLoading(logoutBtn, true);
