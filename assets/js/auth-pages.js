@@ -102,11 +102,34 @@ function initLogin() {
       }
     } catch (_) { /* セッション取得失敗は無視してフォーム表示継続 */ }
 
-    // ?confirmed=1 の確認メール完了メッセージ
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('confirmed') === '1') {
+    // 確認メールリンク後の表示判定
+    // hash（#key=value&...）を URLSearchParams で安全に解析
+    const params     = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+
+    // query / hash のいずれかに error または error_code が存在するか
+    const errorCode = params.get('error_code') || hashParams.get('error_code') || '';
+    const hasError  = !!(params.get('error') || hashParams.get('error') || errorCode);
+
+    if (hasError) {
+      // 優先1: otp_expired
+      if (errorCode === 'otp_expired') {
+        showMsg(msgEl,
+          '確認リンクが期限切れまたは使用済みです。すでに確認済みの場合は、そのままログインしてください。ログインできない場合は、確認メールを再送してください。',
+          true
+        );
+      } else {
+        // 優先2: その他の認証エラー
+        showMsg(msgEl,
+          'メールアドレスの確認に失敗しました。確認メールを再送して、もう一度お試しください。',
+          true
+        );
+      }
+    } else if (params.get('confirmed') === '1') {
+      // 優先3: エラーなし confirmed=1
       showMsg(msgEl, 'メールアドレスの確認が完了しました。ログインしてください。', false);
     }
+    // 優先4: 何も表示しない（通常ログイン画面）
   })();
 
   if (!form) return;
