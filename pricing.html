@@ -388,9 +388,24 @@
 <div class="cta-block">
   <div class="cta-card">
     <div class="cta-price-line">予定価格　月額 980円（税込予定）</div>
-    <span class="cta-disabled" aria-disabled="true">月額980円で提供予定</span>
-    <div class="cta-note">現在、正式版の公開準備中です。<br>公開時期が決まりましたら本サイト上でお知らせします。</div>
-    <div class="cta-note" style="margin-top:14px;"><a href="signup.html" style="color:var(--ink-soft);text-decoration:underline;">今すぐアカウントを作成する（無料）</a></div>
+
+    <!-- ローディング：状態確定前に表示。状態確定後に hidden にする -->
+    <div id="pricing-cta-loading" aria-live="polite">
+      <span class="cta-note">確認中…</span>
+    </div>
+
+    <!-- CTA コンテナ：状態確定後に hidden を外して内容を挿入する -->
+    <div id="pricing-cta-container" hidden></div>
+
+    <!-- JavaScript 無効時のフォールバック -->
+    <noscript>
+      <style>#pricing-cta-loading { display: none; }</style>
+      <div class="cta-note">
+        <a href="signup.html" style="text-decoration:underline;">無料アカウントを作成</a>
+        ／
+        <a href="login.html" style="text-decoration:underline;">ログイン</a>
+      </div>
+    </noscript>
   </div>
 </div>
 
@@ -408,5 +423,155 @@
 </footer>
 
 <script type="module" src="assets/js/auth-common.js"></script>
+<script type="module">
+/**
+ * pricing.html 契約状態別 CTA 表示
+ *
+ * セキュリティ注記：
+ *   - この分岐は UI 上の案内表示のみ。認可・コンテンツ保護ではない。
+ *   - paid 状態であっても有料コンテンツは返さない。
+ *   - DOM 非表示を保護手段にしない。
+ *   - subscriptions への書き込みは行わない。
+ *   - window.* / localStorage / sessionStorage / Cookie に状態を保存しない。
+ */
+import { getSubscriptionState } from './assets/js/subscription-state.js';
+
+(async () => {
+  const loadingEl   = document.getElementById('pricing-cta-loading');
+  const containerEl = document.getElementById('pricing-cta-container');
+  if (!loadingEl || !containerEl) return;
+
+  // 状態取得
+  const { state } = await getSubscriptionState();
+
+  // ── 状態別 UI を DOM 操作で構築（innerHTML 不使用）─────────────────
+
+  /**
+   * テキストを持つ要素を生成するヘルパー。
+   * @param {string} tag
+   * @param {string} [text]
+   * @param {string} [className]
+   */
+  function el(tag, text, className) {
+    const node = document.createElement(tag);
+    if (text)      node.textContent = text;
+    if (className) node.className   = className;
+    return node;
+  }
+
+  /**
+   * リンク要素を生成するヘルパー。
+   * @param {string} text
+   * @param {string} href
+   */
+  function link(text, href) {
+    const a = document.createElement('a');
+    a.textContent = text;
+    a.href        = href;
+    a.style.textDecoration = 'underline';
+    return a;
+  }
+
+  /**
+   * attention/inactive/error 共通の「アカウントを確認」リンクを生成する。
+   * @param {string} text
+   * @param {string} href
+   */
+  function makeCtaLink(text, href) {
+    const a = document.createElement('a');
+    a.textContent = text;
+    a.href        = href;
+    a.style.display         = 'inline-block';
+    a.style.marginTop       = '8px';
+    a.style.fontFamily      = 'var(--mono)';
+    a.style.fontSize        = '11px';
+    a.style.color           = 'var(--ink-soft)';
+    a.style.textDecoration  = 'underline';
+    return a;
+  }
+
+  // ── 各状態の UI フラグメント ──────────────────────────────────────
+
+  const fragment = document.createDocumentFragment();
+
+  if (state === 'unauthenticated') {
+    // 主 CTA：無料アカウントを作成（クリッカブルなリンクボタン）
+    const mainA = document.createElement('a');
+    mainA.textContent = '無料アカウントを作成';
+    mainA.href = 'signup.html';
+    // cta-disabled は pointer-events:none のため使用しない。直接スタイルを設定する。
+    mainA.style.display       = 'inline-block';
+    mainA.style.fontFamily    = 'var(--mono)';
+    mainA.style.fontSize      = '12px';
+    mainA.style.border        = '1px solid var(--line-rule)';
+    mainA.style.padding       = '10px 20px';
+    mainA.style.borderRadius  = '2px';
+    mainA.style.letterSpacing = '0.04em';
+    mainA.style.textDecoration = 'none';
+    mainA.style.color         = 'var(--ink)';
+    fragment.appendChild(mainA);
+
+    // 補助リンク：ログイン
+    const note = el('div', null, 'cta-note');
+    note.style.marginTop = '10px';
+    const loginA = link('ログイン', 'login.html');
+    loginA.style.color = 'var(--ink-soft)';
+    note.appendChild(loginA);
+    fragment.appendChild(note);
+
+  } else if (state === 'free') {
+    // 状態テキスト
+    fragment.appendChild(el('div', '有料版は現在準備中です', 'cta-note'));
+    // 非活性ボタン
+    const disabledSpan = el('span', '月額980円で提供予定', 'cta-disabled');
+    disabledSpan.setAttribute('aria-disabled', 'true');
+    disabledSpan.style.marginTop = '8px';
+    disabledSpan.style.display   = 'inline-block';
+    fragment.appendChild(disabledSpan);
+    // 補助リンク：beta.html
+    const betaNote = el('div', null, 'cta-note');
+    betaNote.style.marginTop = '10px';
+    const betaA = link('有料β版の先行案内を受け取る', 'beta.html');
+    betaA.style.color = 'var(--ink-soft)';
+    betaNote.appendChild(betaA);
+    fragment.appendChild(betaNote);
+
+  } else if (state === 'paid') {
+    fragment.appendChild(el('div', '有料プランをご利用中です', 'cta-note'));
+    const a = document.createElement('a');
+    a.textContent = 'アカウントを確認';
+    a.href = 'account.html';
+    a.style.display       = 'inline-block';
+    a.style.marginTop     = '8px';
+    a.style.fontFamily    = 'var(--mono)';
+    a.style.fontSize      = '12px';
+    a.style.border        = '1px solid var(--line-rule)';
+    a.style.padding       = '10px 20px';
+    a.style.borderRadius  = '2px';
+    a.style.letterSpacing = '0.04em';
+    a.style.textDecoration = 'none';
+    a.style.color         = 'var(--ink-soft)';
+    fragment.appendChild(a);
+
+  } else if (state === 'attention') {
+    fragment.appendChild(el('div', 'お支払い状況をご確認ください', 'cta-note'));
+    fragment.appendChild(makeCtaLink('アカウントを確認', 'account.html'));
+
+  } else if (state === 'inactive') {
+    fragment.appendChild(el('div', '現在、有効な有料プランはありません', 'cta-note'));
+    fragment.appendChild(makeCtaLink('アカウントを確認', 'account.html'));
+
+  } else {
+    // state === 'error'
+    fragment.appendChild(el('div', '契約情報を確認できませんでした', 'cta-note'));
+    fragment.appendChild(makeCtaLink('アカウントを確認', 'account.html'));
+  }
+
+  // ── DOM に反映 ─────────────────────────────────────────────────────
+  containerEl.replaceChildren(fragment);
+  loadingEl.hidden   = true;
+  containerEl.hidden = false;
+})();
+</script>
 </body>
 </html>

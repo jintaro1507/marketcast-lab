@@ -137,9 +137,14 @@
 
 <div id="app"></div>
 
-<script>
+<script type="module">
+import { getSubscriptionState } from './assets/js/subscription-state.js';
+
 (async function(){
   'use strict';
+
+  /* 契約状態取得を開始（公開部分の描画を待たせない） */
+  const subscriptionStatePromise = getSubscriptionState();
 
   /* ------------------------------------------------------------------ */
   /* 定数                                                                 */
@@ -255,7 +260,17 @@
   /* 描画                                                                 */
   /* ------------------------------------------------------------------ */
 
+  /* 公開部分を先に描画する（契約状態取得を待たない） */
   render(data, cause);
+
+  /* 契約状態の確定を待ってから CTA ブロックだけを更新する */
+  /* render() 完了後のため DOM 上に data-subscription-cta 要素が存在することが保証される */
+  const { state } = await subscriptionStatePromise;
+  document
+    .querySelectorAll('[data-subscription-cta]')
+    .forEach((ctaBlock) => {
+      ctaBlock.replaceChildren(buildCtaContent(state));
+    });
 
   /* ================================================================== */
   /* render 関数群                                                        */
@@ -446,6 +461,62 @@
   /* E: top1 表示                                                         */
   /* ------------------------------------------------------------------ */
 
+  /* ------------------------------------------------------------------ */
+  /* CTA：契約状態別コンテンツ生成                                        */
+  /* ------------------------------------------------------------------ */
+  /*
+   * セキュリティ注記：
+   *   この関数の返値は UI 上の案内表示のみ。認可・コンテンツ保護ではない。
+   *   paid 状態であっても有料コンテンツは返さない。
+   *   DOM 非表示を保護手段にしない。
+   */
+  function buildCtaContent(state) {
+    const frag = document.createDocumentFragment();
+
+    /**
+     * リンク要素を生成するヘルパー（innerHTML 不使用）。
+     */
+    function makeLink(text, href) {
+      const a = document.createElement('a');
+      a.textContent = text;
+      a.href = href;
+      a.style.color = 'var(--ink-soft)';
+      a.style.textDecoration = 'underline';
+      return a;
+    }
+
+    if (state === 'unauthenticated') {
+      frag.appendChild(makeLink('ログインして詳細機能を確認', 'login.html'));
+
+    } else if (state === 'free') {
+      frag.appendChild(makeLink('詳細比較は有料版で提供予定です', 'pricing.html'));
+
+    } else if (state === 'paid') {
+      /* 非活性。span を使用・a href="#" にしない */
+      const span = document.createElement('span');
+      span.className = 'cta-disabled';
+      span.textContent = '詳細比較は現在準備中です';
+      span.setAttribute('aria-disabled', 'true');
+      frag.appendChild(span);
+
+    } else if (state === 'attention') {
+      frag.appendChild(makeLink('契約状況をご確認ください', 'account.html'));
+
+    } else if (state === 'inactive') {
+      frag.appendChild(makeLink('詳細比較は有料版で提供予定です', 'pricing.html'));
+
+    } else {
+      /* error */
+      frag.appendChild(makeLink('契約情報を確認できませんでした', 'account.html'));
+    }
+
+    return frag;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* E: 類似局面カード                                                    */
+  /* ------------------------------------------------------------------ */
+
   function buildTopMatch(freeTopMatch, cause){
     const wrap = el('div','match');
 
@@ -487,11 +558,10 @@
       detailLink.href = 'event_detail.html?id=' + encodeURIComponent(m.event_id);
       body.appendChild(detailLink);
 
-      /* CTA */
-      const ctaBlock = el('div','cta-block');
-      const ctaText = m.cta || '有料版で類似局面の詳細比較を見る';
-      ctaBlock.appendChild(el('span','cta-disabled', ctaText));
-      ctaBlock.appendChild(el('div','cta-note','正式版で提供予定'));
+      /* CTA：IIFE 内で render() 完了後に data-subscription-cta を検索して更新する */
+      const ctaBlock = el('div', 'cta-block');
+      ctaBlock.setAttribute('data-subscription-cta', 'true');
+      ctaBlock.appendChild(el('span', 'cta-note', '確認中…'));
       body.appendChild(ctaBlock);
 
       card.appendChild(body);
@@ -548,6 +618,15 @@
 
 })();
 </script>
+
+<!-- JavaScript 無効時のフォールバック -->
+<noscript>
+  <div style="padding:8px 5vw;font-family:var(--mono);font-size:11px;color:var(--ink-soft);">
+    詳細機能のご利用には
+    <a href="pricing.html" style="text-decoration:underline;">正式版のご案内</a>
+    をご確認ください。
+  </div>
+</noscript>
 
 <script type="module" src="assets/js/auth-common.js"></script>
 </body>
