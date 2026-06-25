@@ -435,6 +435,7 @@
  *   - window.* / localStorage / sessionStorage / Cookie に状態を保存しない。
  */
 import { getSubscriptionState } from './assets/js/subscription-state.js';
+import { startCheckout, openCustomerPortal } from './assets/js/checkout.js';
 
 (async () => {
   const loadingEl   = document.getElementById('pricing-cta-loading');
@@ -520,38 +521,53 @@ import { getSubscriptionState } from './assets/js/subscription-state.js';
     fragment.appendChild(note);
 
   } else if (state === 'free') {
-    // 状態テキスト
-    fragment.appendChild(el('div', '有料版は現在準備中です', 'cta-note'));
-    // 非活性ボタン
-    const disabledSpan = el('span', '月額980円で提供予定', 'cta-disabled');
-    disabledSpan.setAttribute('aria-disabled', 'true');
-    disabledSpan.style.marginTop = '8px';
-    disabledSpan.style.display   = 'inline-block';
-    fragment.appendChild(disabledSpan);
-    // 補助リンク：beta.html
-    const betaNote = el('div', null, 'cta-note');
-    betaNote.style.marginTop = '10px';
-    const betaA = link('有料β版の先行案内を受け取る', 'beta.html');
-    betaA.style.color = 'var(--ink-soft)';
-    betaNote.appendChild(betaA);
-    fragment.appendChild(betaNote);
+    // エラー表示用（非表示で DOM に追加しておく）
+    const errEl = el('p', '', 'cta-note');
+    errEl.style.color = '#5a1a14';
+    errEl.hidden = true;
+    fragment.appendChild(errEl);
+    // 申し込みボタン
+    const checkoutBtn = document.createElement('button');
+    checkoutBtn.type = 'button';
+    checkoutBtn.textContent = '月額980円で申し込む';
+    checkoutBtn.style.display       = 'inline-block';
+    checkoutBtn.style.marginTop     = '8px';
+    checkoutBtn.style.fontFamily    = 'var(--mono)';
+    checkoutBtn.style.fontSize      = '12px';
+    checkoutBtn.style.border        = '1px solid var(--line-rule)';
+    checkoutBtn.style.padding       = '10px 20px';
+    checkoutBtn.style.borderRadius  = '2px';
+    checkoutBtn.style.letterSpacing = '0.04em';
+    checkoutBtn.style.background    = 'transparent';
+    checkoutBtn.style.color         = 'var(--ink)';
+    checkoutBtn.style.cursor        = 'pointer';
+    checkoutBtn.addEventListener('click', () => startCheckout(checkoutBtn, errEl));
+    fragment.appendChild(checkoutBtn);
 
   } else if (state === 'paid') {
     fragment.appendChild(el('div', '有料プランをご利用中です', 'cta-note'));
-    const a = document.createElement('a');
-    a.textContent = 'アカウントを確認';
-    a.href = 'account.html';
-    a.style.display       = 'inline-block';
-    a.style.marginTop     = '8px';
-    a.style.fontFamily    = 'var(--mono)';
-    a.style.fontSize      = '12px';
-    a.style.border        = '1px solid var(--line-rule)';
-    a.style.padding       = '10px 20px';
-    a.style.borderRadius  = '2px';
-    a.style.letterSpacing = '0.04em';
-    a.style.textDecoration = 'none';
-    a.style.color         = 'var(--ink-soft)';
-    fragment.appendChild(a);
+    // エラー表示用
+    const errEl = el('p', '', 'cta-note');
+    errEl.style.color = '#5a1a14';
+    errEl.hidden = true;
+    fragment.appendChild(errEl);
+    // Customer Portal ボタン
+    const portalBtn = document.createElement('button');
+    portalBtn.type = 'button';
+    portalBtn.textContent = 'プランを管理する';
+    portalBtn.style.display       = 'inline-block';
+    portalBtn.style.marginTop     = '8px';
+    portalBtn.style.fontFamily    = 'var(--mono)';
+    portalBtn.style.fontSize      = '12px';
+    portalBtn.style.border        = '1px solid var(--line-rule)';
+    portalBtn.style.padding       = '10px 20px';
+    portalBtn.style.borderRadius  = '2px';
+    portalBtn.style.letterSpacing = '0.04em';
+    portalBtn.style.background    = 'transparent';
+    portalBtn.style.color         = 'var(--ink-soft)';
+    portalBtn.style.cursor        = 'pointer';
+    portalBtn.addEventListener('click', () => openCustomerPortal(portalBtn, errEl));
+    fragment.appendChild(portalBtn);
 
   } else if (state === 'attention') {
     fragment.appendChild(el('div', 'お支払い状況をご確認ください', 'cta-note'));
@@ -559,7 +575,28 @@ import { getSubscriptionState } from './assets/js/subscription-state.js';
 
   } else if (state === 'inactive') {
     fragment.appendChild(el('div', '現在、有効な有料プランはありません', 'cta-note'));
-    fragment.appendChild(makeCtaLink('アカウントを確認', 'account.html'));
+    // エラー表示用
+    const errElInactive = el('p', '', 'cta-note');
+    errElInactive.style.color = '#5a1a14';
+    errElInactive.hidden = true;
+    fragment.appendChild(errElInactive);
+    // 再申し込みボタン
+    const resubBtn = document.createElement('button');
+    resubBtn.type = 'button';
+    resubBtn.textContent = '月額980円で申し込む';
+    resubBtn.style.display       = 'inline-block';
+    resubBtn.style.marginTop     = '8px';
+    resubBtn.style.fontFamily    = 'var(--mono)';
+    resubBtn.style.fontSize      = '12px';
+    resubBtn.style.border        = '1px solid var(--line-rule)';
+    resubBtn.style.padding       = '10px 20px';
+    resubBtn.style.borderRadius  = '2px';
+    resubBtn.style.letterSpacing = '0.04em';
+    resubBtn.style.background    = 'transparent';
+    resubBtn.style.color         = 'var(--ink)';
+    resubBtn.style.cursor        = 'pointer';
+    resubBtn.addEventListener('click', () => startCheckout(resubBtn, errElInactive));
+    fragment.appendChild(resubBtn);
 
   } else {
     // state === 'error'

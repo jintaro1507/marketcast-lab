@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お申し込み完了 ｜ Marketcast Lab</title>
+<style>
+  :root{
+    --paper:#F2EFE8; --paper-deep:#E8E3D7; --ink:#1C1A16; --ink-soft:#5B564B;
+    --line-rule:#cfc7b6;
+    --display:"Shippori Mincho","Noto Serif JP",serif;
+    --body:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;
+    --mono:"JetBrains Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.7;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+
+  header{border-bottom:1px solid var(--line-rule);padding:18px 5vw 16px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .brand{font-family:var(--display);font-size:20px;letter-spacing:0.04em;display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{font-family:var(--mono);font-size:11px;color:var(--ink-soft);border:1px solid var(--line-rule);padding:2px 6px;border-radius:2px;letter-spacing:0.08em;}
+  nav{display:flex;gap:24px;font-size:13px;color:var(--ink-soft);}
+  nav a:hover{color:var(--ink);}
+
+  .page-wrap{max-width:560px;margin:80px auto 100px;padding:0 5vw;}
+  .success-card{border:1px solid var(--line-rule);background:var(--paper-deep);padding:36px 40px;}
+  .success-label{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:20px;}
+  .success-title{font-family:var(--display);font-size:clamp(20px,3vw,26px);margin:0 0 16px;line-height:1.4;}
+  .success-body{font-size:13.5px;color:var(--ink-soft);line-height:1.85;margin:0 0 28px;}
+  .success-note{font-family:var(--mono);font-size:11px;color:var(--ink-soft);border-left:2px solid var(--line-rule);padding-left:10px;margin-bottom:28px;line-height:1.8;opacity:0.85;}
+
+  .action-link{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:12px;
+    border:1px solid var(--line-rule);
+    padding:10px 20px;
+    border-radius:2px;
+    letter-spacing:0.04em;
+    color:var(--ink);
+    margin-right:12px;
+    margin-bottom:8px;
+  }
+  .action-link:hover{border-color:var(--ink-soft);}
+  .action-link.secondary{color:var(--ink-soft);}
+
+  footer{border-top:1px solid var(--line-rule);padding:20px 5vw;font-size:12px;color:var(--ink-soft);margin-top:auto;}
+
+  #loading-msg{font-size:13px;color:var(--ink-soft);margin-bottom:16px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><a href="index.html">Marketcast Lab</a> <span class="mark">観測所</span></div>
+  <nav>
+    <a href="index.html#events">イベント観測</a>
+    <a href="index.html#assets">資産別反応史</a>
+    <a href="account.html" data-auth-link>アカウント</a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+  <div class="success-card">
+    <div class="success-label">Payment Confirmed</div>
+    <h1 class="success-title">お申し込みありがとうございます</h1>
+    <p class="success-body">
+      有料プランのお申し込みが完了しました。<br>
+      Stripe によるお支払い確認後、アカウントが有効になります。
+      反映には数秒〜数分かかる場合があります。
+    </p>
+    <p class="success-note" id="loading-msg">契約状態を確認中…</p>
+    <div>
+      <a class="action-link" href="account.html">アカウントを確認する</a>
+      <a class="action-link secondary" href="index.html">トップへ戻る</a>
+    </div>
+  </div>
+</div>
+
+<footer>Marketcast Lab — β版</footer>
+
+<script type="module" src="assets/js/auth-common.js"></script>
+<script type="module">
+import { getSubscriptionState } from './assets/js/subscription-state.js';
+
+(async () => {
+  const noteEl = document.getElementById('loading-msg');
+  if (!noteEl) return;
+
+  // Webhook 反映を待つためポーリング（最大 3 回、2 秒間隔）
+  let attempts = 0;
+  const MAX_ATTEMPTS = 3;
+
+  while (attempts < MAX_ATTEMPTS) {
+    await new Promise(r => setTimeout(r, 2000));
+    const { state } = await getSubscriptionState();
+    attempts++;
+
+    if (state === 'paid') {
+      noteEl.textContent = '有料プランが有効になりました。';
+      return;
+    }
+  }
+
+  // タイムアウト：Webhook が遅延している可能性を案内
+  noteEl.textContent =
+    '反映に時間がかかっています。しばらくしてからアカウントページをご確認ください。';
+})();
+</script>
+
+</body>
+</html>

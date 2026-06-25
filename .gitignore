@@ -4,10 +4,11 @@ test_beta_waitlist.mjs
 
 .DS_Store
 
-.DS_Store
-
 # Local environment files / secrets
 .env
 .env.*
 !.env.example
 !**/.env.example
+
+# Supabase Edge Functions ローカル開発用シークレット
+supabase/.env.local

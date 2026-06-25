@@ -120,6 +120,11 @@
     <div id="plan-name" hidden></div>
     <div id="plan-period" hidden></div>
     <p id="plan-error" hidden></p>
+    <!-- 有料プラン利用者向け Customer Portal ボタン（JS で表示制御） -->
+    <div id="plan-actions" hidden style="margin-top:18px;">
+      <p id="portal-error" class="auth-msg auth-msg--error" hidden></p>
+      <button type="button" id="portal-btn" class="logout-btn">プランを管理する（解約・請求確認）</button>
+    </div>
   </div>
 
   <button type="button" id="logout-btn" class="logout-btn">ログアウト</button>
@@ -129,5 +134,27 @@
 
 <script type="module" src="assets/js/auth-pages.js"></script>
 <script type="module" src="assets/js/auth-common.js"></script>
+<script type="module">
+/**
+ * account.html — Customer Portal ボタン制御
+ * auth-pages.js のプラン表示とは独立して subscriptionState を取得し、
+ * paid / attention 状態のみポータルボタンを表示する。
+ */
+import { getSubscriptionState } from './assets/js/subscription-state.js';
+import { openCustomerPortal } from './assets/js/checkout.js';
+
+(async () => {
+  const { state } = await getSubscriptionState();
+  if (state !== 'paid' && state !== 'attention') return;
+
+  const actionsEl = document.getElementById('plan-actions');
+  const portalBtn = document.getElementById('portal-btn');
+  const portalErr = document.getElementById('portal-error');
+  if (!actionsEl || !portalBtn) return;
+
+  actionsEl.hidden = false;
+  portalBtn.addEventListener('click', () => openCustomerPortal(portalBtn, portalErr));
+})();
+</script>
 </body>
 </html>

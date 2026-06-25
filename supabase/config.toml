@@ -371,6 +371,11 @@ authorization_url_path = "/oauth/consent"
 # Allow dynamic client registration
 allow_dynamic_registration = false
 
+# stripe-webhook は Stripe からの未認証リクエストを受け取るため JWT 検証を無効にする。
+# Stripe 署名検証は Edge Function 内部で行う。
+[functions.stripe-webhook]
+verify_jwt = false
+
 [edge_runtime]
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.
