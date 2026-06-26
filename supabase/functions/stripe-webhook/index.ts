@@ -49,20 +49,43 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
   if (!webhookSecret) return jsonError(500, 'Webhook not configured');
 
+  // raw body を一度だけ読み取る（constructEventAsync に渡す前に一切加工しない）
+  const body = await req.text();
+
+  // ── 署名検証（Stripe クライアント初期化より先に行う） ────────────────────
+  // constructEventAsync は HMAC-SHA256 の検証のみを行い HTTP 呼び出しをしない。
+  // そのため Stripe API キーは使用しない。STRIPE_SECRET_KEY が未設定でも検証は可能。
+  //
+  // Deno Edge Runtime には Node.js の crypto.createHmac がないため、
+  // 同期版 constructEvent は使用不可。
+  // SubtleCrypto（Web Crypto API）を使う非同期版 + createSubtleCryptoProvider が必須。
+  const cryptoProvider = Stripe.createSubtleCryptoProvider();
+  // constructEventAsync は Stripe インスタンスのメソッドとして呼び出す必要があるが、
+  // 署名検証は API キーを一切使わない。STRIPE_SECRET_KEY がなければ一時インスタンスで代替する。
+  const _verifyStripe = new Stripe(
+    Deno.env.get('STRIPE_SECRET_KEY') ?? 'sk_test_verify_only_placeholder_no_api_calls',
+    { apiVersion: '2025-02-24.acacia' as const },
+  );
+
+  let event: Stripe.Event;
+  try {
+    event = await _verifyStripe.webhooks.constructEventAsync(
+      body,
+      signature,
+      webhookSecret,
+      undefined,    // tolerance（デフォルト300秒）
+      cryptoProvider,
+    );
+  } catch (_) {
+    return jsonError(400, 'Invalid signature');
+  }
+
+  // ── Stripe クライアント初期化（署名検証後。API 呼び出しに必要） ──────────
   let stripe: Stripe;
   try {
     stripe = getStripe();
   } catch (_) {
     return jsonError(500, 'Payment service not configured');
-  }
-
-  const body = await req.text();
-
-  let event: Stripe.Event;
-  try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (_) {
-    return jsonError(400, 'Invalid signature');
   }
 
   // ── 2. 冪等性チェック ─────────────────────────────────────────────────────
