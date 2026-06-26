@@ -20,6 +20,18 @@
  *   失敗時は記録しないため Stripe が再送できる。
  *   同時受信で競合 INSERT（unique violation: 23505）が発生した場合は
  *   処理済み相当として 200 を返し、不要な Stripe 再送を防ぐ。
+ *   23505 以外の INSERT 失敗は 500 を返して Stripe に再送させる。
+ *
+ * ── 冪等性チェック SELECT エラー ────────────────────────────────────────
+ *   事前 SELECT で DB エラーが発生した場合は 500 を返して Stripe に再送させる。
+ *   エラーを無視して業務処理へ進まない。
+ *
+ * ── 処理結果（outcome）──────────────────────────────────────────────────
+ *   各イベントの処理結果を stripe_webhook_events.outcome へ記録する。
+ *   applied              … 課金・顧客情報を正常反映した
+ *   ignored              … 未対応イベント、対象外 mode、更新不要
+ *   unresolved_user      … Stripe イベントから user_id を解決できなかった
+ *   duplicate_subscription … 同一ユーザーに別の blocking Subscription が存在した
  *
  * ── customer.subscription.deleted の行削除不採用 ─────────────────────────
  *   「行なし = free（未契約）」の設計原則を維持する。
@@ -32,162 +44,278 @@
  *   3. Stripe Customer metadata.supabase_user_id（API 呼び出しフォールバック）
  */
 
-import Stripe from 'npm:stripe@17.7.0';
-import { SupabaseClient } from 'npm:@supabase/supabase-js@2';
-import { jsonOk, jsonError } from '../_shared/response.ts';
-import { getStripe } from '../_shared/stripe.ts';
-import { getSupabaseAdmin } from '../_shared/supabase.ts';
+import Stripe from "npm:stripe@17.7.0";
+import { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import { jsonError, jsonOk } from "../_shared/response.ts";
+import { getStripe } from "../_shared/stripe.ts";
+import { getSupabaseAdmin } from "../_shared/supabase.ts";
+
+// ─── 処理結果型 ──────────────────────────────────────────────────────────────
+
+/** stripe_webhook_events.outcome の許可値（migration の CHECK 制約と一致） */
+export type WebhookOutcome =
+  | "applied"
+  | "ignored"
+  | "unresolved_user"
+  | "duplicate_subscription";
+
+/** handleEvent の返値。stripe_webhook_events へそのまま記録する。 */
+export type WebhookProcessResult = {
+  outcome: WebhookOutcome;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+};
+
+// ─── 定数 ────────────────────────────────────────────────────────────────────
 
 const BLOCKING_SUBSCRIPTION_STATUSES = new Set([
-  'incomplete',
-  'trialing',
-  'active',
-  'past_due',
-  'unpaid',
-  'paused',
+  "incomplete",
+  "trialing",
+  "active",
+  "past_due",
+  "unpaid",
+  "paused",
 ]);
 
-Deno.serve(async (req: Request): Promise<Response> => {
-  // Webhook は Stripe サーバーから呼ばれるため OPTIONS / CORS は不要
-  if (req.method !== 'POST') return jsonError(405, 'Method not allowed');
+// ─── テスト用エクスポート：純粋関数 ──────────────────────────────────────────
 
-  // ── 1. Stripe 署名検証 ───────────────────────────────────────────────────
-  const signature = req.headers.get('stripe-signature');
-  if (!signature) return jsonError(400, 'Missing stripe-signature');
+/**
+ * Checkout Session の mode を評価し、'subscription' 以外なら 'ignored' を返す。
+ * null を返した場合は続行（caller が処理を継続する）。
+ */
+export function resolveCheckoutMode(
+  mode: string | null | undefined,
+): "ignored" | null {
+  return mode === "subscription" ? null : "ignored";
+}
 
-  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
-  if (!webhookSecret) return jsonError(500, 'Webhook not configured');
+/**
+ * Invoice オブジェクトから Subscription ID を解決する。
+ * subscription フィールドが文字列でない場合は null（→ ignored）。
+ */
+export function resolveInvoiceSubscriptionId(
+  invoice: { subscription?: unknown },
+): string | null {
+  return typeof invoice.subscription === "string" ? invoice.subscription : null;
+}
 
-  // raw body を一度だけ読み取る（constructEventAsync に渡す前に一切加工しない）
-  const body = await req.text();
-
-  // ── 署名検証（Stripe クライアント初期化より先に行う） ────────────────────
-  // constructEventAsync は HMAC-SHA256 の検証のみを行い HTTP 呼び出しをしない。
-  // そのため Stripe API キーは使用しない。STRIPE_SECRET_KEY が未設定でも検証は可能。
-  //
-  // Deno Edge Runtime には Node.js の crypto.createHmac がないため、
-  // 同期版 constructEvent は使用不可。
-  // SubtleCrypto（Web Crypto API）を使う非同期版 + createSubtleCryptoProvider が必須。
-  const cryptoProvider = Stripe.createSubtleCryptoProvider();
-  // constructEventAsync は Stripe インスタンスのメソッドとして呼び出す必要があるが、
-  // 署名検証は API キーを一切使わない。STRIPE_SECRET_KEY がなければ一時インスタンスで代替する。
-  const _verifyStripe = new Stripe(
-    Deno.env.get('STRIPE_SECRET_KEY') ?? 'sk_test_verify_only_placeholder_no_api_calls',
-    { apiVersion: '2025-02-24.acacia' as const },
+/**
+ * 既存行と受信 Subscription を比較し、別の blocking Subscription が存在するかを返す。
+ * true の場合は upsert を拒否して duplicate_subscription として記録する。
+ */
+export function checkDuplicateSubscription(
+  existingSubId: string | null | undefined,
+  existingStatus: string | null | undefined,
+  incomingSubId: string,
+): boolean {
+  return Boolean(
+    existingSubId &&
+      existingSubId !== incomingSubId &&
+      BLOCKING_SUBSCRIPTION_STATUSES.has(existingStatus ?? ""),
   );
+}
 
-  let event: Stripe.Event;
-  try {
-    event = await _verifyStripe.webhooks.constructEventAsync(
-      body,
-      signature,
-      webhookSecret,
-      undefined,    // tolerance（デフォルト300秒）
-      cryptoProvider,
-    );
-  } catch (_) {
-    return jsonError(400, 'Invalid signature');
-  }
+// ─── テスト用エクスポート：DB 操作ヘルパー ───────────────────────────────────
 
-  // ── Stripe クライアント初期化（署名検証後。API 呼び出しに必要） ──────────
-  let stripe: Stripe;
-  try {
-    stripe = getStripe();
-  } catch (_) {
-    return jsonError(500, 'Payment service not configured');
-  }
-
-  // ── 2. 冪等性チェック ─────────────────────────────────────────────────────
-  const supabaseAdmin = getSupabaseAdmin();
-
-  const { data: existing } = await supabaseAdmin
-    .from('stripe_webhook_events')
-    .select('event_id')
-    .eq('event_id', event.id)
+/**
+ * 冪等性チェック（stripe_webhook_events への SELECT）。
+ * DB エラー時は 500 Response を返す。
+ * 処理済みの場合は skipped 200 を返す。
+ * 未処理（継続）の場合は null を返す。
+ */
+export async function runIdempotencyCheck(
+  supabase: SupabaseClient,
+  eventId: string,
+  eventType: string,
+): Promise<Response | null> {
+  const { data: existing, error: idempotencyError } = await supabase
+    .from("stripe_webhook_events")
+    .select("event_id")
+    .eq("event_id", eventId)
     .maybeSingle();
+
+  if (idempotencyError) {
+    console.error(
+      "[stripe-webhook] idempotency check failed",
+      JSON.stringify({
+        identifier: "idempotency_check_failed",
+        event_id: eventId,
+        event_type: eventType,
+        error_code: idempotencyError.code,
+      }),
+    );
+    return jsonError(500, "Service unavailable");
+  }
 
   if (existing) {
     return jsonOk({ received: true, skipped: true });
   }
 
-  // ── 3. イベント処理 ──────────────────────────────────────────────────────
-  try {
-    await handleEvent(event, stripe, supabaseAdmin);
-  } catch (err) {
-    console.error(
-      '[stripe-webhook] processing error',
-      event.type,
-      event.id,
-      (err as Error).message,
-    );
-    return jsonError(500, 'Processing failed');
-  }
+  return null;
+}
 
-  // ── 4. 処理成功後に記録 ───────────────────────────────────────────────────
-  const { error: insertError } = await supabaseAdmin
-    .from('stripe_webhook_events')
-    .insert({ event_id: event.id, event_type: event.type });
+/**
+ * 処理済みイベントを stripe_webhook_events へ記録し、最終 Response を返す。
+ * 23505（同時配送の競合）は 200 で受理する。
+ * 23505 以外の INSERT 失敗は 500 を返して Stripe に再送させる。
+ */
+export async function writeEventRecord(
+  supabase: SupabaseClient,
+  eventId: string,
+  eventType: string,
+  result: WebhookProcessResult,
+): Promise<Response> {
+  const { error: insertError } = await supabase
+    .from("stripe_webhook_events")
+    .insert({
+      event_id: eventId,
+      event_type: eventType,
+      outcome: result.outcome,
+      stripe_customer_id: result.stripeCustomerId ?? null,
+      stripe_subscription_id: result.stripeSubscriptionId ?? null,
+      error_code: null,
+    });
 
   if (insertError) {
-    if (insertError.code === '23505') {
-      // PostgreSQL unique violation: 同一 event が並列処理された
-      // → 処理済み相当として 200 を返し Stripe の不要な再送を防ぐ
+    if (insertError.code === "23505") {
       return jsonOk({ received: true, duplicate: true });
     }
-    // それ以外の INSERT 失敗: subscriptions 同期は完了しているため 200 を返す
-    // event_id の記録漏れは次回再送時の処理重複につながるが、upsert は冪等なため無害
-    console.warn(
-      '[stripe-webhook] event record insert failed',
-      event.id,
-      insertError.code,
+    console.error(
+      "[stripe-webhook] event record insert failed",
+      JSON.stringify({
+        identifier: "event_record_insert_failed",
+        event_id: eventId,
+        event_type: eventType,
+        error_code: insertError.code,
+      }),
     );
+    return jsonError(500, "Event record failed");
   }
 
   return jsonOk({ received: true });
-});
+}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// イベントディスパッチ
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── テスト用エクスポート：イベントディスパッチ ──────────────────────────────
 
-async function handleEvent(
+/**
+ * イベントを種別に応じてディスパッチし、処理結果を返す。
+ * throw した場合は呼び出し元が 500 を返して Stripe に再送させる。
+ * テスト時は stripe / supabase をモックで注入する。
+ */
+export async function handleEvent(
   event: Stripe.Event,
   stripe: Stripe,
   supabase: SupabaseClient,
-): Promise<void> {
+): Promise<WebhookProcessResult> {
   switch (event.type) {
-    case 'checkout.session.completed': {
+    case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      if (session.mode === 'subscription') {
-        await handleCheckoutCompleted(session, stripe, supabase, event.type);
+      if (resolveCheckoutMode(session.mode) === "ignored") {
+        return { outcome: "ignored" };
       }
-      break;
+      return handleCheckoutCompleted(session, stripe, supabase, event.type);
     }
-    case 'customer.subscription.created':
-    case 'customer.subscription.updated': {
+    case "customer.subscription.created":
+    case "customer.subscription.updated": {
       const eventSub = event.data.object as Stripe.Subscription;
-      await handleSubscriptionUpsert(eventSub, stripe, supabase, event.type);
-      break;
+      return handleSubscriptionUpsert(eventSub, stripe, supabase, event.type);
     }
-    case 'customer.subscription.deleted': {
+    case "customer.subscription.deleted": {
       const eventSub = event.data.object as Stripe.Subscription;
-      await handleSubscriptionDeleted(eventSub, stripe, supabase);
-      break;
+      return handleSubscriptionDeleted(eventSub, stripe, supabase);
     }
-    case 'invoice.payment_failed':
-    case 'invoice.paid': {
+    case "invoice.payment_failed":
+    case "invoice.paid": {
       const invoice = event.data.object as Stripe.Invoice;
-      await handleInvoiceEvent(invoice, stripe, supabase, event.type);
-      break;
+      return handleInvoiceEvent(invoice, stripe, supabase, event.type);
     }
     default:
-      break;
+      return { outcome: "ignored" };
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ハンドラ実装
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── メインハンドラ ───────────────────────────────────────────────────────────
+
+if (import.meta.main) {
+  Deno.serve(async (req: Request): Promise<Response> => {
+    // Webhook は Stripe サーバーから呼ばれるため OPTIONS / CORS は不要
+    if (req.method !== "POST") return jsonError(405, "Method not allowed");
+
+    // ── 1. Stripe 署名検証 ──────────────────────────────────────────────────
+    const signature = req.headers.get("stripe-signature");
+    if (!signature) return jsonError(400, "Missing stripe-signature");
+
+    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    if (!webhookSecret) return jsonError(500, "Webhook not configured");
+
+    // raw body を一度だけ読み取る（constructEventAsync に渡す前に一切加工しない）
+    const body = await req.text();
+
+    // ── 署名検証（Stripe クライアント初期化より先に行う） ──────────────────
+    // constructEventAsync は HMAC-SHA256 の検証のみを行い HTTP 呼び出しをしない。
+    // そのため Stripe API キーは使用しない。STRIPE_SECRET_KEY が未設定でも検証は可能。
+    //
+    // Deno Edge Runtime には Node.js の crypto.createHmac がないため、
+    // 同期版 constructEvent は使用不可。
+    // SubtleCrypto（Web Crypto API）を使う非同期版 + createSubtleCryptoProvider が必須。
+    const cryptoProvider = Stripe.createSubtleCryptoProvider();
+    const _verifyStripe = new Stripe(
+      Deno.env.get("STRIPE_SECRET_KEY") ??
+        "sk_test_verify_only_placeholder_no_api_calls",
+      { apiVersion: "2025-02-24.acacia" as const },
+    );
+
+    let event: Stripe.Event;
+    try {
+      event = await _verifyStripe.webhooks.constructEventAsync(
+        body,
+        signature,
+        webhookSecret,
+        undefined, // tolerance（デフォルト300秒）
+        cryptoProvider,
+      );
+    } catch (_) {
+      return jsonError(400, "Invalid signature");
+    }
+
+    // ── Stripe クライアント初期化（署名検証後。API 呼び出しに必要） ─────────
+    let stripe: Stripe;
+    try {
+      stripe = getStripe();
+    } catch (_) {
+      return jsonError(500, "Payment service not configured");
+    }
+
+    const supabaseAdmin = getSupabaseAdmin();
+
+    // ── 2. 冪等性チェック ────────────────────────────────────────────────────
+    const idempotencyResponse = await runIdempotencyCheck(
+      supabaseAdmin,
+      event.id,
+      event.type,
+    );
+    if (idempotencyResponse !== null) return idempotencyResponse;
+
+    // ── 3. イベント処理 ─────────────────────────────────────────────────────
+    let result: WebhookProcessResult;
+    try {
+      result = await handleEvent(event, stripe, supabaseAdmin);
+    } catch (err) {
+      console.error(
+        "[stripe-webhook] processing error",
+        event.type,
+        event.id,
+        (err as Error).message,
+      );
+      return jsonError(500, "Processing failed");
+    }
+
+    // ── 4. 処理成功後に記録 ─────────────────────────────────────────────────
+    return writeEventRecord(supabaseAdmin, event.id, event.type, result);
+  });
+}
+
+// ─── ハンドラ実装 ────────────────────────────────────────────────────────────
 
 /**
  * checkout.session.completed
@@ -199,20 +327,28 @@ async function handleCheckoutCompleted(
   stripe: Stripe,
   supabase: SupabaseClient,
   eventType: string,
-): Promise<void> {
+): Promise<WebhookProcessResult> {
   const userId = session.client_reference_id;
-  if (!userId) throw new Error('No client_reference_id in checkout session');
+  if (!userId) throw new Error("No client_reference_id in checkout session");
 
-  const customerId =
-    typeof session.customer === 'string' ? session.customer : null;
-  const subscriptionId =
-    typeof session.subscription === 'string' ? session.subscription : null;
+  const customerId = typeof session.customer === "string"
+    ? session.customer
+    : null;
+  const subscriptionId = typeof session.subscription === "string"
+    ? session.subscription
+    : null;
   if (!customerId || !subscriptionId) {
-    throw new Error('Missing customer or subscription in checkout session');
+    throw new Error("Missing customer or subscription in checkout session");
   }
 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  await upsertSubscription(userId, customerId, subscription, supabase, eventType);
+  return upsertSubscription(
+    userId,
+    customerId,
+    subscription,
+    supabase,
+    eventType,
+  );
 }
 
 /**
@@ -227,17 +363,39 @@ async function handleSubscriptionUpsert(
   stripe: Stripe,
   supabase: SupabaseClient,
   eventType: string,
-): Promise<void> {
+): Promise<WebhookProcessResult> {
   // イベントオブジェクトの状態を使わず、常に最新状態を取得する
   const subscription = await stripe.subscriptions.retrieve(eventSub.id);
 
   const customerId = resolveCustomerId(subscription.customer);
-  if (!customerId) return;
+  if (!customerId) {
+    return {
+      outcome: "unresolved_user",
+      stripeSubscriptionId: subscription.id,
+    };
+  }
 
-  const userId = await resolveUserId(customerId, supabase, stripe, subscription);
-  if (!userId) return;
+  const userId = await resolveUserId(
+    customerId,
+    supabase,
+    stripe,
+    subscription,
+  );
+  if (!userId) {
+    return {
+      outcome: "unresolved_user",
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscription.id,
+    };
+  }
 
-  await upsertSubscription(userId, customerId, subscription, supabase, eventType);
+  return upsertSubscription(
+    userId,
+    customerId,
+    subscription,
+    supabase,
+    eventType,
+  );
 }
 
 /**
@@ -252,23 +410,37 @@ async function handleSubscriptionDeleted(
   eventSub: Stripe.Subscription,
   stripe: Stripe,
   supabase: SupabaseClient,
-): Promise<void> {
+): Promise<WebhookProcessResult> {
   const customerId = resolveCustomerId(eventSub.customer);
-  if (!customerId) return;
+  if (!customerId) {
+    return { outcome: "unresolved_user", stripeSubscriptionId: eventSub.id };
+  }
 
   // subscription metadata → DB → Customer metadata の順で user_id を解決
   const userId = await resolveUserId(customerId, supabase, stripe, eventSub);
-  if (!userId) return;
+  if (!userId) {
+    return {
+      outcome: "unresolved_user",
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: eventSub.id,
+    };
+  }
 
   // 解約時も Customer 対応を stripe_customers に収束させる
   await upsertStripeCustomer(userId, customerId, supabase);
 
   await supabase
-    .from('subscriptions')
-    .update({ status: 'canceled', cancel_at_period_end: false })
-    .eq('user_id', userId)
-    .eq('stripe_subscription_id', eventSub.id) // 再購読後の行を誤 cancel しない
+    .from("subscriptions")
+    .update({ status: "canceled", cancel_at_period_end: false })
+    .eq("user_id", userId)
+    .eq("stripe_subscription_id", eventSub.id) // 再購読後の行を誤 cancel しない
     .throwOnError();
+
+  return {
+    outcome: "applied",
+    stripeCustomerId: customerId,
+    stripeSubscriptionId: eventSub.id,
+  };
 }
 
 /**
@@ -281,24 +453,40 @@ async function handleInvoiceEvent(
   stripe: Stripe,
   supabase: SupabaseClient,
   eventType: string,
-): Promise<void> {
-  const subscriptionId =
-    typeof invoice.subscription === 'string' ? invoice.subscription : null;
-  if (!subscriptionId) return;
+): Promise<WebhookProcessResult> {
+  const subscriptionId = resolveInvoiceSubscriptionId(invoice);
+  if (!subscriptionId) return { outcome: "ignored" };
 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
   const customerId = resolveCustomerId(subscription.customer);
-  if (!customerId) return;
+  if (!customerId) {
+    return { outcome: "unresolved_user", stripeSubscriptionId: subscriptionId };
+  }
 
-  const userId = await resolveUserId(customerId, supabase, stripe, subscription);
-  if (!userId) return;
+  const userId = await resolveUserId(
+    customerId,
+    supabase,
+    stripe,
+    subscription,
+  );
+  if (!userId) {
+    return {
+      outcome: "unresolved_user",
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscriptionId,
+    };
+  }
 
-  await upsertSubscription(userId, customerId, subscription, supabase, eventType);
+  return upsertSubscription(
+    userId,
+    customerId,
+    subscription,
+    supabase,
+    eventType,
+  );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// stripe_customers テーブル書き込み
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── stripe_customers テーブル書き込み ───────────────────────────────────────
 
 /**
  * stripe_customers テーブルへ Customer 対応を保存する（Webhook 経由）。
@@ -311,19 +499,21 @@ async function upsertStripeCustomer(
   supabase: SupabaseClient,
 ): Promise<void> {
   const { error } = await supabase
-    .from('stripe_customers')
+    .from("stripe_customers")
     .upsert(
       { user_id: userId, stripe_customer_id: customerId },
-      { onConflict: 'user_id' },
+      { onConflict: "user_id" },
     );
   if (error) {
-    console.warn('[stripe-webhook] stripe_customers upsert failed', userId, error.code);
+    console.warn(
+      "[stripe-webhook] stripe_customers upsert failed",
+      userId,
+      error.code,
+    );
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 共通ユーティリティ
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── 共通ユーティリティ ──────────────────────────────────────────────────────
 
 function resolveCustomerId(
   customer:
@@ -332,8 +522,8 @@ function resolveCustomerId(
     | Stripe.DeletedCustomer
     | null,
 ): string | null {
-  if (typeof customer === 'string') return customer;
-  if (customer && 'id' in customer) return customer.id;
+  if (typeof customer === "string") return customer;
+  if (customer && "id" in customer) return customer.id;
   return null;
 }
 
@@ -359,16 +549,16 @@ async function resolveUserId(
 
   // 2. subscriptions テーブル
   const { data } = await supabase
-    .from('subscriptions')
-    .select('user_id')
-    .eq('stripe_customer_id', customerId)
+    .from("subscriptions")
+    .select("user_id")
+    .eq("stripe_customer_id", customerId)
     .maybeSingle();
   if (data?.user_id) return data.user_id;
 
   // 3. Stripe Customer metadata
   try {
     const customer = await stripe.customers.retrieve(customerId);
-    if ('deleted' in customer && customer.deleted) return null;
+    if ("deleted" in customer && customer.deleted) return null;
     return (customer as Stripe.Customer).metadata?.supabase_user_id ?? null;
   } catch (_) {
     return null;
@@ -390,7 +580,7 @@ async function upsertSubscription(
   subscription: Stripe.Subscription,
   supabase: SupabaseClient,
   eventType: string,
-): Promise<void> {
+): Promise<WebhookProcessResult> {
   // Customer 対応を stripe_customers に収束させる（Checkout 以前の既存 Customer も対象）
   await upsertStripeCustomer(userId, customerId, supabase);
 
@@ -400,30 +590,35 @@ async function upsertSubscription(
   // C: 既存 stripe_subscription_id !== incoming かつ既存 status が blocking → 上書き拒否
   // D: 既存 status が canceled / incomplete_expired → 新しい Subscription へ置換を許可
   const { data: existingRow } = await supabase
-    .from('subscriptions')
-    .select('stripe_subscription_id, status')
-    .eq('user_id', userId)
+    .from("subscriptions")
+    .select("stripe_subscription_id, status")
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (
-    existingRow?.stripe_subscription_id &&
-    existingRow.stripe_subscription_id !== subscription.id &&
-    BLOCKING_SUBSCRIPTION_STATUSES.has(existingRow.status ?? '')
+    checkDuplicateSubscription(
+      existingRow?.stripe_subscription_id,
+      existingRow?.status,
+      subscription.id,
+    )
   ) {
     // 再送では解決しない論理競合（同一ユーザーに複数の有効 Subscription が存在）。
     // throw すると Stripe が無限再送するため、ここでは 200 で受理する。
-    // 200 を返すことで呼び出し元が stripe_webhook_events に event_id を記録し、
-    // 同イベントの再処理を防ぐ。正常状態ではなく運用確認が必要な異常として扱う。
+    // duplicate_subscription として記録し、運用確認が必要な異常として扱う。
     console.error(JSON.stringify({
-      identifier: 'duplicate_active_subscription_detected',
+      identifier: "duplicate_active_subscription_detected",
       user_id: userId,
-      stored_subscription_id: existingRow.stripe_subscription_id,
+      stored_subscription_id: existingRow?.stripe_subscription_id,
       incoming_subscription_id: subscription.id,
-      stored_status: existingRow.status,
+      stored_status: existingRow?.status,
       incoming_status: subscription.status,
       event_type: eventType,
     }));
-    return;
+    return {
+      outcome: "duplicate_subscription",
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscription.id,
+    };
   }
 
   const priceId = subscription.items.data[0]?.price.id ?? null;
@@ -432,7 +627,7 @@ async function upsertSubscription(
   ).toISOString();
 
   await supabase
-    .from('subscriptions')
+    .from("subscriptions")
     .upsert(
       {
         user_id: userId,
@@ -443,7 +638,13 @@ async function upsertSubscription(
         price_id: priceId,
         cancel_at_period_end: subscription.cancel_at_period_end,
       },
-      { onConflict: 'user_id' },
+      { onConflict: "user_id" },
     )
     .throwOnError();
+
+  return {
+    outcome: "applied",
+    stripeCustomerId: customerId,
+    stripeSubscriptionId: subscription.id,
+  };
 }
