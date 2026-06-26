@@ -2,6 +2,9 @@
 test_beta_local.html
 test_beta_waitlist.mjs
 
+# Claude Code ローカル開発ツール
+.claude/
+
 .DS_Store
 
 # Local environment files / secrets
