@@ -109,11 +109,51 @@
   footer .back{display:inline-block;border-bottom:1px solid var(--line-rule);}
   footer .foot-disclaimer{max-width:60ch;line-height:1.8;}
 
+  /* ===== premium panel ===== */
+  .premium-panel{padding:14px 5vw 0;}
+  .premium-gate-box{border:1px solid var(--line-rule);background:var(--paper-deep);padding:18px 20px;max-width:720px;}
+  .premium-gate-attention{border-left:3px solid var(--ink-soft);}
+  .premium-gate-msg{font-size:13.5px;color:var(--ink-soft);margin:0 0 12px;line-height:1.75;}
+  .premium-gate-link{font-family:var(--mono);font-size:12px;border-bottom:1px solid var(--line-rule);color:var(--ink-soft);margin-right:12px;}
+  .premium-gate-link:hover{color:var(--ink);}
+  .premium-paid-wrap{max-width:720px;}
+  .premium-load-btn{font-family:var(--mono);font-size:12px;border:1px solid var(--line-rule);padding:8px 16px;border-radius:2px;color:var(--ink-soft);background:var(--paper);cursor:pointer;letter-spacing:0.02em;}
+  .premium-load-btn:hover:not(:disabled){border-color:var(--ink-soft);color:var(--ink);}
+  .premium-load-btn:disabled{opacity:0.55;cursor:default;}
+  .premium-result-area{margin-top:20px;}
+  .pm-loading{font-family:var(--mono);font-size:12px;color:var(--ink-soft);padding:4px 0;}
+  .pm-error{padding:14px 18px;border:1px solid var(--line-rule);border-left:3px solid var(--ink-soft);background:var(--paper-deep);font-family:var(--mono);font-size:12px;color:var(--ink-soft);line-height:1.7;}
+  .pm-error-link{display:block;margin-top:8px;font-size:11px;border-bottom:1px solid var(--line-rule);color:var(--ink-soft);}
+  .pm-empty{padding:14px 18px;border:1px solid var(--line-rule);background:var(--paper-deep);font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
+  .pm-card{border:1px solid var(--line-rule);background:var(--paper-deep);max-width:720px;margin-bottom:14px;overflow:hidden;}
+  .pm-card-head{padding:14px 18px 12px;border-bottom:1px solid var(--line-rule);}
+  .pm-rank{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;color:var(--ink-soft);margin-bottom:6px;}
+  .pm-name{font-family:var(--display);font-size:16px;margin:0 0 4px;line-height:1.45;}
+  .pm-date{font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
+  .pm-score{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);margin-top:4px;}
+  .pm-axes{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .pm-axis-chip{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:2px;border:1px solid var(--line-rule);color:var(--ink-soft);}
+  .pm-axis-match{border-color:var(--down);color:var(--down);}
+  .pm-card-body{padding:14px 18px 16px;}
+  .pm-detail-link{display:inline-block;font-family:var(--mono);font-size:11.5px;border:1px solid var(--line-rule);padding:6px 12px;border-radius:2px;color:var(--ink-soft);margin-bottom:14px;}
+  .pm-detail-link:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .pm-text-label{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--ink-soft);margin:10px 0 4px;}
+  .pm-text{font-size:13px;color:var(--ink-soft);margin:0;line-height:1.75;}
+  .pm-reactions{margin-top:14px;border-top:1px solid var(--line-rule);padding-top:12px;}
+  .pm-reactions-label{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;color:var(--ink-soft);margin-bottom:8px;}
+  .pm-rxn-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;}
+  .pm-rxn-table th{text-align:left;color:var(--ink-soft);font-weight:400;padding:3px 8px 3px 0;font-size:10px;}
+  .pm-rxn-table td{padding:3px 8px 3px 0;color:var(--ink-soft);}
+  .pm-rxn-table td.up{color:var(--up);}
+  .pm-rxn-table td.down{color:var(--down);}
+
   /* ===== responsive ===== */
   @media(max-width:680px){
     .ctx-grid{grid-template-columns:repeat(2,1fr);}
     .env-row{gap:6px;}
     .rate-detail .rate-row{gap:4px 16px;}
+    .pm-rxn-table{font-size:10px;}
+    .pm-rxn-table th,.pm-rxn-table td{padding:2px 4px 2px 0;}
   }
   @media(max-width:320px){
     .ctx-grid{grid-template-columns:1fr;}
@@ -139,6 +179,7 @@
 
 <script type="module">
 import { getSubscriptionState } from './assets/js/subscription-state.js';
+import { setupPremiumSection } from './assets/js/current-context-premium.js';
 
 (async function(){
   'use strict';
@@ -263,14 +304,21 @@ import { getSubscriptionState } from './assets/js/subscription-state.js';
   /* 公開部分を先に描画する（契約状態取得を待たない） */
   render(data, cause);
 
-  /* 契約状態の確定を待ってから CTA ブロックだけを更新する */
-  /* render() 完了後のため DOM 上に data-subscription-cta 要素が存在することが保証される */
+  /* 契約状態の確定を待ってから CTA ブロックとプレミアムセクションを更新する */
+  /* render() 完了後のため DOM 上に data-subscription-cta / #premium-section が存在することが保証される */
   const { state } = await subscriptionStatePromise;
   document
     .querySelectorAll('[data-subscription-cta]')
     .forEach((ctaBlock) => {
       ctaBlock.replaceChildren(buildCtaContent(state));
     });
+
+  /* プレミアムセクションを初期化（free_top_match のキーを allowedSet として渡す） */
+  const premiumSectionEl = document.getElementById('premium-section');
+  if (premiumSectionEl) {
+    const allowedSet = new Set(Object.keys(data.free_top_match ?? {}));
+    setupPremiumSection(state, cause, allowedSet, premiumSectionEl);
+  }
 
   /* ================================================================== */
   /* render 関数群                                                        */
@@ -319,6 +367,11 @@ import { getSubscriptionState } from './assets/js/subscription-state.js';
     /* E: free_top_match */
     frag.appendChild(el('div','section-label','現在の市場環境と過去局面の重なり'));
     frag.appendChild(buildTopMatch(d.free_top_match, cause));
+
+    /* プレミアムセクション：契約状態確定後に setupPremiumSection で初期化される */
+    const premiumSection = document.createElement('div');
+    premiumSection.id = 'premium-section';
+    frag.appendChild(premiumSection);
 
     /* meta / 生成日時 */
     const mb = el('div','meta-block');
@@ -492,12 +545,11 @@ import { getSubscriptionState } from './assets/js/subscription-state.js';
       frag.appendChild(makeLink('詳細比較は有料版で提供予定です', 'pricing.html'));
 
     } else if (state === 'paid') {
-      /* 非活性。span を使用・a href="#" にしない */
-      const span = document.createElement('span');
-      span.className = 'cta-disabled';
-      span.textContent = '詳細比較は現在準備中です';
-      span.setAttribute('aria-disabled', 'true');
-      frag.appendChild(span);
+      /* 詳細比較は下記プレミアムセクションで提供 */
+      const note = document.createElement('span');
+      note.className = 'cta-note';
+      note.textContent = '詳細比較は下記でご確認いただけます';
+      frag.appendChild(note);
 
     } else if (state === 'attention') {
       frag.appendChild(makeLink('契約状況をご確認ください', 'account.html'));
