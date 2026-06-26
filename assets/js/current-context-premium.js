@@ -151,6 +151,9 @@ async function _handleLoad(btn, cause, resultArea) {
 
     if (error) {
       const status = error.context?.status ?? error.status ?? null;
+      if (status === 403) {
+        _cache.clear();
+      }
       _renderError(resultArea, status);
       return;
     }
