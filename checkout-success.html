@@ -88,9 +88,9 @@ import { getSubscriptionState } from './assets/js/subscription-state.js';
   const noteEl = document.getElementById('loading-msg');
   if (!noteEl) return;
 
-  // Webhook 反映を待つためポーリング（最大 3 回、2 秒間隔）
+  // Webhook 反映を待つためポーリング（最大 5 回、2 秒間隔）
   let attempts = 0;
-  const MAX_ATTEMPTS = 3;
+  const MAX_ATTEMPTS = 5;
 
   while (attempts < MAX_ATTEMPTS) {
     await new Promise(r => setTimeout(r, 2000));
@@ -103,9 +103,10 @@ import { getSubscriptionState } from './assets/js/subscription-state.js';
     }
   }
 
-  // タイムアウト：Webhook が遅延している可能性を案内
+  // タイムアウト：Webhook 遅延の可能性を案内。pricing.html への再申込みを誘導しない
   noteEl.textContent =
-    '反映に時間がかかっています。しばらくしてからアカウントページをご確認ください。';
+    '反映に時間がかかっています。数分後にアカウントページをご確認ください。' +
+    'この決済が完了している場合、再度申し込む必要はありません。';
 })();
 </script>
 

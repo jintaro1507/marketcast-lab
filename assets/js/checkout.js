@@ -31,7 +31,7 @@ export async function startCheckout(btn, errorEl = null) {
       if (status === 409) {
         _showError(
           errorEl,
-          'すでに有料プランをご利用中です。アカウントページからご確認ください。',
+          'すでに有効または処理中の契約があります。アカウントページをご確認ください。',
         );
       } else if (status === 401) {
         // 認証切れ：ログインページへ誘導

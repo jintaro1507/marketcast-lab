@@ -38,6 +38,15 @@ import { jsonOk, jsonError } from '../_shared/response.ts';
 import { getStripe } from '../_shared/stripe.ts';
 import { getSupabaseAdmin } from '../_shared/supabase.ts';
 
+const BLOCKING_SUBSCRIPTION_STATUSES = new Set([
+  'incomplete',
+  'trialing',
+  'active',
+  'past_due',
+  'unpaid',
+  'paused',
+]);
+
 Deno.serve(async (req: Request): Promise<Response> => {
   // Webhook は Stripe サーバーから呼ばれるため OPTIONS / CORS は不要
   if (req.method !== 'POST') return jsonError(405, 'Method not allowed');
@@ -150,14 +159,14 @@ async function handleEvent(
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.mode === 'subscription') {
-        await handleCheckoutCompleted(session, stripe, supabase);
+        await handleCheckoutCompleted(session, stripe, supabase, event.type);
       }
       break;
     }
     case 'customer.subscription.created':
     case 'customer.subscription.updated': {
       const eventSub = event.data.object as Stripe.Subscription;
-      await handleSubscriptionUpsert(eventSub, stripe, supabase);
+      await handleSubscriptionUpsert(eventSub, stripe, supabase, event.type);
       break;
     }
     case 'customer.subscription.deleted': {
@@ -168,7 +177,7 @@ async function handleEvent(
     case 'invoice.payment_failed':
     case 'invoice.paid': {
       const invoice = event.data.object as Stripe.Invoice;
-      await handleInvoiceEvent(invoice, stripe, supabase);
+      await handleInvoiceEvent(invoice, stripe, supabase, event.type);
       break;
     }
     default:
@@ -189,6 +198,7 @@ async function handleCheckoutCompleted(
   session: Stripe.Checkout.Session,
   stripe: Stripe,
   supabase: SupabaseClient,
+  eventType: string,
 ): Promise<void> {
   const userId = session.client_reference_id;
   if (!userId) throw new Error('No client_reference_id in checkout session');
@@ -202,7 +212,7 @@ async function handleCheckoutCompleted(
   }
 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  await upsertSubscription(userId, customerId, subscription, supabase);
+  await upsertSubscription(userId, customerId, subscription, supabase, eventType);
 }
 
 /**
@@ -216,6 +226,7 @@ async function handleSubscriptionUpsert(
   eventSub: Stripe.Subscription,
   stripe: Stripe,
   supabase: SupabaseClient,
+  eventType: string,
 ): Promise<void> {
   // イベントオブジェクトの状態を使わず、常に最新状態を取得する
   const subscription = await stripe.subscriptions.retrieve(eventSub.id);
@@ -226,7 +237,7 @@ async function handleSubscriptionUpsert(
   const userId = await resolveUserId(customerId, supabase, stripe, subscription);
   if (!userId) return;
 
-  await upsertSubscription(userId, customerId, subscription, supabase);
+  await upsertSubscription(userId, customerId, subscription, supabase, eventType);
 }
 
 /**
@@ -269,6 +280,7 @@ async function handleInvoiceEvent(
   invoice: Stripe.Invoice,
   stripe: Stripe,
   supabase: SupabaseClient,
+  eventType: string,
 ): Promise<void> {
   const subscriptionId =
     typeof invoice.subscription === 'string' ? invoice.subscription : null;
@@ -281,7 +293,7 @@ async function handleInvoiceEvent(
   const userId = await resolveUserId(customerId, supabase, stripe, subscription);
   if (!userId) return;
 
-  await upsertSubscription(userId, customerId, subscription, supabase);
+  await upsertSubscription(userId, customerId, subscription, supabase, eventType);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -377,9 +389,42 @@ async function upsertSubscription(
   customerId: string,
   subscription: Stripe.Subscription,
   supabase: SupabaseClient,
+  eventType: string,
 ): Promise<void> {
   // Customer 対応を stripe_customers に収束させる（Checkout 以前の既存 Customer も対象）
   await upsertStripeCustomer(userId, customerId, supabase);
+
+  // 異なる Subscription ID で既存の有効行を上書きしないよう事前チェック
+  // A: 既存行なし → 通常作成
+  // B: 既存 stripe_subscription_id === incoming → 通常更新
+  // C: 既存 stripe_subscription_id !== incoming かつ既存 status が blocking → 上書き拒否
+  // D: 既存 status が canceled / incomplete_expired → 新しい Subscription へ置換を許可
+  const { data: existingRow } = await supabase
+    .from('subscriptions')
+    .select('stripe_subscription_id, status')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (
+    existingRow?.stripe_subscription_id &&
+    existingRow.stripe_subscription_id !== subscription.id &&
+    BLOCKING_SUBSCRIPTION_STATUSES.has(existingRow.status ?? '')
+  ) {
+    // 再送では解決しない論理競合（同一ユーザーに複数の有効 Subscription が存在）。
+    // throw すると Stripe が無限再送するため、ここでは 200 で受理する。
+    // 200 を返すことで呼び出し元が stripe_webhook_events に event_id を記録し、
+    // 同イベントの再処理を防ぐ。正常状態ではなく運用確認が必要な異常として扱う。
+    console.error(JSON.stringify({
+      identifier: 'duplicate_active_subscription_detected',
+      user_id: userId,
+      stored_subscription_id: existingRow.stripe_subscription_id,
+      incoming_subscription_id: subscription.id,
+      stored_status: existingRow.status,
+      incoming_status: subscription.status,
+      event_type: eventType,
+    }));
+    return;
+  }
 
   const priceId = subscription.items.data[0]?.price.id ?? null;
   const currentPeriodEnd = new Date(

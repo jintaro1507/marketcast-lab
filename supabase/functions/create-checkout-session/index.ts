@@ -21,6 +21,15 @@ import { getStripe } from '../_shared/stripe.ts';
 import { getSupabaseAdmin, getSupabaseUserClient } from '../_shared/supabase.ts';
 import { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 
+const BLOCKING_SUBSCRIPTION_STATUSES = new Set([
+  'incomplete',
+  'trialing',
+  'active',
+  'past_due',
+  'unpaid',
+  'paused',
+]);
+
 /** Supabase が発行する user.id は常に UUID 形式。クエリ埋め込み前に検証する。 */
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -56,9 +65,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
       .maybeSingle(),
   ]);
 
-  // 二重契約防止
+  // 二重契約防止（DB 側チェック）
   const existingStatus = subResult.data?.status;
-  if (existingStatus === 'active' || existingStatus === 'trialing') {
+  if (existingStatus && BLOCKING_SUBSCRIPTION_STATUSES.has(existingStatus)) {
     return jsonError(409, 'Already subscribed', origin);
   }
 
@@ -106,11 +115,44 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return jsonError(502, 'Failed to confirm billing account', origin);
   }
 
+  // ── 5b. Stripe 側の既存 Subscription 確認 ────────────────────────────────
+  // DB チェックは Webhook 反映遅延で行が存在しない場合に空振りする。
+  // confirmedCustomerId が確定した時点で Stripe API を直接確認して二重作成を防ぐ。
+  try {
+    const subList = await stripe.subscriptions.list({
+      customer: confirmedCustomerId,
+      status: 'all',
+      limit: 100,
+    });
+    const blockingSubs = subList.data.filter(
+      (sub) => BLOCKING_SUBSCRIPTION_STATUSES.has(sub.status),
+    );
+    if (blockingSubs.length > 0) {
+      if (blockingSubs.length > 1) {
+        console.warn(
+          '[create-checkout-session] multiple blocking subscriptions detected',
+          'user_id:', user.id,
+          'count:', blockingSubs.length,
+          'sub_ids:', blockingSubs.map((s) => s.id),
+        );
+      }
+      return jsonError(409, 'Already subscribed', origin);
+    }
+  } catch (_) {
+    return jsonError(502, 'Failed to verify subscription status', origin);
+  }
+
   // ── 6. Checkout Session 作成 ──────────────────────────────────────────────
   // client_reference_id: Webhook で user_id を特定する主要経路
   // metadata: Session オブジェクトから user_id を参照可能にする補助
   // subscription_data.metadata: Subscription オブジェクト自体に user_id を埋め込む
   //   → customer.subscription.created 単独着弾時に resolve 可能
+  //
+  // Checkout Session には idempotency key を設定しない。
+  // 日付単位キーは離脱後の再試行・同日解約再申込みで完了済み/期限切れ Session を
+  // 返す副作用があり、正常な再試行を妨げる。完全な並列防止には DB 管理の
+  // checkout attempt ID が必要であり、日付単位キーでは正しく解決できない。
+  // 並列リクエストのガードは上流の DB + Stripe API 二重チェックが担う。
   let session: Stripe.Checkout.Session;
   try {
     session = await stripe.checkout.sessions.create({
