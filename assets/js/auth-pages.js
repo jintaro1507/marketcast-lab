@@ -447,20 +447,23 @@ function formatPeriodEnd(value) {
 
 // プラン表示要素の排他制御
 // state: 'loading' | 'ok' | 'error'
-function setPlanState(state, planLabel, periodLabel) {
+function setPlanState(state, planLabel, periodLabel, cancelNotice = null) {
   const loadingEl = document.getElementById('plan-loading');
   const nameEl    = document.getElementById('plan-name');
   const periodEl  = document.getElementById('plan-period');
+  const cancelEl  = document.getElementById('plan-cancel-notice');
   const errorEl   = document.getElementById('plan-error');
 
   if (loadingEl) loadingEl.hidden = (state !== 'loading');
   if (nameEl)    nameEl.hidden    = (state !== 'ok');
   if (periodEl)  periodEl.hidden  = (state !== 'ok') || !periodLabel;
+  if (cancelEl)  cancelEl.hidden  = (state !== 'ok') || !cancelNotice;
   if (errorEl)   errorEl.hidden   = (state !== 'error');
 
   if (state === 'ok') {
     if (nameEl)   nameEl.textContent   = planLabel  || '';
     if (periodEl && periodLabel) periodEl.textContent = '現在の契約期間：' + periodLabel + 'まで';
+    if (cancelEl && cancelNotice) cancelEl.textContent = cancelNotice;
   }
   if (state === 'error' && errorEl) {
     errorEl.textContent = 'プラン情報を取得できませんでした。時間をおいて再度お試しください。';
@@ -498,7 +501,7 @@ function initAccount() {
     try {
       const { data: sub, error } = await supabase
         .from('subscriptions')
-        .select('user_id,status,current_period_end')
+        .select('user_id,status,current_period_end,cancel_at_period_end')
         .eq('user_id', userId)
         .maybeSingle();
 
@@ -515,7 +518,7 @@ function initAccount() {
         return;
       }
 
-      const label = PLAN_LABEL_MAP[sub.status];
+      let label = PLAN_LABEL_MAP[sub.status];
 
       if (!label) {
         setPlanState('error');
@@ -523,7 +526,14 @@ function initAccount() {
       }
 
       const period = formatPeriodEnd(sub.current_period_end);
-      setPlanState('ok', label, period);
+      let cancelNotice = null;
+      if (sub.cancel_at_period_end && (sub.status === 'active' || sub.status === 'trialing')) {
+        label += '（解約予約中）';
+        const dateStr = formatPeriodEnd(sub.current_period_end);
+        const datePart = dateStr ? dateStr + 'に解約されます。' : '期末に解約されます。';
+        cancelNotice = datePart + 'それまでは有料機能をご利用いただけます。';
+      }
+      setPlanState('ok', label, period, cancelNotice);
 
     } catch (_) {
       setPlanState('error');
