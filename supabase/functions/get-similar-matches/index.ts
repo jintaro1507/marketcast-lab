@@ -24,6 +24,7 @@ import { jsonOk, jsonError } from '../_shared/response.ts';
 import { getSupabaseAdmin, getSupabaseUserClient } from '../_shared/supabase.ts';
 import { getSubscriptionAccess } from '../_shared/subscription.ts';
 import { computeMatches, type ScoredEvent } from './matching.ts';
+import { computeEventTimeline, DISCLAIMER, type AssetTimeline } from '../_shared/timeline.ts';
 
 // ─── 内部型定義 ───────────────────────────────────────────────────────────────
 
@@ -183,6 +184,20 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const events = eventReactions.events as ScoredEvent[];
   const matches = computeMatches(causeTag, marketStateTags, events);
 
+  // ── 11. Timeline 計算（各マッチに方向データを付与） ───────────────────────
+  // computeEventTimeline は純粋関数で外部IOなし。Top5件の計算コスト軽微。
+  const enrichedMatches = matches.map((m) => {
+    let timeline: AssetTimeline[] | null = null;
+    try {
+      const computed = computeEventTimeline({ reactions: m.reactions });
+      // 有効資産0件は null として返す。空配列を有効なTimelineとして扱わない。
+      timeline = computed.length > 0 ? computed : null;
+    } catch (_) {
+      // timeline計算失敗はマッチングレスポンス全体を壊さない
+    }
+    return { ...m, timeline };
+  });
+
   // ── 12. レスポンス ────────────────────────────────────────────────────────
   // 内部 DB 情報（subscription/user_id/JWT）は含めない
   return jsonOk(
@@ -194,7 +209,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
         max_score: Object.keys(marketStateTags).length,
         method: 'market_state_tag_overlap',
       },
-      matches,
+      timeline_disclaimer: DISCLAIMER,
+      matches: enrichedMatches,
     },
     origin,
   );

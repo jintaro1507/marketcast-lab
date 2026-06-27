@@ -298,7 +298,7 @@ function _buildMatchCard(m, maxScore) {
 
   /* 資産反応テーブル */
   if (m.reactions && typeof m.reactions === 'object' && !Array.isArray(m.reactions)) {
-    const rxnEl = _buildReactionsTable(m.reactions);
+    const rxnEl = _buildReactionsTable(m.reactions, m.timeline ?? null);
     if (rxnEl) body.appendChild(rxnEl);
   }
 
@@ -308,7 +308,7 @@ function _buildMatchCard(m, maxScore) {
 
 /* ─── 資産反応テーブル ───────────────────────────────────────────────────── */
 
-function _buildReactionsTable(reactions) {
+function _buildReactionsTable(reactions, timelineAssets) {
   const rows = [];
   for (const key of ASSET_ORDER) {
     const r = reactions[key];
@@ -322,6 +322,18 @@ function _buildReactionsTable(reactions) {
   }
 
   if (rows.length === 0) return null;
+
+  // timelineAssets を asset_key でルックアップするMapを作成
+  const tlMap = new Map();
+  if (Array.isArray(timelineAssets)) {
+    for (const a of timelineAssets) {
+      if (a && typeof a.asset_key === 'string') tlMap.set(a.asset_key, a);
+    }
+  }
+  const hasTl = tlMap.size > 0;
+
+  const DIR_SYMBOL = { up: '↑', down: '↓', flat: '→', na: '—' };
+  const DIR_LABEL  = { up: '上昇', down: '下降', flat: '横ばい', na: 'データなし' };
 
   const section = _el('div', 'pm-reactions');
   section.appendChild(_el('div', 'pm-reactions-label', '資産別変化率（過去局面発生後）'));
@@ -341,6 +353,12 @@ function _buildReactionsTable(reactions) {
     th.scope = 'col';
     th.textContent = PERIOD_LABELS[p];
     hrow.appendChild(th);
+  }
+  if (hasTl) {
+    const thDir = document.createElement('th');
+    thDir.scope = 'col';
+    thDir.textContent = '推移';
+    hrow.appendChild(thDir);
   }
   thead.appendChild(hrow);
   table.appendChild(thead);
@@ -375,10 +393,46 @@ function _buildReactionsTable(reactions) {
       }
       tr.appendChild(td);
     }
+
+    /* 推移列（timelineがある場合のみ） */
+    if (hasTl) {
+      const tdDir = document.createElement('td');
+      tdDir.className = 'pm-rxn-dir';
+      const tlAsset = tlMap.get(row.key);
+      if (tlAsset && tlAsset.directions) {
+        const dirs = tlAsset.directions;
+        const patternSpan = document.createElement('span');
+        patternSpan.setAttribute('aria-label',
+          PERIOD_KEYS.map(p => DIR_LABEL[dirs[p]] || dirs[p]).join('→')
+        );
+        patternSpan.textContent = PERIOD_KEYS.map(p => DIR_SYMBOL[dirs[p]] || '—').join('');
+        tdDir.appendChild(patternSpan);
+
+        if (tlAsset.mid_term_reversal) {
+          const badge = document.createElement('span');
+          badge.className = 'dir-reversal';
+          badge.textContent = '中期反転';
+          badge.title = '初動（1日後）と中期（30日後）で方向が異なります';
+          tdDir.appendChild(badge);
+        }
+      } else {
+        tdDir.textContent = '—';
+      }
+      tr.appendChild(tdDir);
+    }
+
     tbody.appendChild(tr);
   }
   table.appendChild(tbody);
   section.appendChild(table);
+
+  /* timelineがある場合のみ注意書きを追加 */
+  if (hasTl) {
+    const tlNote = _el('div', 'pm-tl-note',
+      '推移欄の記号（↑↓→）は過去の価格変化の方向を記録したものです。売買推奨ではありません。'
+    );
+    section.appendChild(tlNote);
+  }
 
   return section;
 }

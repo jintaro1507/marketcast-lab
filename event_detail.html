@@ -142,6 +142,31 @@
     .contrast-mid{padding:8px 0;transform:rotate(90deg);}
     .ctx-grid{grid-template-columns:repeat(2,1fr);}
   }
+
+  /* Reaction Timeline（プレミアム） */
+  .tl-section{padding:14px 5vw 0;}
+  .tl-disclaimer{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-bottom:10px;max-width:64ch;line-height:1.7;border:1px solid var(--line-rule);background:var(--paper-deep);padding:10px 12px;}
+  .tl-wrap{overflow-x:auto;}
+  table.tl-table{border-collapse:collapse;font-size:13px;min-width:400px;width:100%;}
+  table.tl-table th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;color:var(--ink-soft);border-bottom:1px solid var(--line-rule);padding:8px 12px;}
+  table.tl-table td{padding:11px 12px;border-bottom:1px solid var(--line-rule);font-family:var(--mono);}
+  table.tl-table td:first-child{font-family:var(--body);}
+  .tl-dir{text-align:center;}
+  .dir-up{color:var(--up);}
+  .dir-down{color:var(--down);}
+  .dir-flat{color:var(--ink-soft);}
+  .dir-reversal{font-size:9px;font-family:var(--mono);color:var(--ink-soft);border:1px solid var(--line-rule);background:var(--paper-deep);padding:1px 5px;border-radius:2px;white-space:nowrap;}
+  .tl-gate{padding:14px 5vw 0;}
+  .tl-gate-inner{background:var(--paper-deep);border:1px solid var(--line-rule);padding:16px 18px;max-width:540px;}
+  .tl-gate-msg{margin:0 0 12px;font-size:13.5px;color:var(--ink-soft);}
+  .tl-gate-links{display:flex;gap:10px;flex-wrap:wrap;}
+  .tl-gate-link{font-size:13px;border:1px solid var(--line-rule);padding:7px 14px;border-radius:2px;color:var(--ink-soft);}
+  .tl-gate-link:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .tl-error{padding:14px 5vw 0;font-size:13px;color:var(--ink-soft);}
+  .tl-error-link{margin-left:10px;border-bottom:1px solid var(--line-rule);}
+  .tl-loading{padding:14px 5vw 0;font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
+  .tl-nodata{font-size:13px;color:var(--ink-soft);}
+  @media(max-width:680px){.dir-reversal{display:none;}}
 </style>
 </head>
 <body>
@@ -422,6 +447,8 @@
       return '';
     })()}
 
+    <div id="timeline-section"></div>
+
     ${whyHtml}
 
     ${contrastHtml}
@@ -449,6 +476,261 @@
     });
   });
 })();
+</script>
+
+<script type="module">
+import { supabase } from './assets/js/supabase-client.js';
+
+(async function initTimeline() {
+  const params = new URLSearchParams(location.search);
+  const eventId = params.get('id');
+  if (!eventId) return;
+
+  // #timeline-section が DOM に現れるまで待つ（非同期IIFEによるinnerHTML設定を待つ）
+  const section = await waitForElement('timeline-section');
+  if (!section) return;
+
+  // ローディング表示
+  const loadEl = document.createElement('div');
+  loadEl.className = 'tl-loading';
+  loadEl.textContent = '方向推移データを読み込み中…';
+  section.appendChild(loadEl);
+
+  // セッション取得
+  let session = null;
+  try {
+    const { data } = await supabase.auth.getSession();
+    session = data.session;
+  } catch (_) {
+    section.replaceChildren();
+    return;
+  }
+
+  if (!session) {
+    section.replaceChildren(buildGateBox('unauthenticated'));
+    return;
+  }
+
+  // Timeline API 呼び出し
+  let apiResult = null;
+  try {
+    const { data, error } = await supabase.functions.invoke('get-event-reaction-timeline', {
+      body: { event_id: eventId },
+    });
+    if (error) {
+      const status = error.context?.status ?? error.status ?? null;
+      section.replaceChildren(buildErrorFrag(status));
+      return;
+    }
+    apiResult = data;
+  } catch (_) {
+    section.replaceChildren(buildErrorFrag('network'));
+    return;
+  }
+
+  if (!apiResult) {
+    section.replaceChildren(buildErrorFrag('invalid'));
+    return;
+  }
+
+  section.replaceChildren(buildTimelineContent(apiResult));
+})();
+
+function waitForElement(id, maxMs) {
+  maxMs = maxMs || 6000;
+  return new Promise(function(resolve) {
+    var el = document.getElementById(id);
+    if (el) { resolve(el); return; }
+    var start = Date.now();
+    var root = document.getElementById('content') || document.body;
+    var obs = new MutationObserver(function() {
+      var found = document.getElementById(id);
+      if (found || Date.now() - start > maxMs) {
+        obs.disconnect();
+        resolve(found || null);
+      }
+    });
+    obs.observe(root, { childList: true, subtree: true });
+  });
+}
+
+var DIR_SYMBOL = { up: '↑', down: '↓', flat: '→', na: '—' };
+var DIR_LABEL  = { up: '上昇', down: '下降', flat: '横ばい', na: 'データなし' };
+var HORIZON_LABELS = { d1: '1日後', d7: '7日後', d30: '30日後', d90: '90日後' };
+
+function buildTimelineContent(data) {
+  var frag = document.createDocumentFragment();
+
+  var sLabel = document.createElement('div');
+  sLabel.className = 'section-label';
+  sLabel.textContent = '価格反応の方向推移（プレミアム）';
+  frag.appendChild(sLabel);
+
+  var wrap = document.createElement('div');
+  wrap.className = 'tl-section';
+
+  if (data.disclaimer) {
+    var note = document.createElement('div');
+    note.className = 'tl-disclaimer';
+    note.textContent = data.disclaimer;
+    wrap.appendChild(note);
+  }
+
+  var assets = Array.isArray(data.assets) ? data.assets : [];
+  if (assets.length > 0) {
+    var tWrap = document.createElement('div');
+    tWrap.className = 'tl-wrap';
+    tWrap.appendChild(buildDirectionTable(assets));
+    wrap.appendChild(tWrap);
+  } else {
+    var noData = document.createElement('div');
+    noData.className = 'tl-nodata';
+    noData.textContent = 'このイベントの方向データがありません。';
+    wrap.appendChild(noData);
+  }
+
+  frag.appendChild(wrap);
+  return frag;
+}
+
+function buildDirectionTable(assets) {
+  var horizons = ['d1', 'd7', 'd30', 'd90'];
+  var table = document.createElement('table');
+  table.className = 'tl-table';
+
+  var thead = document.createElement('thead');
+  var hrow = document.createElement('tr');
+  var thAsset = document.createElement('th');
+  thAsset.scope = 'col';
+  thAsset.textContent = '資産';
+  hrow.appendChild(thAsset);
+  for (var hi = 0; hi < horizons.length; hi++) {
+    var th = document.createElement('th');
+    th.scope = 'col';
+    th.style.textAlign = 'center';
+    th.textContent = HORIZON_LABELS[horizons[hi]] || horizons[hi];
+    hrow.appendChild(th);
+  }
+  var thJudge = document.createElement('th');
+  thJudge.scope = 'col';
+  thJudge.textContent = '判定';
+  hrow.appendChild(thJudge);
+  thead.appendChild(hrow);
+  table.appendChild(thead);
+
+  var tbody = document.createElement('tbody');
+  for (var ai = 0; ai < assets.length; ai++) {
+    var asset = assets[ai];
+    var tr = document.createElement('tr');
+
+    var tdName = document.createElement('td');
+    tdName.textContent = asset.label || asset.asset_key || '';
+    tr.appendChild(tdName);
+
+    var dirs = asset.directions || {};
+    for (var hj = 0; hj < horizons.length; hj++) {
+      var h = horizons[hj];
+      var td = document.createElement('td');
+      td.className = 'tl-dir';
+      var dir = dirs[h] || 'na';
+      var span = document.createElement('span');
+      span.setAttribute('aria-label', DIR_LABEL[dir] || dir);
+      span.textContent = DIR_SYMBOL[dir] || '—';
+      if (dir === 'up') span.className = 'dir-up';
+      else if (dir === 'down') span.className = 'dir-down';
+      else span.className = 'dir-flat';
+      td.appendChild(span);
+      tr.appendChild(td);
+    }
+
+    var tdJudge = document.createElement('td');
+    if (asset.mid_term_reversal) {
+      var badge = document.createElement('span');
+      badge.className = 'dir-reversal';
+      badge.textContent = '中期反転';
+      badge.title = '初動（1日後）と中期（30日後）で方向が異なります';
+      tdJudge.appendChild(badge);
+    }
+    tr.appendChild(tdJudge);
+
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  return table;
+}
+
+function buildGateBox(reason) {
+  var frag = document.createDocumentFragment();
+
+  var sLabel = document.createElement('div');
+  sLabel.className = 'section-label';
+  sLabel.textContent = '価格反応の方向推移';
+  frag.appendChild(sLabel);
+
+  var gate = document.createElement('div');
+  gate.className = 'tl-gate';
+  var inner = document.createElement('div');
+  inner.className = 'tl-gate-inner';
+
+  var msg = document.createElement('p');
+  msg.className = 'tl-gate-msg';
+  if (reason === 'unauthenticated') {
+    msg.textContent = 'ログインすると、各資産の価格変化の方向パターン・中期反転の有無を確認できます。';
+  } else {
+    msg.textContent = '有料プランでは、各資産の価格変化の方向パターン・中期反転の有無を確認できます。';
+  }
+  inner.appendChild(msg);
+
+  var links = document.createElement('div');
+  links.className = 'tl-gate-links';
+  if (reason === 'unauthenticated') {
+    var a1 = document.createElement('a');
+    a1.href = 'login.html';
+    a1.className = 'tl-gate-link';
+    a1.textContent = 'ログインする';
+    links.appendChild(a1);
+  }
+  var a2 = document.createElement('a');
+  a2.href = 'pricing.html';
+  a2.className = 'tl-gate-link';
+  a2.textContent = '有料プランを見る';
+  links.appendChild(a2);
+  inner.appendChild(links);
+  gate.appendChild(inner);
+  frag.appendChild(gate);
+  return frag;
+}
+
+function buildErrorFrag(status) {
+  var frag = document.createDocumentFragment();
+  var sLabel = document.createElement('div');
+  sLabel.className = 'section-label';
+  sLabel.textContent = '価格反応の方向推移';
+  frag.appendChild(sLabel);
+
+  var box = document.createElement('div');
+  box.className = 'tl-error';
+  box.setAttribute('role', 'alert');
+
+  if (status === 403) {
+    box.textContent = '有料プランでご利用いただける機能です。';
+    var link = document.createElement('a');
+    link.href = 'pricing.html';
+    link.className = 'tl-error-link';
+    link.textContent = '有料プランを見る';
+    box.appendChild(link);
+  } else if (status === 401) {
+    box.textContent = 'セッションが切れました。再度ログインしてください。';
+  } else if (status === 404) {
+    box.textContent = 'このイベントの推移データが見つかりませんでした。';
+  } else if (status === 503) {
+    box.textContent = '方向推移データを一時的に取得できませんでした。上記の数値テーブルでご確認ください。';
+  } else {
+    box.textContent = '方向推移データの取得に失敗しました。上記の数値テーブルでご確認ください。';
+  }
+  frag.appendChild(box);
+  return frag;
+}
 </script>
 
 <script type="module" src="assets/js/auth-common.js"></script>
