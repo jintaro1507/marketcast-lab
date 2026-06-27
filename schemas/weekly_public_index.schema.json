@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "weekly_public_index.schema.json",
+  "title": "WeeklyPublicIndexSchema",
+  "description": "GitHub Pages に公開する週次レポート一覧インデックス JSON。restricted 生値・有料情報を含まない。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "updated_at",
+    "latest_week_id",
+    "reports"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "スキーマバージョン（常に 1）"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "インデックス最終更新日時（UTC・秒単位）"
+    },
+    "latest_week_id": {
+      "description": "最新の週番号（例: 2026-W26）。レポートが 0 件の場合は null。",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "string",
+          "pattern": "^\\d{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$"
+        }
+      ]
+    },
+    "reports": {
+      "type": "array",
+      "description": "公開済みレポート一覧（新しい順）",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "week_id",
+          "revision",
+          "published_at",
+          "title",
+          "period_start",
+          "period_end",
+          "env_label",
+          "teaser_hash"
+        ],
+        "properties": {
+          "week_id": {
+            "type": "string",
+            "pattern": "^\\d{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "period_start": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "period_end": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "env_label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "teaser_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    }
+  }
+}

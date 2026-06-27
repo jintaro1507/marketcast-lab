@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "weekly_public_teaser.schema.json",
+  "title": "WeeklyPublicTeaserSchema",
+  "description": "GitHub Pages に公開する週次ティーザー JSON。restricted 生値・有料情報（paid_body / paid_body_hash）を含まない。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "week_id",
+    "revision",
+    "published_at",
+    "teaser_hash",
+    "free_teaser"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "スキーマバージョン（常に 1）"
+    },
+    "week_id": {
+      "type": "string",
+      "pattern": "^\\d{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$",
+      "description": "ISO 8601 週番号（例: 2026-W26）"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "ドラフトリビジョン番号（1 以上）"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "公開日時（UTC・秒単位、例: 2026-06-29T01:30:00+00:00）"
+    },
+    "teaser_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "free_teaser の SHA-256（64 桁小文字 16 進数）"
+    },
+    "free_teaser": {
+      "type": "object",
+      "description": "無料公開ティーザー本文（weekly_free_teaser.schema.json と同一構造）"
+    }
+  }
+}
