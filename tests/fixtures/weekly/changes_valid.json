@@ -1,0 +1,77 @@
+{
+  "week_id": "2026-W26",
+  "previous_week_id": "2026-W25",
+  "period_start": "2026-06-22",
+  "period_end": "2026-06-26",
+  "assets": [
+    {
+      "asset_key": "wti",
+      "restricted": false,
+      "status": "ok",
+      "as_of": "2026-06-26",
+      "previous_as_of": "2026-06-19",
+      "pct_change": 3.2,
+      "pt_change": null,
+      "direction": "up",
+      "warn": []
+    },
+    {
+      "asset_key": "gold",
+      "restricted": true,
+      "status": "ok",
+      "as_of": "2026-06-26",
+      "previous_as_of": "2026-06-19",
+      "pct_change": 0.8,
+      "pt_change": null,
+      "direction": "up",
+      "warn": []
+    },
+    {
+      "asset_key": "sp500",
+      "restricted": true,
+      "status": "ok",
+      "as_of": "2026-06-26",
+      "previous_as_of": "2026-06-19",
+      "pct_change": -1.1,
+      "pt_change": null,
+      "direction": "down",
+      "warn": []
+    },
+    {
+      "asset_key": "ust10y",
+      "restricted": false,
+      "status": "ok",
+      "as_of": "2026-06-26",
+      "previous_as_of": "2026-06-19",
+      "pct_change": null,
+      "pt_change": 0.09,
+      "direction": "up",
+      "warn": []
+    },
+    {
+      "asset_key": "usdjpy",
+      "restricted": false,
+      "status": "ok",
+      "as_of": "2026-06-26",
+      "previous_as_of": "2026-06-19",
+      "pct_change": 0.3,
+      "pt_change": null,
+      "direction": "flat",
+      "warn": []
+    },
+    {
+      "asset_key": "vix",
+      "restricted": false,
+      "status": "ok",
+      "as_of": "2026-06-26",
+      "previous_as_of": "2026-06-19",
+      "pct_change": 12.4,
+      "pt_change": null,
+      "direction": "up",
+      "warn": []
+    }
+  ],
+  "hard_errors": [],
+  "warnings": [],
+  "generated_at": "2026-06-27T00:00:00+00:00"
+}

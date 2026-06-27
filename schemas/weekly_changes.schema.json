@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "weekly_changes.schema.json",
+  "title": "WeeklyChanges",
+  "description": "週次差分計算結果。restricted 生値（current_value / previous_value）を含まない。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "week_id",
+    "previous_week_id",
+    "period_start",
+    "period_end",
+    "assets",
+    "hard_errors",
+    "warnings",
+    "generated_at"
+  ],
+  "properties": {
+    "week_id": {
+      "type": "string",
+      "pattern": "^\\d{4}-W(0[1-9]|[1-4]\\d|5[0-3])$"
+    },
+    "previous_week_id": {
+      "type": "string"
+    },
+    "period_start": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "period_end": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "assets": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/AssetChange" }
+    },
+    "hard_errors": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "generated_at": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "AssetChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_key",
+        "restricted",
+        "status",
+        "direction"
+      ],
+      "properties": {
+        "asset_key": {
+          "enum": ["wti", "gold", "sp500", "ust10y", "usdjpy", "vix"]
+        },
+        "restricted": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": ["ok", "no_data", "error", "missing_prev"]
+        },
+        "as_of": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+          ]
+        },
+        "previous_as_of": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+          ]
+        },
+        "pct_change": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "number" }
+          ]
+        },
+        "pt_change": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "number" }
+          ]
+        },
+        "direction": {
+          "enum": ["up", "down", "flat", "na"]
+        },
+        "warn": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}
