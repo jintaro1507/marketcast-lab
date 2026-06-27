@@ -35,12 +35,15 @@ export function getAllowedOrigin(reqOrigin: string | null): string | null {
 }
 
 /** 許可 Origin 用の CORS レスポンスヘッダーを生成する */
-export function makeCorsHeaders(allowedOrigin: string): Record<string, string> {
+export function makeCorsHeaders(
+  allowedOrigin: string,
+  methods = 'POST, OPTIONS',
+): Record<string, string> {
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Headers':
       'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': methods,
     Vary: 'Origin',
   };
 }
@@ -49,8 +52,11 @@ export function makeCorsHeaders(allowedOrigin: string): Record<string, string> {
  * OPTIONS プリフライトレスポンス。
  * 不許可 Origin には CORS ヘッダーを返さない（ブラウザがリクエストをブロックする）。
  */
-export function handleOptions(reqOrigin: string | null): Response {
+export function handleOptions(
+  reqOrigin: string | null,
+  methods = 'POST, OPTIONS',
+): Response {
   const allowed = getAllowedOrigin(reqOrigin);
   if (!allowed) return new Response(null, { status: 204 });
-  return new Response(null, { status: 204, headers: makeCorsHeaders(allowed) });
+  return new Response(null, { status: 204, headers: makeCorsHeaders(allowed, methods) });
 }
