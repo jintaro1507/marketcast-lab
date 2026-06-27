@@ -1,0 +1,64 @@
+{
+  "matches": [
+    {
+      "rank": 1,
+      "event_id": "test_fictional_event_2022",
+      "event_name": "架空テストイベント（2022年）",
+      "event_date": "2022-02-24",
+      "score": 3,
+      "matched_axes": ["vix", "oil", "rate"],
+      "unmatched_axes": [],
+      "cause_tags": ["monetary_tightening"],
+      "why_reaction": null,
+      "key_insight": null,
+      "timelines": {
+        "wti":    { "d1": "up",   "d7": "up",   "d30": "down", "d90": "down", "mid_term_reversal": true  },
+        "gold":   { "d1": "up",   "d7": "up",   "d30": "up",   "d90": "flat", "mid_term_reversal": false },
+        "sp500":  { "d1": "down", "d7": "down",  "d30": "up",   "d90": "up",   "mid_term_reversal": true  },
+        "ust10y": { "d1": "up",   "d7": "up",   "d30": "flat", "d90": "na",   "mid_term_reversal": false },
+        "usdjpy": { "d1": "flat", "d7": "down",  "d30": "down", "d90": "down", "mid_term_reversal": false },
+        "vix":    { "d1": "up",   "d7": "flat",  "d30": "down", "d90": "down", "mid_term_reversal": false }
+      }
+    },
+    {
+      "rank": 2,
+      "event_id": "test_fictional_event_2023",
+      "event_name": "架空テストイベントB（2023年）",
+      "event_date": "2023-03-15",
+      "score": 2,
+      "matched_axes": ["vix", "rate"],
+      "unmatched_axes": ["oil"],
+      "cause_tags": ["bank_crisis"],
+      "why_reaction": null,
+      "key_insight": null,
+      "timelines": {
+        "wti":    { "d1": "down", "d7": "down", "d30": "flat", "d90": "up",   "mid_term_reversal": false },
+        "gold":   { "d1": "up",   "d7": "up",   "d30": "up",   "d90": "up",   "mid_term_reversal": false },
+        "sp500":  { "d1": "down", "d7": "flat",  "d30": "up",   "d90": "up",   "mid_term_reversal": true  },
+        "ust10y": { "d1": "down", "d7": "down",  "d30": "flat", "d90": "na",   "mid_term_reversal": false },
+        "usdjpy": { "d1": "up",   "d7": "up",    "d30": "up",   "d90": "flat", "mid_term_reversal": false },
+        "vix":    { "d1": "up",   "d7": "down",  "d30": "down", "d90": "down", "mid_term_reversal": false }
+      }
+    },
+    {
+      "rank": 3,
+      "event_id": "test_fictional_event_2019",
+      "event_name": "架空テストイベントC（2019年）",
+      "event_date": "2019-09-18",
+      "score": 2,
+      "matched_axes": ["oil", "rate"],
+      "unmatched_axes": ["vix"],
+      "cause_tags": ["monetary_easing"],
+      "why_reaction": null,
+      "key_insight": null,
+      "timelines": {
+        "wti":    { "d1": "up",   "d7": "flat",  "d30": "up",   "d90": "up",   "mid_term_reversal": false },
+        "gold":   { "d1": "up",   "d7": "up",    "d30": "up",   "d90": "up",   "mid_term_reversal": false },
+        "sp500":  { "d1": "up",   "d7": "up",    "d30": "up",   "d90": "up",   "mid_term_reversal": false },
+        "ust10y": { "d1": "down", "d7": "down",  "d30": "down", "d90": "na",   "mid_term_reversal": false },
+        "usdjpy": { "d1": "down", "d7": "down",  "d30": "flat", "d90": "up",   "mid_term_reversal": false },
+        "vix":    { "d1": "down", "d7": "down",  "d30": "down", "d90": "down", "mid_term_reversal": false }
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-06-27T00:00:00+09:00",
+  "indicators": {
+    "vix":    { "value": 19.8, "as_of": "2026-06-26", "status": "ok" },
+    "oil":    { "value": 74.6, "as_of": "2026-06-26", "status": "ok" },
+    "ff":     { "value": 5.33, "as_of": "2026-06-26", "status": "ok" },
+    "ust10y": { "value": 4.21, "as_of": "2026-06-26", "status": "ok" }
+  },
+  "market_state_tags": { "vix": "elev", "oil": "mid", "rate": "high" },
+  "rate_display": { "rate_env_label": "高", "spread": -1.12, "curve_note": "inverted" },
+  "data_completeness": 3,
+  "free_top_match": {},
+  "disclaimer": "本データは過去の市場状況の記録であり、将来の値動きを示すものでも、売買を推奨するものでもありません。",
+  "data_note": "各指標の基準日はデータ提供元の更新タイミングにより異なります。"
+}
