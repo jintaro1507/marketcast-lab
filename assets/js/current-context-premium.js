@@ -406,7 +406,7 @@ function _buildReactionsTable(reactions, timelineAssets) {
           const s = document.createElement('span');
           s.className = 'tl-direction dir-' + (dir === 'na' ? 'na' : dir);
           s.setAttribute('aria-label', (PERIOD_LABELS[p] || p) + ': ' + (DIR_LABEL[dir] || dir));
-          s.textContent = DIR_SYMBOL[dir] || '—';
+          s.textContent = dir === 'na' ? '—' : (DIR_SYMBOL[dir] || '') + ' ' + (DIR_LABEL[dir] || dir);
           tdDir.appendChild(s);
         }
 
