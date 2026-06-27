@@ -15,3 +15,7 @@ test_beta_waitlist.mjs
 
 # Supabase Edge Functions ローカル開発用シークレット
 supabase/.env.local
+
+# Python cache
+__pycache__/
+*.py[cod]
