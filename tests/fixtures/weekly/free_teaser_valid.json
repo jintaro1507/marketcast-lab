@@ -1,0 +1,18 @@
+{
+  "week_id": "2026-W25",
+  "title": "Weekly Marketcast 2026年第25週（6/15〜6/19）",
+  "period_start": "2026-06-15",
+  "period_end": "2026-06-19",
+  "env_label": "VIX警戒・エクイティ下落",
+  "teaser_summary": "VIXはやや高い水準でした。金が上昇し、S&P500が下落しました。米10年債利回りは上昇しました。",
+  "featured_theme": {
+    "tag": "monetary_tightening",
+    "label": "金融引き締め",
+    "summary": "中央銀行による利上げや量的引き締めが市場全体に影響を与えた局面です。"
+  },
+  "top_match_preview": {
+    "event_name": "架空テストイベント（2022年）",
+    "event_date": "2022-02-24"
+  },
+  "disclaimer": "本情報は過去の価格変化の記録であり、投資助言ではありません。"
+}

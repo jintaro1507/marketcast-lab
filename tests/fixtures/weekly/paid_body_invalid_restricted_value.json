@@ -1,0 +1,96 @@
+{
+  "_comment": "INVALID: gold の end_value が null ではない（999.99）。restricted 資産の生値混入。if/then により失敗すること。",
+  "summary": "テスト用要約文です。",
+  "asset_summaries": [
+    {
+      "asset_key": "wti",
+      "label": "WTI原油先物",
+      "restricted": false,
+      "direction": "up",
+      "pct_change": 3.2,
+      "pt_change": null,
+      "level_class": "mid",
+      "end_value": 74.6
+    },
+    {
+      "asset_key": "gold",
+      "label": "金(GLD)",
+      "restricted": true,
+      "direction": "up",
+      "pct_change": 0.8,
+      "pt_change": null,
+      "level_class": null,
+      "end_value": 999.99
+    },
+    {
+      "asset_key": "sp500",
+      "label": "S&P500",
+      "restricted": true,
+      "direction": "down",
+      "pct_change": -1.1,
+      "pt_change": null,
+      "level_class": null,
+      "end_value": null
+    },
+    {
+      "asset_key": "ust10y",
+      "label": "米10年債利回り",
+      "restricted": false,
+      "direction": "up",
+      "pct_change": null,
+      "pt_change": 0.09,
+      "level_class": null,
+      "end_value": 4.21
+    },
+    {
+      "asset_key": "usdjpy",
+      "label": "ドル円",
+      "restricted": false,
+      "direction": "up",
+      "pct_change": 0.5,
+      "pt_change": null,
+      "level_class": null,
+      "end_value": 156.8
+    },
+    {
+      "asset_key": "vix",
+      "label": "VIX(恐怖指数)",
+      "restricted": false,
+      "direction": "up",
+      "pct_change": 12.4,
+      "pt_change": null,
+      "level_class": "elev",
+      "end_value": 19.8
+    }
+  ],
+  "themes": [
+    {
+      "tag": "monetary_tightening",
+      "label": "金融引き締め",
+      "summary": "テスト用テーマ説明。",
+      "caveat": "テスト用注意事項。"
+    }
+  ],
+  "similar_events": [
+    {
+      "rank": 1,
+      "event_id": "test_event",
+      "event_name": "架空テストイベント",
+      "event_date": "2022-02-24",
+      "score": 2.5,
+      "matched_axes": ["vix"],
+      "unmatched_axes": [],
+      "timelines": {
+        "wti": { "d1": "up", "d7": "up", "d30": "down", "d90": "down", "mid_term_reversal": true }
+      },
+      "why_reaction": null,
+      "key_insight": null
+    }
+  ],
+  "observation_points": [
+    "観測ポイント1",
+    "観測ポイント2",
+    "観測ポイント3"
+  ],
+  "disclaimer": "免責事項テキスト。"
+}

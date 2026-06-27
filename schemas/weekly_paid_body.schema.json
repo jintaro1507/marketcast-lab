@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "weekly_paid_body.schema.json",
+  "title": "WeeklyPaidBodySchema",
+  "description": "Weekly Marketcast の有料本文コンテンツ。weekly_reports.paid_body JSONB カラムに保存する内容。restricted 生値（gold/sp500 の end_value）を含まない。get-weekly-marketcast Edge Function 経由でのみ有料会員へ返す。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "asset_summaries",
+    "themes",
+    "similar_events",
+    "observation_points",
+    "disclaimer"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "週次要約文。テンプレート生成。変化率（%・pt）は含めてよいが restricted 生値は不可。"
+    },
+    "asset_summaries": {
+      "type": "array",
+      "description": "6資産の週次変化サマリー。ASSET_ORDER 順（wti/gold/sp500/ust10y/usdjpy/vix）。",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/AssetSummary" }
+    },
+    "themes": {
+      "type": "array",
+      "description": "注目テーマ（group_metadata.json 由来）。1〜3件。",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/Theme" }
+    },
+    "similar_events": {
+      "type": "array",
+      "description": "類似局面（Matcher 結果）。1〜5件。",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/SimilarEvent" }
+    },
+    "observation_points": {
+      "type": "array",
+      "description": "来週の観測ポイント。3〜5件。",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      }
+    },
+    "disclaimer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "免責文言"
+    }
+  },
+  "$defs": {
+    "Direction": {
+      "type": "string",
+      "enum": ["up", "down", "flat", "na"],
+      "description": "価格変化方向"
+    },
+    "AssetSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_key",
+        "label",
+        "restricted",
+        "direction",
+        "pct_change",
+        "pt_change",
+        "level_class",
+        "end_value"
+      ],
+      "description": "資産別週次サマリー。restricted=true の資産（gold/sp500）は end_value を null とする（DB の CHECK 制約と同じ規則を schema でも保証）。",
+      "properties": {
+        "asset_key": {
+          "type": "string",
+          "enum": ["wti", "gold", "sp500", "ust10y", "usdjpy", "vix"]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "restricted": {
+          "type": "boolean"
+        },
+        "direction": { "$ref": "#/$defs/Direction" },
+        "pct_change": {
+          "type": ["number", "null"],
+          "description": "週次変化率（%）。米10年債（ust10y）は null。"
+        },
+        "pt_change": {
+          "type": ["number", "null"],
+          "description": "週次変化幅（pt）。ust10y 専用。他は null。"
+        },
+        "level_class": {
+          "type": ["string", "null"],
+          "maxLength": 32,
+          "description": "水準分類。vix: calm/elev/stress/panic。wti: lo/mid/hi。他: null。"
+        },
+        "end_value": {
+          "type": ["number", "null"],
+          "description": "週末生値。restricted=true（gold/sp500）では null 必須。"
+        }
+      },
+      "if": {
+        "properties": {
+          "asset_key": { "enum": ["gold", "sp500"] }
+        },
+        "required": ["asset_key"]
+      },
+      "then": {
+        "description": "restricted 資産（gold/sp500）: end_value は null 必須、restricted は true 必須。",
+        "properties": {
+          "restricted": { "const": true },
+          "end_value":  { "type": "null" }
+        }
+      },
+      "else": {
+        "description": "非 restricted 資産: restricted は false 必須。",
+        "properties": {
+          "restricted": { "const": false }
+        }
+      }
+    },
+    "Theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag", "label", "summary", "caveat"],
+      "description": "注目テーマ（group_metadata.json 由来の承認済みテキストのみ）。",
+      "properties": {
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "caveat": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    },
+    "AssetTimeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["d1", "d7", "d30", "d90", "mid_term_reversal"],
+      "description": "資産別 Reaction Timeline（方向のみ。価格情報は含まない）。",
+      "properties": {
+        "d1":  { "$ref": "#/$defs/Direction" },
+        "d7":  { "$ref": "#/$defs/Direction" },
+        "d30": { "$ref": "#/$defs/Direction" },
+        "d90": { "$ref": "#/$defs/Direction" },
+        "mid_term_reversal": {
+          "type": "boolean",
+          "description": "中期反転フラグ（|d1|≥0.5% かつ |d30|≥0.5% かつ d1 と d30 の符号が逆）"
+        }
+      }
+    },
+    "SimilarEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rank",
+        "event_id",
+        "event_name",
+        "event_date",
+        "score",
+        "matched_axes",
+        "unmatched_axes",
+        "timelines",
+        "why_reaction",
+        "key_insight"
+      ],
+      "description": "類似局面（Matcher 結果 1件）。price データは含まない。Timeline は方向文字列のみ。",
+      "properties": {
+        "rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "event_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "score": {
+          "type": "number",
+          "description": "類似スコア（一致軸数）"
+        },
+        "matched_axes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "maxItems": 4
+        },
+        "unmatched_axes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "maxItems": 4
+        },
+        "timelines": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "資産別 Timeline。全6資産分が揃わなくてもよい（データ不足の資産は省略可）。",
+          "properties": {
+            "wti":    { "$ref": "#/$defs/AssetTimeline" },
+            "gold":   { "$ref": "#/$defs/AssetTimeline" },
+            "sp500":  { "$ref": "#/$defs/AssetTimeline" },
+            "ust10y": { "$ref": "#/$defs/AssetTimeline" },
+            "usdjpy": { "$ref": "#/$defs/AssetTimeline" },
+            "vix":    { "$ref": "#/$defs/AssetTimeline" }
+          }
+        },
+        "why_reaction": {
+          "type": ["string", "null"],
+          "maxLength": 500
+        },
+        "key_insight": {
+          "type": ["string", "null"],
+          "maxLength": 500
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "_comment": "INVALID: top_match_preview に score フィールドが含まれている。additionalProperties: false により失敗すること。",
+  "week_id": "2026-W25",
+  "title": "Weekly Marketcast 2026年第25週（6/15〜6/19）",
+  "period_start": "2026-06-15",
+  "period_end": "2026-06-19",
+  "env_label": "VIX警戒",
+  "teaser_summary": "テスト用要約文です。",
+  "top_match_preview": {
+    "event_name": "架空テストイベント",
+    "event_date": "2022-02-24",
+    "score": 2.5
+  },
+  "disclaimer": "免責事項テキスト。"
+}

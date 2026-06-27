@@ -1,0 +1,101 @@
+{
+  "summary": "VIXはやや高い水準でした。金が+0.8%上昇し、S&P500が-1.1%下落しました。米10年債利回りが+0.09pt上昇しました。",
+  "asset_summaries": [
+    {
+      "asset_key": "wti",
+      "label": "WTI原油先物",
+      "restricted": false,
+      "direction": "up",
+      "pct_change": 3.2,
+      "pt_change": null,
+      "level_class": "mid",
+      "end_value": 74.6
+    },
+    {
+      "asset_key": "gold",
+      "label": "金(GLD)",
+      "restricted": true,
+      "direction": "up",
+      "pct_change": 0.8,
+      "pt_change": null,
+      "level_class": null,
+      "end_value": null
+    },
+    {
+      "asset_key": "sp500",
+      "label": "S&P500",
+      "restricted": true,
+      "direction": "down",
+      "pct_change": -1.1,
+      "pt_change": null,
+      "level_class": null,
+      "end_value": null
+    },
+    {
+      "asset_key": "ust10y",
+      "label": "米10年債利回り",
+      "restricted": false,
+      "direction": "up",
+      "pct_change": null,
+      "pt_change": 0.09,
+      "level_class": null,
+      "end_value": 4.21
+    },
+    {
+      "asset_key": "usdjpy",
+      "label": "ドル円",
+      "restricted": false,
+      "direction": "up",
+      "pct_change": 0.5,
+      "pt_change": null,
+      "level_class": null,
+      "end_value": 156.8
+    },
+    {
+      "asset_key": "vix",
+      "label": "VIX(恐怖指数)",
+      "restricted": false,
+      "direction": "up",
+      "pct_change": 12.4,
+      "pt_change": null,
+      "level_class": "elev",
+      "end_value": 19.8
+    }
+  ],
+  "themes": [
+    {
+      "tag": "monetary_tightening",
+      "label": "金融引き締め",
+      "summary": "中央銀行による利上げや量的引き締めが市場全体に影響を与えた局面です。",
+      "caveat": "金融政策の変化が市場に与える影響は多岐にわたります。本情報は過去の観測に基づくものです。"
+    }
+  ],
+  "similar_events": [
+    {
+      "rank": 1,
+      "event_id": "test_fictional_event_2022",
+      "event_name": "架空テストイベント（2022年）",
+      "event_date": "2022-02-24",
+      "score": 2.5,
+      "matched_axes": ["vix", "oil"],
+      "unmatched_axes": ["rate"],
+      "timelines": {
+        "wti":    { "d1": "up",   "d7": "up",   "d30": "down", "d90": "down", "mid_term_reversal": true  },
+        "gold":   { "d1": "up",   "d7": "up",   "d30": "up",   "d90": "flat", "mid_term_reversal": false },
+        "sp500":  { "d1": "down", "d7": "down",  "d30": "up",   "d90": "up",   "mid_term_reversal": true  },
+        "ust10y": { "d1": "up",   "d7": "up",   "d30": "flat", "d90": "na",   "mid_term_reversal": false },
+        "usdjpy": { "d1": "flat", "d7": "down",  "d30": "down", "d90": "down", "mid_term_reversal": false },
+        "vix":    { "d1": "up",   "d7": "flat",  "d30": "down", "d90": "down", "mid_term_reversal": false }
+      },
+      "why_reaction": null,
+      "key_insight": null
+    }
+  ],
+  "observation_points": [
+    "VIXの水準が前週から変化するか",
+    "WTI原油の方向と変動幅を確認（今週+3.2%）",
+    "米10年債利回りの方向が変化するか（今週+0.09pt）",
+    "金とS&P500の方向差が継続するか（金上昇・S&P500下落）"
+  ],
+  "disclaimer": "本情報は過去の価格変化の記録であり、投資助言ではありません。"
+}
