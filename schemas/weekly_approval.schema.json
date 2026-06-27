@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WeeklyApproval",
+  "description": "Weekly Marketcast 承認ファイルのスキーマ。本文（free_teaser/paid_body）を含まない。",
+  "type": "object",
+  "required": [
+    "week_id",
+    "revision",
+    "approved_at",
+    "approved_by",
+    "draft_generated_at",
+    "teaser_hash",
+    "paid_body_hash",
+    "approval_version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "week_id": {
+      "type": "string",
+      "pattern": "^\\d{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$",
+      "description": "ISO 8601 週番号"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "承認対象のリビジョン番号"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "承認日時（ISO 8601）"
+    },
+    "approved_by": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "承認者識別子（OPERATOR_NAME 環境変数から取得）"
+    },
+    "draft_generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "承認対象 draft の generated_at"
+    },
+    "teaser_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "free_teaser の SHA-256（小文字 hex 64文字）"
+    },
+    "paid_body_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "paid_body の SHA-256（小文字 hex 64文字）"
+    },
+    "approval_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "承認ファイルの schema version（固定値 1）"
+    }
+  }
+}

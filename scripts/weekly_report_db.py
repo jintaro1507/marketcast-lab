@@ -61,6 +61,35 @@ class WeeklyReportDB(WeeklyDB):
             f"/weekly_reports?week_id=eq.{week_id}",
         )
 
+    def patch_report_to_published(
+        self,
+        week_id: str,
+        revision: int,
+        payload: dict,
+        *,
+        allow_production: bool = False,
+    ) -> list[dict]:
+        """
+        weekly_reports を draft → published に PATCH する。
+
+        条件: week_id=eq.{week_id}&status=eq.draft&revision=eq.{revision}
+        Prefer: return=representation で更新後の行を返す。
+
+        Returns:
+            更新された行のリスト（正常時は 1 件）
+        """
+        self._check_production_guard(allow_production)
+        _, rows = self._request(
+            "PATCH",
+            (
+                f"/weekly_reports"
+                f"?week_id=eq.{week_id}&status=eq.draft&revision=eq.{revision}"
+            ),
+            body=payload,
+            extra_headers={"Prefer": "return=representation"},
+        )
+        return rows if isinstance(rows, list) else ([rows] if rows else [])
+
 
 # ─── draft 検証 ──────────────────────────────────────────────────────────────
 
