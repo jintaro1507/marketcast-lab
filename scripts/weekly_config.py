@@ -7,6 +7,8 @@ supabase/migrations の CHECK 制約と一致させること。
 """
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
 RESTRICTED_ASSETS: frozenset[str] = frozenset({"gold", "sp500"})
 
 # 6資産の固定定義
@@ -94,4 +96,9 @@ def is_restricted(asset_key: str) -> bool:
 
 
 def is_production_url(url: str) -> bool:
-    return PROD_PROJECT_REF in url
+    """本番 Supabase URL かどうかをホスト名で判定する。"""
+    try:
+        host = urlparse(url).hostname or ""
+    except Exception:
+        host = ""
+    return PROD_PROJECT_REF in host

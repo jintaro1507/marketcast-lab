@@ -20,14 +20,15 @@ if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
 
-def _get_fab(fred_api_key: str):
+def _get_fab(fred_api_key: str) -> tuple:
     """
     fetch_and_build をインポートし、FRED_API_KEY をパッチして返す。
-    モジュール変数を上書きすることで、既存の取得ロジックを安全に再利用する。
+    Returns (module, original_key) — 呼び出し元で finally 節に元のキーを復元すること。
     """
     import fetch_and_build as _fab  # noqa: PLC0415
+    orig = _fab.FRED_API_KEY
     _fab.FRED_API_KEY = fred_api_key
-    return _fab
+    return _fab, orig
 
 
 def fetch_week_observations(
@@ -47,23 +48,26 @@ def fetch_week_observations(
     today = datetime.date.today()
     days_needed = max((today - period_start).days + 30, 90)
 
-    fab = _get_fab(fred_api_key)
+    fab, orig_key = _get_fab(fred_api_key)
     source = asset_config["source"]
     source_used: str
 
-    if source == "stooq":
-        try:
-            raw = fab.fetch_stooq_series(asset_config["stooq_id"], days_needed)
-            source_used = f"stooq_{asset_config['stooq_id']}"
-        except Exception as e:
-            print(f"  [Stooq→Yahoo フォールバック] {asset_config['stooq_id']}: {type(e).__name__}")
-            raw = fab.fetch_yahoo_series(asset_config["yahoo_symbol"], days_needed)
-            source_used = f"yahoo_{asset_config['yahoo_symbol']}"
-    elif source == "fred":
-        raw = fab.fetch_fred_series(asset_config["fred_id"], days_needed)
-        source_used = f"fred_{asset_config['fred_id']}"
-    else:
-        raise ValueError(f"Unknown source: {source!r}")
+    try:
+        if source == "stooq":
+            try:
+                raw = fab.fetch_stooq_series(asset_config["stooq_id"], days_needed)
+                source_used = f"stooq_{asset_config['stooq_id']}"
+            except Exception as e:
+                print(f"  [Stooq→Yahoo フォールバック] {asset_config['stooq_id']}: {type(e).__name__}")
+                raw = fab.fetch_yahoo_series(asset_config["yahoo_symbol"], days_needed)
+                source_used = f"yahoo_{asset_config['yahoo_symbol']}"
+        elif source == "fred":
+            raw = fab.fetch_fred_series(asset_config["fred_id"], days_needed)
+            source_used = f"fred_{asset_config['fred_id']}"
+        else:
+            raise ValueError(f"Unknown source: {source!r}")
+    finally:
+        fab.FRED_API_KEY = orig_key
 
     # 対象週内（月〜金）に絞り込む
     week_obs: list[tuple[str, float]] = []

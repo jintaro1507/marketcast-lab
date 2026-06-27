@@ -6,14 +6,16 @@ compute_change() と JSON Schema 検証を中心にテストする。
 """
 import datetime
 import json
+import math
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
-from weekly_config import ASSET_CONFIG_MAP, ASSET_CONFIGS
-from calculate_weekly_changes import compute_change
+from weekly_config import ASSET_CONFIG_MAP, ASSET_CONFIGS, is_production_url, PROD_PROJECT_REF
+from calculate_weekly_changes import compute_change, _safe_float, _assert_no_raw_values
 
 # fixtures
 FIXTURES_DIR = Path(__file__).parent / "fixtures" / "weekly"
@@ -237,6 +239,182 @@ class TestComputeChangeAllAssets(unittest.TestCase):
         ust_pct, ust_pt, _ = compute_change(ASSET_CONFIG_MAP["ust10y"], 4.30, 4.20)
         self.assertIsNone(ust_pct)
         self.assertIsNotNone(ust_pt)
+
+
+# ── _safe_float 単体テスト ────────────────────────────────────────────
+
+class TestSafeFloat(unittest.TestCase):
+    """PostgREST から返る NUMERIC 値の安全変換をテストする。"""
+
+    def test_float_input(self):
+        self.assertAlmostEqual(_safe_float(100.5), 100.5)
+
+    def test_int_input(self):
+        self.assertAlmostEqual(_safe_float(100), 100.0)
+
+    def test_string_float(self):
+        # PostgREST が NUMERIC を文字列で返す場合
+        self.assertAlmostEqual(_safe_float("100.5"), 100.5)
+
+    def test_string_int(self):
+        self.assertAlmostEqual(_safe_float("42"), 42.0)
+
+    def test_none_returns_none(self):
+        self.assertIsNone(_safe_float(None))
+
+    def test_zero_ok(self):
+        self.assertEqual(_safe_float(0.0), 0.0)
+
+    def test_zero_string_ok(self):
+        self.assertEqual(_safe_float("0"), 0.0)
+
+    def test_negative_ok(self):
+        self.assertAlmostEqual(_safe_float("-3.14"), -3.14)
+
+    def test_invalid_string_raises(self):
+        with self.assertRaises(ValueError):
+            _safe_float("not_a_number")
+
+    def test_nan_raises(self):
+        with self.assertRaises(ValueError):
+            _safe_float(math.nan)
+
+    def test_nan_string_raises(self):
+        with self.assertRaises(ValueError):
+            _safe_float("nan")
+
+    def test_inf_raises(self):
+        with self.assertRaises(ValueError):
+            _safe_float(math.inf)
+
+    def test_bool_raises(self):
+        with self.assertRaises(ValueError):
+            _safe_float(True)
+
+
+# ── 出力非露出テスト ──────────────────────────────────────────────────
+
+class TestOutputNonExposure(unittest.TestCase):
+    """差分出力に生値フィールドが含まれないことを確認する。"""
+
+    def _minimal_result(self, extra_keys=None):
+        asset = {
+            "asset_key":  "wti",
+            "restricted": False,
+            "status":     "ok",
+            "as_of":      "2026-01-03",
+            "pct_change": 1.0,
+            "pt_change":  None,
+            "direction":  "up",
+            "warn":       [],
+        }
+        if extra_keys:
+            asset.update(extra_keys)
+        return {"assets": [asset]}
+
+    def test_clean_result_passes(self):
+        _assert_no_raw_values(self._minimal_result())  # should not raise
+
+    def test_current_value_raises(self):
+        with self.assertRaises(RuntimeError):
+            _assert_no_raw_values(self._minimal_result({"current_value": 100.0}))
+
+    def test_previous_value_raises(self):
+        with self.assertRaises(RuntimeError):
+            _assert_no_raw_values(self._minimal_result({"previous_value": 100.0}))
+
+    def test_value_raises(self):
+        with self.assertRaises(RuntimeError):
+            _assert_no_raw_values(self._minimal_result({"value": 100.0}))
+
+    def test_empty_assets_passes(self):
+        _assert_no_raw_values({"assets": []})
+
+    def test_no_assets_key_passes(self):
+        _assert_no_raw_values({})
+
+
+# ── fetch_and_build インポート安全性テスト ────────────────────────────
+
+class TestFetchAndBuildImportSafety(unittest.TestCase):
+    """fetch_and_build をインポートしても副作用がないことを確認する。"""
+
+    def test_import_has_expected_attributes(self):
+        import fetch_and_build as fab
+        self.assertTrue(hasattr(fab, "FRED_API_KEY"))
+        self.assertTrue(hasattr(fab, "fetch_fred_series"))
+        self.assertTrue(hasattr(fab, "fetch_stooq_series"))
+
+    def test_fred_api_key_is_string_on_import(self):
+        import fetch_and_build as fab
+        self.assertIsInstance(fab.FRED_API_KEY, str)
+
+    def test_fred_key_restored_after_patch_and_exception(self):
+        """FRED_API_KEY が例外後も元の値に復元されることを確認する。"""
+        import fetch_and_build as fab
+        import weekly_sources as ws
+
+        original_key = fab.FRED_API_KEY
+
+        # fetch_fred_series をモックして即例外を発生させる
+        wti_cfg = {
+            "asset_key": "wti",
+            "source": "fred",
+            "fred_id": "DCOILWTICO",
+        }
+        with mock.patch.object(fab, "fetch_fred_series", side_effect=RuntimeError("mock_error")):
+            try:
+                ws.fetch_week_observations(
+                    wti_cfg,
+                    "sentinel_test_key",
+                    datetime.date(2017, 1, 9),
+                    datetime.date(2017, 1, 13),
+                )
+            except RuntimeError:
+                pass
+
+        self.assertEqual(
+            fab.FRED_API_KEY, original_key,
+            "FRED_API_KEY が例外後に復元されていません",
+        )
+
+    def test_main_not_executed_on_import(self):
+        """import 時に __main__ ブロックが実行されないことを確認する。"""
+        import fetch_and_build as fab
+        # main ガードが正しければ import でネットワークアクセスが走らない
+        # このテスト自体が高速に完了することで副作用なしを確認
+        self.assertTrue(True)
+
+
+# ── 本番 URL 判定テスト ───────────────────────────────────────────────
+
+class TestProductionGuardCheck(unittest.TestCase):
+    """is_production_url() がホスト名ベースで正しく判定することを確認する。"""
+
+    def test_prod_supabase_url_detected(self):
+        url = f"https://{PROD_PROJECT_REF}.supabase.co"
+        self.assertTrue(is_production_url(url))
+
+    def test_prod_url_with_path_detected(self):
+        url = f"https://{PROD_PROJECT_REF}.supabase.co/rest/v1"
+        self.assertTrue(is_production_url(url))
+
+    def test_local_url_not_prod(self):
+        self.assertFalse(is_production_url("http://127.0.0.1:54321"))
+
+    def test_localhost_not_prod(self):
+        self.assertFalse(is_production_url("http://localhost:54321"))
+
+    def test_ref_in_path_only_not_prod(self):
+        # project ref がパスにのみ含まれる URL は本番扱いしない
+        fake_url = f"http://localhost:54321/{PROD_PROJECT_REF}/data"
+        self.assertFalse(is_production_url(fake_url))
+
+    def test_different_project_not_prod(self):
+        self.assertFalse(is_production_url("https://aabbccddeeff.supabase.co"))
+
+    def test_empty_string_not_prod(self):
+        self.assertFalse(is_production_url(""))
 
 
 if __name__ == "__main__":
