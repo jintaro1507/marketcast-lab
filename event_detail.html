@@ -483,7 +483,8 @@ import { supabase } from './assets/js/supabase-client.js';
 
 (async function initTimeline() {
   const params = new URLSearchParams(location.search);
-  const eventId = params.get('id');
+  // URLパラメータに .html 拡張子が含まれる場合（例: ?id=saudi_attack_2019.html）を正規化する
+  const eventId = (params.get('id') ?? '').replace(/\.html$/i, '');
   if (!eventId) return;
 
   // #timeline-section が DOM に現れるまで待つ（非同期IIFEによるinnerHTML設定を待つ）
