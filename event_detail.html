@@ -189,7 +189,7 @@
 <script>
 (async function(){
   const params = new URLSearchParams(location.search);
-  const id = params.get('id');
+  const id = (params.get('id') ?? '').replace(/\.html$/i, '');
   const content = document.getElementById('content');
 
   const horizonLabels = {d1:'1日後', d7:'7日後', d30:'30日後', d90:'90日後'};
@@ -255,7 +255,7 @@
 
   const causeLabels = data.cause_tag_labels || {};
   const effectLabels = data.effect_tag_labels || {};
-  const ev = (data.events||[]).find(e => e.id === id) || data.events[0];
+  const ev = (data.events||[]).find(e => e.id === id) || (id ? null : data.events[0]);
   if(!ev){ content.innerHTML = '<div class="empty">イベントが見つかりませんでした。</div>'; return; }
 
   document.title = ev.name + ' ｜ Marketcast Lab';
