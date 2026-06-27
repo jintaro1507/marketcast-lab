@@ -2,7 +2,7 @@
 
 ## 概要
 
-Weekly Marketcast の公開フローにおける「承認」ステップを説明します。  
+Weekly Marketcast の公開フローにおける「承認」ステップを説明します。
 承認は **ローカルファイルへの記録** であり、DB は変更しません。
 
 ## 承認フローの全体像
@@ -105,7 +105,7 @@ APPROVE 2026-W26
 
 ## DB 変更なし
 
-承認ステップでは `weekly_reports` の `status` は `draft` のままです。  
+承認ステップでは `weekly_reports` の `status` は `draft` のままです。
 DB が `published` に遷移するのは **Pages 反映確認後** です（W2-4B 以降）。
 
 | カラム | 承認後 |
