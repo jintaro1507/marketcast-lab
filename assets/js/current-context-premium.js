@@ -333,7 +333,7 @@ function _buildReactionsTable(reactions, timelineAssets) {
   const hasTl = tlMap.size > 0;
 
   const DIR_SYMBOL = { up: '↑', down: '↓', flat: '→', na: '—' };
-  const DIR_LABEL  = { up: '上昇', down: '下降', flat: '横ばい', na: 'データなし' };
+  const DIR_LABEL  = { up: '上昇', down: '下落', flat: '横ばい', na: 'データなし' };
 
   const section = _el('div', 'pm-reactions');
   section.appendChild(_el('div', 'pm-reactions-label', '資産別変化率（過去局面発生後）'));
@@ -401,12 +401,14 @@ function _buildReactionsTable(reactions, timelineAssets) {
       const tlAsset = tlMap.get(row.key);
       if (tlAsset && tlAsset.directions) {
         const dirs = tlAsset.directions;
-        const patternSpan = document.createElement('span');
-        patternSpan.setAttribute('aria-label',
-          PERIOD_KEYS.map(p => DIR_LABEL[dirs[p]] || dirs[p]).join('→')
-        );
-        patternSpan.textContent = PERIOD_KEYS.map(p => DIR_SYMBOL[dirs[p]] || '—').join('');
-        tdDir.appendChild(patternSpan);
+        for (const p of PERIOD_KEYS) {
+          const dir = dirs[p] || 'na';
+          const s = document.createElement('span');
+          s.className = 'tl-direction dir-' + (dir === 'na' ? 'na' : dir);
+          s.setAttribute('aria-label', (PERIOD_LABELS[p] || p) + ': ' + (DIR_LABEL[dir] || dir));
+          s.textContent = DIR_SYMBOL[dir] || '—';
+          tdDir.appendChild(s);
+        }
 
         if (tlAsset.mid_term_reversal) {
           const badge = document.createElement('span');
@@ -429,7 +431,7 @@ function _buildReactionsTable(reactions, timelineAssets) {
   /* timelineがある場合のみ注意書きを追加 */
   if (hasTl) {
     const tlNote = _el('div', 'pm-tl-note',
-      '推移欄の記号（↑↓→）は過去の価格変化の方向を記録したものです。売買推奨ではありません。'
+      '推移欄の方向表示（↑上昇・↓下落・→横ばい）は過去の価格変化の方向を記録したものです。売買推奨ではありません。'
     );
     section.appendChild(tlNote);
   }

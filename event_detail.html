@@ -152,10 +152,12 @@
   table.tl-table td{padding:11px 12px;border-bottom:1px solid var(--line-rule);font-family:var(--mono);}
   table.tl-table td:first-child{font-family:var(--body);}
   .tl-dir{text-align:center;}
-  .dir-up{color:var(--up);}
-  .dir-down{color:var(--down);}
-  .dir-flat{color:var(--ink-soft);}
-  .dir-reversal{font-size:9px;font-family:var(--mono);color:var(--ink-soft);border:1px solid var(--line-rule);background:var(--paper-deep);padding:1px 5px;border-radius:2px;white-space:nowrap;}
+  .tl-direction{display:inline-flex;align-items:center;justify-content:center;min-width:4.5em;padding:0.25rem 0.5rem;border-radius:999px;font-size:0.8rem;font-weight:600;line-height:1.2;white-space:nowrap;}
+  .dir-up{color:var(--up);background:rgba(138,59,46,0.10);}
+  .dir-down{color:var(--down);background:rgba(47,93,78,0.10);}
+  .dir-flat{color:var(--ink-soft);background:rgba(91,86,75,0.08);}
+  .dir-na{color:var(--ink-soft);}
+  .dir-reversal{font-size:10px;font-family:var(--mono);font-weight:600;color:var(--ink-soft);border:1px solid var(--line-rule);background:var(--paper-deep);padding:2px 7px;border-radius:2px;white-space:nowrap;}
   .tl-gate{padding:14px 5vw 0;}
   .tl-gate-inner{background:var(--paper-deep);border:1px solid var(--line-rule);padding:16px 18px;max-width:540px;}
   .tl-gate-msg{margin:0 0 12px;font-size:13.5px;color:var(--ink-soft);}
@@ -556,7 +558,7 @@ function waitForElement(id, maxMs) {
 }
 
 var DIR_SYMBOL = { up: '↑', down: '↓', flat: '→', na: '—' };
-var DIR_LABEL  = { up: '上昇', down: '下降', flat: '横ばい', na: 'データなし' };
+var DIR_LABEL  = { up: '上昇', down: '下落', flat: '横ばい', na: 'データなし' };
 var HORIZON_LABELS = { d1: '1日後', d7: '7日後', d30: '30日後', d90: '90日後' };
 
 function buildTimelineContent(data) {
@@ -636,10 +638,13 @@ function buildDirectionTable(assets) {
       var dir = dirs[h] || 'na';
       var span = document.createElement('span');
       span.setAttribute('aria-label', DIR_LABEL[dir] || dir);
-      span.textContent = DIR_SYMBOL[dir] || '—';
-      if (dir === 'up') span.className = 'dir-up';
-      else if (dir === 'down') span.className = 'dir-down';
-      else span.className = 'dir-flat';
+      if (dir === 'na') {
+        span.className = 'tl-direction dir-na';
+        span.textContent = '—';
+      } else {
+        span.className = 'tl-direction dir-' + dir;
+        span.textContent = (DIR_SYMBOL[dir] || '') + ' ' + (DIR_LABEL[dir] || dir);
+      }
       td.appendChild(span);
       tr.appendChild(td);
     }
