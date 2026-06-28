@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Marketcast ｜ Marketcast Lab</title>
+<style>
+  :root{
+    --paper:#F2EFE8; --paper-deep:#E8E3D7; --ink:#1C1A16; --ink-soft:#5B564B;
+    --line-rule:#cfc7b6;
+    --oil:#B5703A; --gold:#9C7A2E; --equity:#38456B; --bond:#7A6A55; --fx:#4A6B5A;
+    --up:#8A3B2E; --down:#2F5D4E;
+    --display:"Shippori Mincho","Noto Serif JP",serif;
+    --body:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;
+    --mono:"JetBrains Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.7;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ===== strip / header / nav ===== */
+  .strip{background:var(--ink);color:var(--paper);font-size:12px;padding:8px 5vw;letter-spacing:0.02em;}
+  .strip b{font-weight:600;}
+  header{border-bottom:1px solid var(--line-rule);padding:18px 5vw 16px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .brand{font-family:var(--display);font-size:20px;letter-spacing:0.04em;display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{font-family:var(--mono);font-size:11px;color:var(--ink-soft);border:1px solid var(--line-rule);padding:2px 6px;border-radius:2px;letter-spacing:0.08em;}
+  nav{display:flex;gap:24px;font-size:13px;color:var(--ink-soft);}
+  nav a:hover{color:var(--ink);}
+
+  /* ===== breadcrumb ===== */
+  .breadcrumb{padding:20px 5vw 0;font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
+  .breadcrumb a{border-bottom:1px solid var(--line-rule);}
+  .breadcrumb-sep{margin:0 6px;}
+
+  /* ===== loading ===== */
+  .wm-loading{padding:60px 5vw;font-family:var(--mono);font-size:13px;color:var(--ink-soft);}
+
+  /* ===== gate box（未ログイン・無料・未公開・空状態） ===== */
+  .wm-gate-box{margin:40px 5vw;padding:24px 28px;border:1px solid var(--line-rule);background:var(--paper-deep);max-width:640px;}
+  .wm-gate-title{font-family:var(--display);font-size:18px;margin:0 0 12px;line-height:1.45;}
+  .wm-gate-msg{font-size:14px;color:var(--ink-soft);margin:0 0 10px;line-height:1.75;}
+  .wm-gate-sub{font-size:13px;color:var(--ink-soft);margin:0 0 16px;line-height:1.7;opacity:0.85;}
+  .wm-gate-link{display:inline-block;font-family:var(--mono);font-size:12px;border:1px solid var(--line-rule);padding:8px 16px;border-radius:2px;color:var(--ink-soft);margin:4px 8px 4px 0;}
+  .wm-gate-link:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .wm-link{font-family:var(--mono);font-size:12px;border-bottom:1px solid var(--line-rule);color:var(--ink-soft);}
+  .wm-link:hover{color:var(--ink);}
+
+  /* ===== error box ===== */
+  .wm-error-box{margin:40px 5vw;padding:20px 24px;border:1px solid var(--line-rule);border-left:3px solid var(--ink-soft);background:var(--paper-deep);max-width:640px;}
+  .wm-error-msg{font-size:14px;color:var(--ink-soft);margin:0 0 14px;line-height:1.75;}
+  .wm-retry-btn{font-family:var(--mono);font-size:12px;border:1px solid var(--line-rule);padding:7px 14px;border-radius:2px;color:var(--ink-soft);background:var(--paper);cursor:pointer;}
+  .wm-retry-btn:hover{border-color:var(--ink-soft);color:var(--ink);}
+
+  /* ===== report header ===== */
+  .wm-report-head{padding:28px 5vw 24px;border-bottom:1px solid var(--line-rule);}
+  .wm-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;}
+  .wm-title{font-family:var(--display);font-size:clamp(22px,3vw,30px);margin:0 0 12px;line-height:1.35;}
+  .wm-meta{display:flex;flex-wrap:wrap;gap:4px 0;font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-bottom:14px;}
+  .wm-meta-item{color:var(--ink-soft);}
+  .wm-meta-sep{margin:0 10px;opacity:0.5;}
+  .wm-report-desc{font-size:13px;color:var(--ink-soft);margin:0;line-height:1.75;max-width:60ch;opacity:0.85;}
+
+  /* ===== section ===== */
+  .wm-section{padding:32px 5vw 0;}
+  .wm-section-label{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--line-rule);}
+
+  /* ===== summary ===== */
+  .wm-summary-text{font-size:14.5px;line-height:1.85;color:var(--ink);margin:0;max-width:72ch;}
+
+  /* ===== themes ===== */
+  .wm-themes-list{display:flex;flex-direction:column;gap:12px;}
+  .wm-theme-card{border:1px solid var(--line-rule);background:var(--paper-deep);padding:16px 20px;}
+  .wm-theme-title{font-family:var(--display);font-size:16px;margin-bottom:8px;line-height:1.45;}
+  .wm-theme-desc{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.8;}
+
+  /* ===== asset grid ===== */
+  .wm-asset-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .wm-asset-card{border:1px solid var(--line-rule);background:var(--paper-deep);padding:14px 16px;}
+  .wm-asset-label{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;color:var(--ink-soft);margin-bottom:8px;}
+  .wm-asset-dir{display:inline-block;font-family:var(--mono);font-size:14px;font-weight:600;padding:3px 8px;border-radius:2px;}
+  .wm-asset-name-sub{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-top:6px;opacity:0.7;}
+  .dir-up{color:var(--up);background:rgba(138,59,46,0.08);}
+  .dir-down{color:var(--down);background:rgba(47,93,78,0.08);}
+  .dir-flat{color:var(--ink-soft);background:rgba(91,86,75,0.07);}
+  .dir-na{color:var(--ink-soft);}
+
+  /* ===== similar events ===== */
+  .wm-events-list{display:flex;flex-direction:column;gap:14px;}
+  .wm-event-card{border:1px solid var(--line-rule);background:var(--paper-deep);overflow:hidden;}
+  .wm-event-head{padding:12px 18px 10px;border-bottom:1px solid var(--line-rule);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+  .wm-event-num{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--ink-soft);}
+  .wm-event-period{font-family:var(--display);font-size:15px;color:var(--ink);line-height:1.4;}
+  .wm-event-desc{font-size:13.5px;color:var(--ink-soft);margin:14px 18px;line-height:1.8;}
+
+  /* ===== timelines ===== */
+  .wm-tl-wrap{margin:0 18px 16px;border-top:1px dashed var(--line-rule);padding-top:12px;}
+  .wm-tl-label{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--ink-soft);margin-bottom:8px;}
+  .wm-tl-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;}
+  .wm-tl-table th{text-align:left;color:var(--ink-soft);font-weight:400;padding:3px 8px 3px 0;font-size:10px;}
+  .wm-tl-table td{padding:4px 8px 4px 0;vertical-align:middle;}
+  .wm-tl-reversal{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-top:6px;padding:4px 8px;border:1px solid var(--line-rule);border-radius:2px;display:inline-block;}
+  .wm-tl-note{font-family:var(--mono);font-size:9.5px;color:var(--ink-soft);margin-top:8px;opacity:0.75;line-height:1.6;}
+
+  /* ===== observation points ===== */
+  .wm-obs-list{display:flex;flex-direction:column;gap:14px;}
+  .wm-obs-item{display:flex;gap:12px;align-items:flex-start;}
+  .wm-obs-num{font-family:var(--mono);font-size:13px;color:var(--ink-soft);padding-top:2px;flex-shrink:0;min-width:1.5em;}
+  .wm-obs-body{flex:1;}
+  .wm-obs-title{font-family:var(--display);font-size:15px;margin-bottom:6px;line-height:1.45;}
+  .wm-obs-desc{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.8;}
+
+  /* ===== disclaimer ===== */
+  .wm-disclaimer{margin:40px 5vw 0;padding:16px 20px;border:1px solid var(--line-rule);background:var(--paper-deep);max-width:72ch;}
+  .wm-disclaimer-label{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;}
+  .wm-disclaimer-text{font-size:12px;color:var(--ink-soft);margin:0;line-height:1.85;}
+
+  /* ===== footer ===== */
+  footer{margin-top:56px;border-top:1px solid var(--line-rule);padding:28px 5vw 50px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;font-size:12px;color:var(--ink-soft);}
+  footer .back{display:inline-block;border-bottom:1px solid var(--line-rule);}
+  footer .foot-disclaimer{max-width:60ch;line-height:1.8;}
+
+  /* ===== responsive ===== */
+  @media(max-width:680px){
+    .wm-asset-grid{grid-template-columns:repeat(2,1fr);}
+    .wm-tl-table{font-size:10px;}
+    .wm-tl-table th,.wm-tl-table td{padding:3px 4px 3px 0;}
+    .wm-meta{flex-direction:column;gap:4px;}
+    .wm-meta-sep{display:none;}
+  }
+  @media(max-width:400px){
+    .wm-asset-grid{grid-template-columns:1fr;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="strip"><b>本サイトは情報提供・教育目的です。</b>個別の投資助言ではありません。最終判断はご自身の責任で行ってください。</div>
+
+<header>
+  <div class="brand"><a href="index.html">Marketcast Lab</a> <span class="mark">観測所</span></div>
+  <nav>
+    <a href="index.html#events">イベント観測</a>
+    <a href="index.html#assets">資産別反応史</a>
+    <a href="glossary.html">用語解説</a>
+    <a href="disclaimer.html">免責事項</a>
+    <a href="login.html" data-auth-link>ログイン</a>
+  </nav>
+</header>
+
+<div class="breadcrumb">
+  <a href="index.html">トップ</a>
+  <span class="breadcrumb-sep">›</span>
+  <span>Weekly Marketcast</span>
+</div>
+
+<div id="weekly-app" aria-live="polite" aria-atomic="true"></div>
+
+<footer>
+  <a class="back" href="index.html">← トップへ戻る</a>
+  <p class="foot-disclaimer">本サイトで提供するすべての情報は教育・情報提供目的であり、特定の金融商品への投資を勧誘するものではありません。</p>
+</footer>
+
+<noscript>
+  <div style="padding:40px 5vw;font-size:14px;color:#5B564B;">
+    このページの表示にはJavaScriptが必要です。
+    ブラウザの設定をご確認ください。
+  </div>
+</noscript>
+
+<script type="module">
+import { initWeeklyPage, watchAuthState } from './assets/js/weekly-marketcast.js';
+import { supabase } from './assets/js/supabase-client.js';
+
+(async function () {
+  'use strict';
+
+  const container = document.getElementById('weekly-app');
+  if (!container) return;
+
+  // week_id を URL クエリから取得（DOM への直接挿入は行わない）
+  const params = new URLSearchParams(window.location.search);
+  const weekId = params.get('week') || null;
+
+  // ページ初期化
+  await initWeeklyPage(container, weekId);
+
+  // 認証状態変化監視（ログアウト時コンテンツ消去）
+  const unwatch = watchAuthState(container, weekId);
+
+  // 再試行ボタン（動的に生成された場合のイベント委譲）
+  container.addEventListener('click', async (e) => {
+    if (e.target && e.target.classList.contains('wm-retry-btn')) {
+      await initWeeklyPage(container, weekId);
+    }
+  });
+
+  // ページ離脱時クリーンアップ
+  window.addEventListener('pagehide', () => {
+    unwatch();
+  }, { once: true });
+})();
+</script>
+
+<script type="module" src="./assets/js/auth-common.js"></script>
+
+</body>
+</html>
