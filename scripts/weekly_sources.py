@@ -31,6 +31,24 @@ def _get_fab(fred_api_key: str) -> tuple:
     return _fab, orig
 
 
+def classify_stooq_error(exc: Exception) -> str:
+    """Stooq取得例外を安全な固定コードに分類する。例外本文・response断片を出力しない。"""
+    from urllib.error import HTTPError, URLError
+    if isinstance(exc, HTTPError):
+        return f"stooq_http_error:{exc.code}"
+    if isinstance(exc, URLError):
+        return "stooq_connection_error"
+    if isinstance(exc, RuntimeError):
+        msg = str(exc)
+        if "HTML応答" in msg:
+            return "stooq_html_response"
+        if "CSVヘッダなし" in msg:
+            return "stooq_invalid_csv_header"
+        if "データ行が空" in msg:
+            return "stooq_empty_data_rows"
+    return "stooq_unknown_error"
+
+
 def fetch_week_observations(
     asset_config: dict,
     fred_api_key: str,
@@ -58,7 +76,7 @@ def fetch_week_observations(
                 raw = fab.fetch_stooq_series(asset_config["stooq_id"], days_needed)
                 source_used = f"stooq_{asset_config['stooq_id']}"
             except Exception as e:
-                print(f"  [Stooq→Yahoo フォールバック] {asset_config['stooq_id']}: {type(e).__name__}")
+                print(f"  [Stooq→Yahoo フォールバック] {asset_config['stooq_id']}: {classify_stooq_error(e)}")
                 raw = fab.fetch_yahoo_series(asset_config["yahoo_symbol"], days_needed)
                 source_used = f"yahoo_{asset_config['yahoo_symbol']}"
         elif source == "fred":
