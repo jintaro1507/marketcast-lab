@@ -20,6 +20,7 @@
  *   - paid_body をログに出力しない
  *   - restricted 生値（price, close, value 等）をキー検査して遮断
  *   - gold/sp500 の end_value が null であることを確認
+ *   - エラーの生メッセージをログに出力しない（固定 stage/error コードのみ）
  */
 
 import { getAllowedOrigin, handleOptions } from '../_shared/cors.ts';
@@ -49,6 +50,13 @@ const FORBIDDEN_RAW_KEYS = new Set([
 
 /** end_value を null 必須とする asset_key */
 const NULL_END_VALUE_ASSETS = new Set(['gold', 'sp500']);
+
+/** 正式 6 資産の asset_key */
+const VALID_ASSET_KEYS = new Set(['wti', 'gold', 'sp500', 'ust10y', 'usdjpy', 'vix']);
+const REQUIRED_ASSET_KEYS = ['wti', 'gold', 'sp500', 'ust10y', 'usdjpy', 'vix'] as const;
+
+/** Direction 列挙値 */
+const VALID_DIRECTIONS = new Set(['up', 'down', 'flat', 'na']);
 
 // ─── ISO 週番号検証 ────────────────────────────────────────────────────────────
 
@@ -107,6 +115,30 @@ export interface PaidBodyError {
 }
 
 /**
+ * AssetTimeline オブジェクト 1 件を検証し errors へ追記する。
+ * prefix: エラーフィールドのプレフィックス（例: "similar_events[0].timelines.wti"）
+ */
+function checkAssetTimeline(prefix: string, tl: unknown, errs: PaidBodyError[]): void {
+  if (typeof tl !== 'object' || tl === null) {
+    errs.push({ field: prefix, message: 'must be an object' });
+    return;
+  }
+  const t = tl as Record<string, unknown>;
+  for (const day of ['d1', 'd7', 'd30', 'd90'] as const) {
+    if (!(day in t)) {
+      errs.push({ field: `${prefix}.${day}`, message: 'required' });
+    } else if (!VALID_DIRECTIONS.has(t[day] as string)) {
+      errs.push({ field: `${prefix}.${day}`, message: 'invalid direction' });
+    }
+  }
+  if (!('mid_term_reversal' in t)) {
+    errs.push({ field: `${prefix}.mid_term_reversal`, message: 'required' });
+  } else if (typeof t.mid_term_reversal !== 'boolean') {
+    errs.push({ field: `${prefix}.mid_term_reversal`, message: 'must be boolean' });
+  }
+}
+
+/**
  * paid_body の内容を TypeScript で検証する。
  * Python の weekly_paid_body.schema.json に相当する実行時サニティチェック。
  * フル schema 検証（Python 側）は保存時に完了しているため、ここでは要点のみ確認する。
@@ -133,7 +165,7 @@ export function validatePaidBody(paidBody: unknown): PaidBodyError[] {
     errors.push({ field: 'summary', message: 'must be a string' });
   }
 
-  // asset_summaries: 6件固定 + gold/sp500 の end_value null 確認
+  // asset_summaries: 6件固定 + asset_key enum + direction enum + end_value null 制約
   if ('asset_summaries' in body) {
     if (!Array.isArray(body.asset_summaries)) {
       errors.push({ field: 'asset_summaries', message: 'must be an array' });
@@ -143,15 +175,47 @@ export function validatePaidBody(paidBody: unknown): PaidBodyError[] {
         message: `must have exactly 6 items, got ${body.asset_summaries.length}`,
       });
     } else {
+      const seenAssets = new Set<string>();
       for (const item of body.asset_summaries) {
-        if (typeof item !== 'object' || item === null) continue;
-        const summary = item as Record<string, unknown>;
-        const key = summary.asset_key;
-        if (typeof key === 'string' && NULL_END_VALUE_ASSETS.has(key) && summary.end_value !== null) {
+        if (typeof item !== 'object' || item === null) {
+          errors.push({ field: 'asset_summaries', message: 'each item must be a non-null object' });
+          continue;
+        }
+        const s = item as Record<string, unknown>;
+        const key = s.asset_key;
+
+        if (typeof key !== 'string') {
+          errors.push({ field: 'asset_summaries', message: 'asset_key must be a string' });
+          continue;
+        }
+        if (!VALID_ASSET_KEYS.has(key)) {
+          errors.push({ field: 'asset_summaries', message: 'unknown asset_key' });
+          continue;
+        }
+        if (seenAssets.has(key)) {
+          errors.push({ field: 'asset_summaries', message: 'duplicate asset_key' });
+        } else {
+          seenAssets.add(key);
+        }
+
+        if (NULL_END_VALUE_ASSETS.has(key) && s.end_value !== null) {
           errors.push({
             field: `asset_summaries[${key}].end_value`,
-            message: `must be null for restricted asset (got ${summary.end_value})`,
+            message: 'must be null for restricted asset',
           });
+        }
+
+        if ('direction' in s && !VALID_DIRECTIONS.has(s.direction as string)) {
+          errors.push({
+            field: `asset_summaries[${key}].direction`,
+            message: 'invalid direction',
+          });
+        }
+      }
+
+      for (const required of REQUIRED_ASSET_KEYS) {
+        if (!seenAssets.has(required)) {
+          errors.push({ field: 'asset_summaries', message: 'missing required asset_key' });
         }
       }
     }
@@ -166,7 +230,7 @@ export function validatePaidBody(paidBody: unknown): PaidBodyError[] {
     }
   }
 
-  // similar_events: 1〜5件
+  // similar_events: 1〜5件 + timelines 検証
   if ('similar_events' in body) {
     if (!Array.isArray(body.similar_events)) {
       errors.push({ field: 'similar_events', message: 'must be an array' });
@@ -175,6 +239,35 @@ export function validatePaidBody(paidBody: unknown): PaidBodyError[] {
         field: 'similar_events',
         message: `must have 1-5 items, got ${body.similar_events.length}`,
       });
+    } else {
+      for (let i = 0; i < body.similar_events.length; i++) {
+        const event = body.similar_events[i];
+        if (typeof event !== 'object' || event === null) continue;
+        const ev = event as Record<string, unknown>;
+
+        const tls = ev.timelines;
+        if (typeof tls !== 'object' || tls === null || Array.isArray(tls)) {
+          if ('timelines' in ev) {
+            errors.push({ field: `similar_events[${i}].timelines`, message: 'must be a non-null object' });
+          }
+          continue;
+        }
+
+        const tlMap = tls as Record<string, unknown>;
+        const seenTlAssets = new Set<string>();
+        for (const [assetKey, timeline] of Object.entries(tlMap)) {
+          if (!VALID_ASSET_KEYS.has(assetKey)) {
+            errors.push({ field: `similar_events[${i}].timelines`, message: 'unknown asset_key in timelines' });
+            continue;
+          }
+          if (seenTlAssets.has(assetKey)) {
+            errors.push({ field: `similar_events[${i}].timelines`, message: 'duplicate asset_key in timelines' });
+            continue;
+          }
+          seenTlAssets.add(assetKey);
+          checkAssetTimeline(`similar_events[${i}].timelines.${assetKey}`, timeline, errors);
+        }
+      }
     }
   }
 
@@ -247,6 +340,7 @@ function jsonResponse(
     headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'private, no-store',
+      'Pragma': 'no-cache',
       ...buildCorsHeaders(origin),
       ...(extraHeaders ?? {}),
     },
@@ -277,7 +371,14 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
   const origin = req.headers.get('Origin');
 
   // ── 1. OPTIONS preflight ────────────────────────────────────────────────────
-  if (req.method === 'OPTIONS') return handleOptions(origin, ALLOWED_METHODS);
+  if (req.method === 'OPTIONS') {
+    // cors.ts の handleOptions を利用しつつ、全レスポンスに Pragma: no-cache を付与する
+    const optRes = handleOptions(origin, ALLOWED_METHODS);
+    const h = new Headers(optRes.headers);
+    h.set('Cache-Control', 'private, no-store');
+    h.set('Pragma', 'no-cache');
+    return new Response(null, { status: optRes.status, headers: h });
+  }
 
   // ── 2. GET のみ受け付ける ──────────────────────────────────────────────────
   if (req.method !== 'GET') {
@@ -318,10 +419,8 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
   let subResult: SubscriptionAccessResult;
   try {
     subResult = await deps.getSubscriptionAccess(userId);
-  } catch (e) {
-    console.error(
-      `[get-weekly-marketcast] [${reqId}] subscription error week=${weekId}: ${(e as Error).message}`,
-    );
+  } catch {
+    console.error(`weekly_marketcast_failed request_id=${reqId} week_id=${weekId} stage=subscription_check error=internal_error`);
     return jsonResponse(500, { error: 'internal_error' }, origin);
   }
 
@@ -336,10 +435,8 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
   let report: WeeklyReportRow | null;
   try {
     report = await deps.fetchReport(weekId);
-  } catch (e) {
-    console.error(
-      `[get-weekly-marketcast] [${reqId}] db error week=${weekId}: ${(e as Error).message}`,
-    );
+  } catch {
+    console.error(`weekly_marketcast_failed request_id=${reqId} week_id=${weekId} stage=report_query error=internal_error`);
     return jsonResponse(500, { error: 'internal_error' }, origin);
   }
 
@@ -353,7 +450,7 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
   if (bodyErrors.length > 0) {
     // paid_body 内容はログに出さない（restricted 生値が含まれる可能性）
     console.error(
-      `[get-weekly-marketcast] [${reqId}] paid_body validation failed week=${weekId} errors=${bodyErrors.length}`,
+      `weekly_marketcast_failed request_id=${reqId} week_id=${weekId} stage=paid_body_validation error=internal_error errors=${bodyErrors.length}`,
     );
     return jsonResponse(500, { error: 'internal_error' }, origin);
   }
@@ -395,11 +492,11 @@ if (import.meta.main) Deno.serve((req: Request): Promise<Response> => {
         .eq('status', 'published');
 
       if (error) {
-        throw new Error(`weekly_reports SELECT failed: ${error.message} (code: ${error.code})`);
+        throw new Error('weekly_reports_query_failed');
       }
       if (!data || data.length === 0) return null;
       if (data.length > 1) {
-        throw new Error(`Unexpected ${data.length} published rows for week_id=${weekId}`);
+        throw new Error('multiple_published_rows');
       }
       return data[0] as WeeklyReportRow;
     },

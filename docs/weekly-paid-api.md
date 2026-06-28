@@ -61,7 +61,7 @@ GET /functions/v1/get-weekly-marketcast?week_id=YYYY-WXX
 }
 ```
 
-**Cache-Control: `private, no-store`** — プロキシ・CDN にキャッシュされない。
+**Cache-Control: `private, no-store`、Pragma: `no-cache`** — プロキシ・CDN にキャッシュされない。HTTP/1.0 プロキシも含め全レスポンスに付与。
 
 ### エラーレスポンス
 
@@ -109,7 +109,8 @@ GET /functions/v1/get-weekly-marketcast?week_id=YYYY-WXX
 | service_role_key 非漏洩 | レスポンスに service role key を含めない |
 | JWT 非漏洩 | エラーレスポンスにトークン・ユーザー詳細を含めない |
 | RLS バイパス | weekly_reports に RLS ポリシーがないため service role client で取得 |
-| キャッシュ禁止 | `Cache-Control: private, no-store` を全レスポンスに付与 |
+| キャッシュ禁止 | `Cache-Control: private, no-store` + `Pragma: no-cache` を全レスポンス（OPTIONS 含む）に付与 |
+| ログ非開示 | DB/認証/認可エラーの生メッセージをログに出力しない。固定 `stage=... error=internal_error` コードのみ記録 |
 
 ---
 
@@ -121,13 +122,28 @@ Edge Function でも以下の実行時チェックを行う:
 | 検証項目 | 条件 |
 |---|---|
 | 必須フィールド | `summary`, `asset_summaries`, `themes`, `similar_events`, `observation_points`, `disclaimer` |
-| `asset_summaries` | 6件固定（wti/gold/sp500/ust10y/usdjpy/vix） |
+| `asset_summaries` | 6件固定。`asset_key` は `wti/gold/sp500/ust10y/usdjpy/vix` の 6 資産が過不足なく揃うこと（重複・不明キー・欠落はすべてエラー） |
+| `direction` | `asset_summaries[*].direction` および `similar_events[*].timelines[asset].d1/d7/d30/d90` は `"up"/"down"/"flat"/"na"` のみ |
 | `gold` / `sp500` | `end_value` が `null` であること |
 | `themes` | 1〜3件 |
 | `similar_events` | 1〜5件 |
+| `similar_events[*].timelines` | 各資産キーが正式 6 資産のいずれか。各 AssetTimeline は `d1/d7/d30/d90`（Direction）と `mid_term_reversal`（boolean）が必須。データ欠損資産は省略可（0〜6 件） |
 | `observation_points` | 3〜5件 |
 | 禁止キー | `value`, `price`, `close`, `api_key`, `service_role_key`, `authorization`, `jwt` 等（再帰検索） |
 | 数値 | NaN / Infinity を含まない |
+| 不正 paid_body | 検証エラー時は 500 を返す。DB の生エラーメッセージは一切クライアントへ返さない |
+
+---
+
+## ログポリシー
+
+| ログレベル | 形式 | 含む情報 |
+|---|---|---|
+| `console.log` | `[get-weekly-marketcast] [reqId] <status> <detail>` | reqId, week_id, ステータス種別 |
+| `console.error`（500 catch） | `weekly_marketcast_failed request_id=X week_id=Y stage=Z error=internal_error` | reqId, week_id, stage コード |
+| `console.error`（paid_body 検証失敗） | `... stage=paid_body_validation errors=N` | エラー件数のみ |
+
+**絶対に出力しないもの:** DB エラーの生メッセージ (`error.message`)、JWT トークン、paid_body の内容、PostgREST エラーコード。
 
 ---
 

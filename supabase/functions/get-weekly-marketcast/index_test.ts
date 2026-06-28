@@ -773,7 +773,7 @@ Deno.test('B9-3: security - 401 response does not include JWT or user details', 
 
 Deno.test('B9-4: security - log fields do not contain paid_body (static code assertion)', () => {
   // index.ts のログ出力は以下の変数のみ:
-  //   reqId, weekId, (e as Error).message, bodyErrors.length
+  //   reqId, weekId, bodyErrors.length（固定コードのみ）
   // paid_body, report.paid_body, body の内容はログに渡さない
   //
   // このテストはコード規約の静的記録として機能する。
@@ -792,4 +792,301 @@ Deno.test('B9-4: security - log fields do not contain paid_body (static code ass
       `log must not include "${term}"`,
     );
   }
+});
+
+// ─── C1: Pragma: no-cache（全ステータスコード） ───────────────────────────────
+
+Deno.test('C1-1: 200 response has Pragma: no-cache', async () => {
+  const res = await handleRequest(makeGET('2024-W01'), makeDeps());
+  assertEquals(res.headers.get('Pragma'), 'no-cache');
+});
+
+Deno.test('C1-2: 400 response has Pragma: no-cache', async () => {
+  const res = await handleRequest(makeGETNoParams(), makeDeps());
+  assertEquals(res.headers.get('Pragma'), 'no-cache');
+});
+
+Deno.test('C1-3: 401 response has Pragma: no-cache', async () => {
+  const req = new Request(
+    'http://localhost/functions/v1/get-weekly-marketcast?week_id=2024-W01',
+    { method: 'GET' },
+  );
+  const res = await handleRequest(req, makeDeps());
+  assertEquals(res.headers.get('Pragma'), 'no-cache');
+});
+
+Deno.test('C1-4: 403 response has Pragma: no-cache', async () => {
+  const res = await handleRequest(makeGET('2024-W01'), makeDeps({ sub: NO_SUB }));
+  assertEquals(res.headers.get('Pragma'), 'no-cache');
+});
+
+Deno.test('C1-5: 404 response has Pragma: no-cache', async () => {
+  const res = await handleRequest(makeGET('2024-W01'), makeDeps({ report: null }));
+  assertEquals(res.headers.get('Pragma'), 'no-cache');
+});
+
+Deno.test('C1-6: 405 response has Pragma: no-cache', async () => {
+  const req = new Request('http://localhost/functions/v1/get-weekly-marketcast?week_id=2024-W01', {
+    method: 'POST',
+  });
+  const res = await handleRequest(req, makeDeps());
+  assertEquals(res.headers.get('Pragma'), 'no-cache');
+});
+
+Deno.test('C1-7: 500 response has Pragma: no-cache', async () => {
+  const res = await handleRequest(makeGET('2024-W01'), makeDeps({ reportThrows: true }));
+  assertEquals(res.headers.get('Pragma'), 'no-cache');
+});
+
+Deno.test('C1-8: OPTIONS response has Pragma: no-cache and Cache-Control', async () => {
+  const req = new Request('http://localhost/functions/v1/get-weekly-marketcast', {
+    method: 'OPTIONS',
+  });
+  const res = await handleRequest(req, makeDeps());
+  assertEquals(res.status, 204);
+  assertEquals(res.headers.get('Pragma'), 'no-cache');
+  assertEquals(res.headers.get('Cache-Control'), 'private, no-store');
+});
+
+Deno.test('C1-9: OPTIONS with allowed origin still has Pragma', async () => {
+  const req = new Request('http://localhost/functions/v1/get-weekly-marketcast', {
+    method: 'OPTIONS',
+    headers: { Origin: 'http://localhost:8000' },
+  });
+  const res = await handleRequest(req, makeDeps());
+  assertEquals(res.status, 204);
+  assertEquals(res.headers.get('Pragma'), 'no-cache');
+});
+
+// ─── C2: asset_key 列挙検証 ───────────────────────────────────────────────────
+
+Deno.test('C2-1: unknown asset_key → error', () => {
+  const body = makeValidPaidBody();
+  const sums = body.asset_summaries as Record<string, unknown>[];
+  // wti を bitcoin に差し替え（6件のまま、wti が存在しない + bitcoin が不正）
+  sums[0] = { asset_key: 'bitcoin', label: 'BTC', restricted: false, direction: 'up', pct_change: 5.0, pt_change: null, level_class: null, end_value: 50000 };
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.message === 'unknown asset_key'), true);
+});
+
+Deno.test('C2-2: duplicate asset_key → duplicate error', () => {
+  const body = makeValidPaidBody();
+  const sums = body.asset_summaries as Record<string, unknown>[];
+  // gold を wti に差し替え（wti が2件、gold が0件）
+  sums[1] = { ...sums[0] };
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.message === 'duplicate asset_key'), true);
+});
+
+Deno.test('C2-3: missing required asset_key → missing error', () => {
+  const body = makeValidPaidBody();
+  const sums = body.asset_summaries as Record<string, unknown>[];
+  // vix を ust10y に差し替え（ust10y が2件、vix が0件）
+  sums[5] = { ...sums[3], label: 'US10Y-2' };
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.message === 'missing required asset_key'), true);
+});
+
+Deno.test('C2-4: all 6 required asset_keys present → no key errors', () => {
+  const errors = validatePaidBody(makeValidPaidBody());
+  assertEquals(errors.filter((e) => e.message.includes('asset_key')), []);
+});
+
+// ─── C3: direction 列挙検証 ───────────────────────────────────────────────────
+
+Deno.test('C3-1: invalid direction string in asset_summaries → error', () => {
+  const body = makeValidPaidBody();
+  const sums = body.asset_summaries as Record<string, unknown>[];
+  sums[0] = { ...sums[0], direction: 'sideways' };
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.field.includes('direction') && e.message === 'invalid direction'), true);
+});
+
+Deno.test('C3-2: numeric direction → error', () => {
+  const body = makeValidPaidBody();
+  const sums = body.asset_summaries as Record<string, unknown>[];
+  sums[0] = { ...sums[0], direction: 1 };
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.field.includes('direction') && e.message === 'invalid direction'), true);
+});
+
+Deno.test('C3-3: null direction → error', () => {
+  const body = makeValidPaidBody();
+  const sums = body.asset_summaries as Record<string, unknown>[];
+  sums[0] = { ...sums[0], direction: null };
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.field.includes('direction') && e.message === 'invalid direction'), true);
+});
+
+Deno.test('C3-4: all valid directions pass (up/down/flat/na)', () => {
+  for (const dir of ['up', 'down', 'flat', 'na']) {
+    const body = makeValidPaidBody();
+    const sums = body.asset_summaries as Record<string, unknown>[];
+    sums[0] = { ...sums[0], direction: dir };
+    const errors = validatePaidBody(body);
+    assertEquals(
+      errors.filter((e) => e.field.includes('wti') && e.field.includes('direction')).length,
+      0,
+      `direction '${dir}' should be valid`,
+    );
+  }
+});
+
+// ─── C4: Timeline 検証 ────────────────────────────────────────────────────────
+
+function makeBodyWithTimeline(tlEntry: Record<string, unknown>): Record<string, unknown> {
+  const body = makeValidPaidBody();
+  const events = body.similar_events as Record<string, unknown>[];
+  events[0] = { ...events[0], timelines: tlEntry };
+  return body;
+}
+
+const VALID_TL = { d1: 'up', d7: 'down', d30: 'flat', d90: 'na', mid_term_reversal: false };
+
+Deno.test('C4-1: empty timelines {} → success', () => {
+  assertEquals(validatePaidBody(makeBodyWithTimeline({})), []);
+});
+
+Deno.test('C4-2: valid 2-asset timelines → success', () => {
+  const body = makeBodyWithTimeline({
+    wti:   { ...VALID_TL },
+    sp500: { d1: 'down', d7: 'down', d30: 'up', d90: 'up', mid_term_reversal: true },
+  });
+  assertEquals(validatePaidBody(body), []);
+});
+
+Deno.test('C4-3: 5-asset timelines (gold missing) → success', () => {
+  const body = makeBodyWithTimeline({
+    wti:    { ...VALID_TL },
+    sp500:  { d1: 'down', d7: 'down', d30: 'up', d90: 'up', mid_term_reversal: true },
+    ust10y: { d1: 'up', d7: 'up', d30: 'up', d90: 'up', mid_term_reversal: false },
+    usdjpy: { d1: 'flat', d7: 'flat', d30: 'na', d90: 'na', mid_term_reversal: false },
+    vix:    { d1: 'down', d7: 'down', d30: 'down', d90: 'down', mid_term_reversal: false },
+  });
+  assertEquals(validatePaidBody(body), []);
+});
+
+Deno.test('C4-4: unknown asset_key in timelines → error', () => {
+  const body = makeBodyWithTimeline({
+    bitcoin: { ...VALID_TL },
+  });
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.message === 'unknown asset_key in timelines'), true);
+});
+
+Deno.test('C4-5: d1 missing in timeline → error', () => {
+  const body = makeBodyWithTimeline({
+    wti: { d7: 'down', d30: 'flat', d90: 'na', mid_term_reversal: false },
+  });
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.field.includes('d1') && e.message === 'required'), true);
+});
+
+Deno.test('C4-6: invalid d7 in timeline → error', () => {
+  const body = makeBodyWithTimeline({
+    wti: { d1: 'up', d7: 'sideways', d30: 'flat', d90: 'na', mid_term_reversal: false },
+  });
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.field.includes('d7') && e.message === 'invalid direction'), true);
+});
+
+Deno.test('C4-7: null d30 in timeline → error', () => {
+  const body = makeBodyWithTimeline({
+    wti: { d1: 'up', d7: 'down', d30: null, d90: 'na', mid_term_reversal: false },
+  });
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.field.includes('d30') && e.message === 'invalid direction'), true);
+});
+
+Deno.test('C4-8: numeric d90 in timeline → error', () => {
+  const body = makeBodyWithTimeline({
+    wti: { d1: 'up', d7: 'down', d30: 'flat', d90: 1, mid_term_reversal: false },
+  });
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.field.includes('d90') && e.message === 'invalid direction'), true);
+});
+
+Deno.test('C4-9: mid_term_reversal string → error', () => {
+  const body = makeBodyWithTimeline({
+    wti: { d1: 'up', d7: 'down', d30: 'flat', d90: 'na', mid_term_reversal: 'false' },
+  });
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.field.includes('mid_term_reversal') && e.message === 'must be boolean'), true);
+});
+
+Deno.test('C4-10: mid_term_reversal missing → error', () => {
+  const body = makeBodyWithTimeline({
+    wti: { d1: 'up', d7: 'down', d30: 'flat', d90: 'na' },
+  });
+  const errors = validatePaidBody(body);
+  assertEquals(errors.some((e) => e.field.includes('mid_term_reversal') && e.message === 'required'), true);
+});
+
+// ─── C5: ログ sanitization（console モック） ──────────────────────────────────
+
+Deno.test('C5-1: DB error message not exposed in logs', async () => {
+  const captured: string[] = [];
+  const origError = console.error;
+  console.error = (...args: unknown[]) => captured.push(args.map(String).join(' '));
+  try {
+    await handleRequest(makeGET('2024-W01'), makeDeps({ reportThrows: true }));
+  } finally {
+    console.error = origError;
+  }
+  // モック依存性が投げるエラーメッセージがログに出ない
+  assertEquals(captured.some((l) => l.includes('DB query error')), false);
+  // 固定 stage コードはログに出る
+  assertEquals(captured.some((l) => l.includes('stage=report_query')), true);
+  assertEquals(captured.some((l) => l.includes('error=internal_error')), true);
+});
+
+Deno.test('C5-2: subscription error message not exposed in logs', async () => {
+  const captured: string[] = [];
+  const origError = console.error;
+  console.error = (...args: unknown[]) => captured.push(args.map(String).join(' '));
+  try {
+    await handleRequest(makeGET('2024-W01'), makeDeps({ subThrows: true }));
+  } finally {
+    console.error = origError;
+  }
+  assertEquals(captured.some((l) => l.includes('DB connection error')), false);
+  assertEquals(captured.some((l) => l.includes('stage=subscription_check')), true);
+  assertEquals(captured.some((l) => l.includes('error=internal_error')), true);
+});
+
+Deno.test('C5-3: paid_body content not exposed in logs on validation failure', async () => {
+  const captured: string[] = [];
+  const origError = console.error;
+  console.error = (...args: unknown[]) => captured.push(args.map(String).join(' '));
+  const report = makeValidReport();
+  (report.paid_body as Record<string, unknown>).price = 99999;
+  try {
+    await handleRequest(makeGET('2024-W01'), makeDeps({ report }));
+  } finally {
+    console.error = origError;
+  }
+  assertEquals(captured.some((l) => l.includes('99999')), false);
+  assertEquals(captured.some((l) => l.includes('price')), false);
+  // エラー件数はログに出る
+  assertEquals(captured.some((l) => l.includes('errors=')), true);
+});
+
+Deno.test('C5-4: JWT token not exposed in logs on auth failure', async () => {
+  const captured: string[] = [];
+  const origLog = console.log;
+  const origError = console.error;
+  console.log = (...args: unknown[]) => captured.push(args.map(String).join(' '));
+  console.error = (...args: unknown[]) => captured.push(args.map(String).join(' '));
+  try {
+    await handleRequest(
+      makeGET('2024-W01', 'Bearer eyJhbGciOiJIUzI1NiJ9.sensitive.payload'),
+      makeDeps({ userResult: { data: { user: null }, error: { message: 'JWT expired token' } } }),
+    );
+  } finally {
+    console.log = origLog;
+    console.error = origError;
+  }
+  assertEquals(captured.some((l) => l.includes('eyJhbGci')), false);
+  assertEquals(captured.some((l) => l.includes('JWT expired token')), false);
+  assertEquals(captured.some((l) => l.includes('sensitive')), false);
 });
